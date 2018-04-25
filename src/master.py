@@ -56,7 +56,6 @@ def init_run(configs):
     init_type = str(configs['initial_net_type'])
     start_size = int(configs['starting_size'])
     fitness_direction = str(configs['fitness_direction'])
-    num_instance_output = int(configs['num_instance_output'])
 
     population, gen, size, advice, BD_table, keep_running = None, None, None, None, None, None #avoiding annoying warnings
 
@@ -88,9 +87,9 @@ def init_run(configs):
         output.init_csv(output_dir, configs)
         # draw_nets.init(output_dir)
 
-        population = net_generator.init_population(init_type, start_size, pop_size, configs)
+        population = init_nets.init_population(init_type, start_size, pop_size, configs)
         advice = init.build_advice(population[0].net, configs)
-        if (configs['edge_state'] == 'probabilistic' and (util.boool(configs['use_knapsack']) == False)):
+        if (configs['instance_states'] == 'probabilistic'):
             BD_table = probabilistic_entropy.build_BD_table(configs)
         else:
             BD_table = None
@@ -108,7 +107,7 @@ def init_dirs(num_workers, output_dir):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    dirs = ["/nets_nx/", "/bias/", "/pickle_nets/", "/to_workers/", "/to_master/", "/nets_pickled/"]
+    dirs = ["/nets_nx/", "/bias/", "/to_workers/", "/to_master/", "/nets_pickled/"]
     for dirr in dirs:
         if not os.path.exists(output_dir + dirr):
             os.makedirs(output_dir+dirr)

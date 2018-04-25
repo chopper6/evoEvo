@@ -139,7 +139,7 @@ def test_stop_condition(size, gen, configs):
 
 def retrieve_indiv_bias(element, M, configs):
 
-    advice_upon = configs['advice_upon']
+    advice_upon = configs['pressure_on']
     bias_on = configs['bias_on']
     biased = boool(configs['biased'])
 

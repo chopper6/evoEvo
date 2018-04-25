@@ -1,4 +1,4 @@
-import instances, solver, node_fitness, fitness, util, probabilistic
+import instances, node_fitness, fitness, util, probabilistic
 
 def pressurize(configs, Net, advice, BD_table):
     # configs:
@@ -6,7 +6,7 @@ def pressurize(configs, Net, advice, BD_table):
     if (util.is_it_none(configs['sampling_rounds_max']) == None): max_sampling_rounds = None
     else: max_sampling_rounds = int(configs['sampling_rounds_max'])
     fitness_metric = str(configs['fitness_metric'])
-    instance_states = str(configs['instance_source'])
+    instance_states = str(configs['instance_states'])
     biased = util.boool(configs['biased'])
     scale_node_fitness = util.boool(configs['scale_node_fitness'])
     directed = util.boool(configs['directed'])

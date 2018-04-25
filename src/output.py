@@ -23,8 +23,8 @@ def master_info(population, gen, size, pop_size, num_survive, advice, BD_table, 
 
     if (num_net_output > 0):
         if (gen % int(end / num_net_output) == 0):
-            nx.write_edgelist(population[0].net, output_dir + "/nets/" + str(gen))
-            pickle_file = output_dir + "/pickle_nets/" + str(gen) + "_pickle"
+            nx.write_edgelist(population[0].net, output_dir + "nets_nx/" + str(gen))
+            pickle_file = output_dir + "/nets_pickled/" + str(gen)
             with open(pickle_file, 'wb') as file:
                 pickle.dump(population[0].net, file)
             deg_distrib_csv(output_dir, population, gen)

@@ -1,5 +1,4 @@
 import math, numpy as np, random as rd
-import leaf_fitness as l_fitness
 import util
 
 

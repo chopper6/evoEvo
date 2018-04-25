@@ -1,0 +1,62 @@
+output_directory         = /home/2014/choppe1/Documents/EvoNet/virt_workspace/data/output/111_bias/test_node5
+
+# general
+debug                     	= False
+directed			= False
+single_cc               	= True
+
+# states
+pressure                 	= 100
+pressure_on           		= edges
+instance_states         	= experience
+state_distribution  		= uniform
+sampling_rounds_multiplier 	= .1
+sampling_rounds_max      	= None
+
+
+# start and stop
+initial_net_type        = random
+starting_size           = 8
+stop_condition		= generation
+ending_size             = 20
+max_generations         = 20
+edge_to_node_ratio      = 2
+
+network_file  = /home/2014/choppe1/Documents/EvoNet/virt_workspace/data/output/108_lowDeg/rewire_attempt_contd/nets/1200
+
+
+# population
+number_of_workers       = 16
+num_worker_nets         = 1
+percent_survive         = 10
+
+# output
+num_data_output     	= 10
+num_net_output        	= 2
+
+# fitness
+fitness_metric 		= info
+fitness_direction       = max
+scale_node_fitness      = False
+
+
+# bias
+biased                   = True
+bias_on                  = nodes
+global_edge_bias         = 0
+bias_distribution        = uniform
+
+
+# mutation
+add_edge_mutation_frequency     = 0
+remove_edge_mutation_frequency  = 0
+rewire_mutation_frequency       = 0
+sign_mutation_frequency         = 0
+reverse_edge_mutation_frequency = 0
+grow_mutation_frequency         = 1
+shrink_mutation_frequency       = 0
+
+# partially implemented 
+num_sims	= 1
+advice_creation	= each
+

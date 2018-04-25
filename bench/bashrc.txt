@@ -1,0 +1,20 @@
+#unused i think
+
+alias python='python3 -B'
+alias python3='python3 -B'
+export PYTHONDONTWRITEBYTECODE='do not produce __pycach__ garbage'
+export PATH=$PYDIR/bin:$PATH
+export LD_LIBRARY_PATH=$PYDIR/lib:$LD_LIBRARY_PATH
+
+
+export scratch=$SCRATCH
+export lib=$HOME/lib
+export SOLVERS_DIRECTORY=$lib/kp_solvers
+export SIMULATION_BATCH_ROOT=$HOME/src/simulators/BATCH_ROOT.py
+export SIMULATION_SCRIPT=$HOME/src/evolve_root.py
+export LAUNCHING_SCRIPT=$HOME/src/launchers/launcher.py
+export SIMULATION_DIRECTORY=$HOME/src/simulators
+export LAUNCHING_DIRECTORY=$HOME/src/launchers/
+alias ls='ls -l'
+alias vim='vim -p'
+alias ldir='cd $HOME/src/launchers/'

@@ -3,7 +3,7 @@ sys.path.insert(0, os.getenv('lib'))
 import util
 
 #--------------------------------------------------------------------------------------------------
-def load_sim_configs (param_file, rank, num_workers):
+def load_sim_configs (param_file, rank):
     parameters = (open(param_file,'r')).readlines()
     assert len(parameters)>0
     configs = {}
@@ -29,7 +29,8 @@ def load_sim_configs (param_file, rank, num_workers):
                 time.sleep(5)
                 continue
 
-        if (configs['number_of_workers'] != num_workers): util.cluster_print(configs['output_directory'],"\nWARNING in init.load_sim_configs(): mpi #workers != config #workers! " + str(configs['number_of_workers']) + " vs " + str(num_workers) + "\n")  # not sure why this doesn't correctly get # config workers...
+        #this is now checked further up in evolve_root
+        #if (configs['number_of_workers'] != num_workers): util.cluster_print(configs['output_directory'],"\nWARNING in init.load_sim_configs(): mpi #workers != config #workers! " + str(configs['number_of_workers']) + " vs " + str(num_workers) + "\n")  # not sure why this doesn't correctly get # config workers...
 
     return configs
 

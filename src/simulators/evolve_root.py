@@ -11,7 +11,7 @@ from time import sleep
 
 def evolve(rank, num_workers, config_file):
 
-    configs = init.load_sim_configs(config_file, rank, num_workers)
+    configs = init.load_sim_configs(config_file, rank)
     orig_output_dir = configs['output_directory']
     num_sims = int(configs['num_sims'])
 

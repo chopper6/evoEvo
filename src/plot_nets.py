@@ -38,7 +38,7 @@ def plot_undir(output_dir, biased, bias_on):
         if not os.path.exists(output_dir + dirr):
             os.makedirs(output_dir + dirr)
 
-    for root, dirs, files in os.walk(output_dir + "/nets/"):
+    for root, dirs, files in os.walk(output_dir + "/nets_nx/"):
         for f in files:
             #print("plot_dir(): file " + str(f))
             undir_deg_distrib(root + "/" + f, output_dir + "/undirected_degree_distribution/", f, biased, bias_on)

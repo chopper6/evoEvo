@@ -7,10 +7,8 @@ import fitness, minion, output, plot_nets, init_nets, pressurize, util, init, pr
 #MASTER EVOLUTION
 def evolve_master(configs):
     # get configs
-    num_workers = int(configs['number_of_workers'])
     output_dir = configs['output_directory']
     worker_pop_size = int(configs['num_worker_nets'])
-    fitness_direction = str(configs['fitness_direction'])
     biased = util.boool(configs['biased'])
     num_sims = int(configs['num_sims'])
 
@@ -28,7 +26,7 @@ def evolve_master(configs):
         distrib_workers(population, gen, worker_pop_size, num_survive, advice, BD_table, biases, configs)
 
         report_timing(t_start, gen, output_dir)
-        population = watch(configs, gen, num_workers, output_dir, num_survive, fitness_direction)
+        population = watch(configs, gen, num_survive)
 
         size = len(population[0].net.nodes())
         gen += 1
@@ -73,7 +71,7 @@ def init_run(configs):
             util.cluster_print(output_dir, "Run already finished, exiting...\n")
             return
 
-        elif (gen and gen!=0 and gen!=1 and gen!=2): #IS CONTINUATION RUN
+        elif (gen > 2): #IS CONTINUATION RUN
             gen = int(gen)-2 #latest may not have finished
             population = parse_worker_popn(num_workers, gen, output_dir, num_survive, fitness_direction)
             size = len(population[0].net.nodes())
@@ -90,7 +88,7 @@ def init_run(configs):
         population = init_nets.init_population(init_type, start_size, pop_size, configs)
         advice = init.build_advice(population[0].net, configs)
         if (configs['instance_states'] == 'probabilistic'):
-            BD_table = probabilistic_entropy.build_BD_table(configs)
+            BD_table = probabilistic.build_BD_table(configs)
         else:
             BD_table = None
 
@@ -146,7 +144,7 @@ def distrib_workers(population, gen, worker_pop_size, num_survive, advice, BD_ta
             with open(dump_file, 'wb') as file:
                 pickle.dump(worker_args, file)
             # pool.map_async(minion.evolve_minion, (dump_file,))
-            minion.evolve_minion(dump_file, gen, 0, output_dir)
+            minion.evolve_minion(dump_file, gen, w, output_dir)
             sleep(.0001)
 
     else:
@@ -180,7 +178,12 @@ def parse_worker_popn (num_workers, gen, output_dir, num_survive, fitness_direct
     return sorted_popn[:num_survive]
 
 
-def watch(configs, gen, num_workers, output_dir, num_survive, fitness_direction):
+def watch(configs, gen, num_survive):
+
+    num_workers = int(configs['number_of_workers'])
+    output_dir = configs['output_directory']
+    fitness_direction = str(configs['fitness_direction'])
+    debug = util.boool(configs['debug'])
 
     dump_dir = output_dir + "/to_master/" + str(gen)
     t_start = time.time()

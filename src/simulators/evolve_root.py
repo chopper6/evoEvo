@@ -14,9 +14,11 @@ def evolve(rank, num_workers, config_file):
     configs = init.load_sim_configs(config_file, rank)
     orig_output_dir = configs['output_directory']
     num_sims = int(configs['num_sims'])
+    debug = util.boool(configs['debug'])
 
     num_workers_config = int(configs['number_of_workers'])
-    assert(num_workers == num_workers_config)
+    assert(num_workers == num_workers_config or debug)
+    assert(num_workers > 0 or debug)
 
     for i in range(num_sims):
 

@@ -68,7 +68,7 @@ def single_advice(M, element, configs):
 #--------------------------------------------------------------------------------------------------
 
 def cluster_print(output_dir, text):
-    with open(output_dir + "/thread_out.txt", 'a') as file:
+    with open(output_dir + "/log.txt", 'a') as file:
         file.write(str(text) + "\n")
         file.flush()
         file.close()

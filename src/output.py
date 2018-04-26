@@ -62,10 +62,6 @@ def init_csv(out_dir, configs):
         for config in configs:
             outConfigs.write(config + "," + str(configs[config]) + "\n")
 
-    out_time = out_dir + "/timing.csv"
-    with open(out_time, 'w') as out_timing:
-        out_timing.write("Net Size, Presssurize Time\n")
-
 
 def popn_data(population, output_dir, gen):
 

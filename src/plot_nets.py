@@ -232,11 +232,11 @@ def features_over_size(dirr, net_info, titles, mins, maxs, use_lims):
 def degree_distrib_change(dirr):
     deg_file_name = dirr + "/degree_distrib.csv"
 
-    if not os.path.exists(dirr + "/degree_distribution_change/"):
-        os.makedirs(dirr + "/degree_distribution_change/")
+    if not os.path.exists(dirr + "/undirected_degree_distribution/"):
+        os.makedirs(dirr + "/undirected_degree_distribution/")
 
     all_lines = [Line.strip() for Line in (open(deg_file_name, 'r')).readlines()]
-    titles = all_lines[0]
+    #titles = all_lines[0]
 
     # Get starting degree distribution
     line = all_lines[1]
@@ -259,8 +259,9 @@ def degree_distrib_change(dirr):
     start_col = '#ff5050'
     end_col = '#0099cc'
 
-    plt.scatter(start_deg, start_freq, c=start_col, alpha=0.8, s=40, marker='o')
-    plt.scatter(end_deg, end_freq, c=end_col, alpha=0.8, s=40, marker='o')
+    plt.loglog(start_deg, start_freq, basex=10, basey=10, linestyle = '', c=start_col, alpha=0.8, markersize=7, marker='o')
+    plt.loglog(end_deg, end_freq, basex=10, basey=10, linestyle='', c=start_col, alpha=0.8, markersize=7, marker='o')
+    #plt.scatter(end_deg, end_freq, c=end_col, alpha=0.8, s=40, marker='o')
 
     ax = matplotlib.pyplot.gca()
     ax.spines["top"].set_visible(False)
@@ -282,7 +283,7 @@ def degree_distrib_change(dirr):
     plt.xlabel('Degree')
     plt.ylabel('Number of Nodes with Given Degree')
     plt.title('Change in Degree Distribution')
-    plt.savefig(dirr + "/degree_distribution_change/in_degree_change.png", dpi=300)
+    plt.savefig(dirr + "/undirected_degree_distribution/degree_change.png", dpi=300)
     plt.clf()
 
 
@@ -342,32 +343,6 @@ def features_over_time(dirr, net_info, titles, mins, maxs, use_lims):
             plt.clf()
 
     return
-
-def solver_time(dirr):
-    img_dirr = dirr + "/images_by_size/"
-    with open(dirr + "/timing.csv", 'r') as timing_csv:
-        lines = timing_csv.readlines()
-        title = lines[0]
-        net_size=[]
-        time=[]
-        for line in lines[1:]:
-            line = line.split(",")
-            line[-1].replace("\n",'')
-            net_size.append(line[0])
-            time.append(line[1])
-        max_net_line = lines[-1].split(",")
-        max_net_size = int(max_net_line[0])
-    x_ticks = []
-    for j in range(0, 11):
-        x_ticks.append(int((max_net_size / 10) * j))
-    plt.plot(net_size,time)
-    plt.xlabel("Net Size")
-    plt.ylabel("Seconds to Pressurize")
-    plt.title("Pressurize Time as Networks Grow")
-    plt.xticks(x_ticks, x_ticks)
-    plt.savefig(img_dirr + "pressurize_time")
-    plt.clf()
-
 
 ################## HELPER FUNCTIONS ##################
 def parse_info(dirr):

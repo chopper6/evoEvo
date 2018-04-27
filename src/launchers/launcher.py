@@ -1,5 +1,7 @@
 import os, sys, subprocess, time, socket
 #sys.path.insert(0, os.getenv('lib'))
+sys.path.insert(0, "/home/chopper/evoEvo/src/")
+sys.path.insert(0, "/home/chopper/evoEvo/src/launchers/")
 import init, util, cluster_paths
 ################################################################################################################################################
 def compile_solvers(CONFIGS):
@@ -159,5 +161,4 @@ if __name__ == "__main__":
     
     qsub_simulation_arg         = [sub_cmd, "-N", job_name,  "-o",  qsub_output_dir+"qsub_simulation_output_"+host+'_'+job_name+'_'+timestamp+".txt", "-e",  qsub_output_dir+"qsub_simulation_error_"+host+'_'+job_name+'_'+timestamp+".txt", "-V", util.slash(os.getenv('LAUNCHING_DIRECTORY'))+sim_script]
     qsub_launching_arg          = [sub_cmd,  "-N", job_name,  "-o",  qsub_output_dir+"qsub_launching_output_"+host+'_'+job_name+'_'+timestamp+".txt", "-e",  qsub_output_dir+"qsub_launching_error_"+host+'_'+job_name+'_'+timestamp+".txt",  "-V", util.slash(os.getenv('LAUNCHING_DIRECTORY'))+launch_script]
-
     launch (simulation_script, simulation_batch_root, launching_script,simulation_directory,launching_directory, input_file, qsub_simulation_arg, qsub_launching_arg, dependency_switch, log)

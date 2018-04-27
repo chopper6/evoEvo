@@ -1,6 +1,6 @@
 *.pyc
-zdata/output/*
-zdata/input/*
+data/output/*
+data/input/*
 *~
 venv
 venv/*

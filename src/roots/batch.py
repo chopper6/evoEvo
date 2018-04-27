@@ -21,7 +21,7 @@ for config_file in CONFIG_FILES:
         continue
     # mpirun --mca mpi_warn_on_fork 0 -n 32 python3 $SIMULATION_SCRIPTv4 $SIMULATION_CONFIGSv4
     sim_script = os.getenv('SIMULATION_SCRIPT')
-    #sim_script = '/home/chopper/src/evolve_root.py' #TODO: check this, but i think it is no longer needed
+    #sim_script = '/home/chopper/src/evolve.py' #TODO: check this, but i think it is no longer needed
     cmd      = ['mpirun','--mca','mpi_warn_on_fork','0','-n',str(size),'python3', sim_script, config_file]
     if 'mpl' in sim_script.split('/')[-1]:
         cmd = ['python3', sim_script, config_file]

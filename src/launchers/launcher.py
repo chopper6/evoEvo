@@ -1,6 +1,6 @@
 import os, sys, subprocess, time, socket
-sys.path.insert(0, os.getenv('lib'))
-import init, util
+#sys.path.insert(0, os.getenv('lib'))
+import init, util, cluster_paths
 ################################################################################################################################################
 def compile_solvers(CONFIGS):
     solvers     = zip(CONFIGS['KP_solver_source'], CONFIGS['KP_solver_binary'])
@@ -24,9 +24,15 @@ def set_qsub_outdir(CONFIGS):
             if qsub_output_dir[i] != dir[i]:
                 qsub_output_dir= qsub_output_dir[:i]
                 break
-    qsub_output_dir = util.slash(qsub_output_dir)
-    if len(qsub_output_dir.split('/'))>2:
-        qsub_output_dir = util.slash('/'.join(util.slash(qsub_output_dir).split('/')[:-1]))
+
+    pieces = qsub_output_dir.rpartition("/")
+    qsub_output_dir = pieces[0]
+    qsub_output_dir += "/qsubs/"
+
+    #qsub_output_dir = util.slash(qsub_output_dir)
+    #if len(qsub_output_dir.split('/'))>2:
+    #    qsub_output_dir = util.slash('/'.join(util.slash(qsub_output_dir).split('/')[:-1]))
+
     if not os.path.isdir(qsub_output_dir):
         try:
             os.makedirs(qsub_output_dir)
@@ -56,6 +62,7 @@ def parseConfigs(input_file):
     return CONFIGS
 ################################################################################################################################################
 def launch(simulation_script, simulation_batch_root, launching_script, simulation_directory,launching_directory,input_file, qsub_simulation_arg, qsub_launching_arg, dependency_switch, log):
+
     os.environ['SIMULATION_SCRIPT']    = simulation_script
     os.environ['SIMULATION_BATCH_ROOT']= simulation_batch_root
     os.environ['LAUNCHING_SCRIPT']     = launching_script
@@ -131,6 +138,10 @@ def setup ():
 if __name__ == "__main__":       
     log, input_file, job_name, timestamp = setup ()
     log.write("\n======================================\n"+time.strftime("%B-%d-%Y-h%Hm%Ms%S")+"\n======================================\n")
+
+    simulation_script, simulation_batch_root, launching_script, simulation_directory, launching_directory, input_base_dir = cluster_paths.get()
+    input_file = input_base_dir + input_file
+
     configs = util.cleanPaths(input_file)
     if len(configs) == 0:
         log.write("\nlen(configs)==0; I will not start a new job. Goodbye\n")
@@ -148,11 +159,5 @@ if __name__ == "__main__":
     
     qsub_simulation_arg         = [sub_cmd, "-N", job_name,  "-o",  qsub_output_dir+"qsub_simulation_output_"+host+'_'+job_name+'_'+timestamp+".txt", "-e",  qsub_output_dir+"qsub_simulation_error_"+host+'_'+job_name+'_'+timestamp+".txt", "-V", util.slash(os.getenv('LAUNCHING_DIRECTORY'))+sim_script]
     qsub_launching_arg          = [sub_cmd,  "-N", job_name,  "-o",  qsub_output_dir+"qsub_launching_output_"+host+'_'+job_name+'_'+timestamp+".txt", "-e",  qsub_output_dir+"qsub_launching_error_"+host+'_'+job_name+'_'+timestamp+".txt",  "-V", util.slash(os.getenv('LAUNCHING_DIRECTORY'))+launch_script]
-    simulation_batch_root       = os.getenv('SIMULATION_BATCH_ROOT') 
-    simulation_script           = os.getenv('SIMULATION_SCRIPT')
-    launching_script            = os.getenv('LAUNCHING_SCRIPT') 
-    simulation_directory        = os.getenv('SIMULATION_DIRECTORY') 
-    launching_directory         = os.getenv('LAUNCHING_DIRECTORY')   
-    
 
     launch (simulation_script, simulation_batch_root, launching_script,simulation_directory,launching_directory, input_file, qsub_simulation_arg, qsub_launching_arg, dependency_switch, log)

@@ -2,7 +2,6 @@
 #PBS -l procs=1
 #PBS -l walltime=00:10:00
 #PBS -A ymj-002-aa
-#PBS -q debug
 
 module load gcc/4.9.1
 module load MKL/11.2

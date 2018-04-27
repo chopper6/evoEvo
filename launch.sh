@@ -1,1 +1,1 @@
-python src/launchers/launcher.py $1
+python src/launchers/launcher.py home/chopper/evoEvo/data/input/$1

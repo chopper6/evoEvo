@@ -4,3 +4,4 @@ data/input/*
 *~
 venv
 venv/*
+*.log

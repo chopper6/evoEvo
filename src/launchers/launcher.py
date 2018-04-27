@@ -4,18 +4,6 @@ sys.path.insert(0, "/home/chopper/evoEvo/src/")
 sys.path.insert(0, "/home/chopper/evoEvo/src/launchers/")
 import init, util, cluster_paths
 ################################################################################################################################################
-def compile_solvers(CONFIGS):
-    solvers     = zip(CONFIGS['KP_solver_source'], CONFIGS['KP_solver_binary'])
-    for KP_solver_source, KP_solver_binary in set(solvers):    
-        soname = '-Wl,-soname,'+KP_solver_binary.split('/')[-1]
-        compile = ['gcc', '-shared', soname, '-o', KP_solver_binary, '-fPIC', KP_solver_source]
-        result = (subprocess.Popen (compile, stdout=subprocess.PIPE, universal_newlines=True)).stdout.read()       
-        try:
-            assert len(result) == 0
-        except:
-            return False
-    return True
-################################################################################################################################################
 def set_qsub_outdir(CONFIGS):
     output_dirs = list(set(CONFIGS['output_directory']))
     qsub_output_dir = output_dirs[0]
@@ -127,22 +115,21 @@ def setup (launching_directory):
     timestamp   = time.strftime("%B-%d-%Y-h%Hm%Ms%S")
     
     log = open (os.path.join (launching_directory, "launcher_batch.log" ), "a")
-    if len(sys.argv) < 2 or not  (os.path.isfile (str(sys.argv[1])))  :
-        log.write ("Usage: python3 launcher_vX.py [/absolute/path/to/input/file.txt (containing paths to configs files)]\nExiting..\n")
-        sys.exit(1)
     job_name    =  input_file.split('/')[-1]
     job_name    = job_name[0:min(10,len(job_name))]
-    
-    return log, input_file, job_name, timestamp
+    return log, job_name, timestamp
 ################################################################################################################################################
 
 if __name__ == "__main__":
-
+    
     simulation_script, simulation_batch_root, launching_script, simulation_directory, launching_directory, input_base_dir = cluster_paths.get()
     input_file   = str(sys.argv[1])
-    input_file = input_base_dir + input_file
-
-    log, input_file, job_name, timestamp = setup (launching_directory)
+   
+    if len(sys.argv) < 2 or not  (os.path.isfile (str(input_file)))  :
+        log.write ("Usage: python3 launcher_vX.py [/absolute/path/to/input/file.txt (containing paths to configs files)]\nExiting..\n")
+        sys.exit(1)
+ 
+    log, job_name, timestamp = setup (launching_directory)
     log.write("\n======================================\n"+time.strftime("%B-%d-%Y-h%Hm%Ms%S")+"\n======================================\n")
 
     configs = util.cleanPaths(input_file)
@@ -151,10 +138,7 @@ if __name__ == "__main__":
         print ("\nlen(configs)==0; I will not start a new job. Goodbye\n")
         sys.exit(1)
     
-    
     CONFIGS=parseConfigs(input_file)
-    
-    assert compile_solvers(CONFIGS)
     
     qsub_output_dir = set_qsub_outdir(CONFIGS)
     

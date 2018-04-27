@@ -1,7 +1,18 @@
 import os, sys, subprocess, time, socket
-#sys.path.insert(0, os.getenv('lib'))
+sys.path.insert(0, os.getenv('lib'))
 import init, util
-
+################################################################################################################################################
+def compile_solvers(CONFIGS):
+    solvers     = zip(CONFIGS['KP_solver_source'], CONFIGS['KP_solver_binary'])
+    for KP_solver_source, KP_solver_binary in set(solvers):    
+        soname = '-Wl,-soname,'+KP_solver_binary.split('/')[-1]
+        compile = ['gcc', '-shared', soname, '-o', KP_solver_binary, '-fPIC', KP_solver_source]
+        result = (subprocess.Popen (compile, stdout=subprocess.PIPE, universal_newlines=True)).stdout.read()       
+        try:
+            assert len(result) == 0
+        except:
+            return False
+    return True
 ################################################################################################################################################
 def set_qsub_outdir(CONFIGS):
     output_dirs = list(set(CONFIGS['output_directory']))
@@ -14,10 +25,6 @@ def set_qsub_outdir(CONFIGS):
                 qsub_output_dir= qsub_output_dir[:i]
                 break
     qsub_output_dir = util.slash(qsub_output_dir)
-    if len(qsub_output_dir.split('/'))>2:
-        qsub_output_dir = util.slash('/'.join(util.slash(qsub_output_dir).split('/')[:-1]))
-
-    qsub_output_dir += "/qsubs/"  #easier for me to put in sep dir
     if len(qsub_output_dir.split('/'))>2:
         qsub_output_dir = util.slash('/'.join(util.slash(qsub_output_dir).split('/')[:-1]))
     if not os.path.isdir(qsub_output_dir):
@@ -132,7 +139,9 @@ if __name__ == "__main__":
     
     
     CONFIGS=parseConfigs(input_file)
-
+    
+    assert compile_solvers(CONFIGS)
+    
     qsub_output_dir = set_qsub_outdir(CONFIGS)
     
     sim_script, launch_script, sub_cmd, dependency_switch, host = setup_qsub_command()

@@ -118,21 +118,20 @@ def setup (launching_directory):
 
     input_file   = str(sys.argv[1])
     if len(sys.argv) < 2 or not (os.path.isfile(str(input_file))):
-        log.write(
-            "Usage: python3 launcher_vX.py [/absolute/path/to/input/file.txt (containing paths to configs files)]\nExiting..\n")
+        log.write("Usage: python3 launcher_vX.py [/absolute/path/to/input/file.txt (containing paths to configs files)]")
+        log.write("Given file = " + str(input_file) + "\nExiting..\n")
         sys.exit(1)
 
     job_name    =  input_file.split('/')[-1]
     job_name    = job_name[0:min(10,len(job_name))]
-    return log, job_name, timestamp
+    return input_file, log, job_name, timestamp
 ################################################################################################################################################
 
 if __name__ == "__main__":
     
     simulation_script, simulation_batch_root, launching_script, simulation_directory, launching_directory, input_base_dir = cluster_paths.get()
-    setup(launching_directory)
 
-    log, job_name, timestamp = setup (launching_directory)
+    input_file, log, job_name, timestamp = setup (launching_directory)
     log.write("\n======================================\n"+time.strftime("%B-%d-%Y-h%Hm%Ms%S")+"\n======================================\n")
 
     configs = util.cleanPaths(input_file)

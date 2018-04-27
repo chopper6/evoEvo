@@ -3,6 +3,11 @@ evoEvo is a project to evolve a population of networks to maximize the informati
 note that some features have not been tested for awhile, these are marked by (!)
 in less elegant cases, asserts may be used to ensure that certain parameter combos are not used (since not yet implemented)
 
+example_configs.txt gives the currently ideal parameters (especially relevant for fitness parameters)
+
+run.sh is specific to rupert/yamaska
+rqmts.txt specifies the packages that need to be installed
+
 PARAMETERS
 # general
 debug 				boolean; sequential run without mpi, often easier to debug

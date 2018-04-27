@@ -123,10 +123,10 @@ def setup_qsub_command():
         pass
     return sim_script, launch_script, sub_cmd, dependency_switch, host
 ################################################################################################################################################
-def setup ():
+def setup (launching_directory):
     timestamp   = time.strftime("%B-%d-%Y-h%Hm%Ms%S")
     
-    log = open (os.path.join (util.slash(os.getenv('LAUNCHING_DIRECTORY')), "launcher_batch.log" ), "a") 
+    log = open (os.path.join (launching_directory, "launcher_batch.log" ), "a")
     if len(sys.argv) < 2 or not  (os.path.isfile (str(sys.argv[1])))  :
         log.write ("Usage: python3 launcher_vX.py [/absolute/path/to/input/file.txt (containing paths to configs files)]\nExiting..\n")
         sys.exit(1)
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     input_file   = str(sys.argv[1])
     input_file = input_base_dir + input_file
 
-    log, input_file, job_name, timestamp = setup ()
+    log, input_file, job_name, timestamp = setup (launching_directory)
     log.write("\n======================================\n"+time.strftime("%B-%d-%Y-h%Hm%Ms%S")+"\n======================================\n")
 
     configs = util.cleanPaths(input_file)
@@ -160,6 +160,6 @@ if __name__ == "__main__":
     
     sim_script, launch_script, sub_cmd, dependency_switch, host = setup_qsub_command()
     
-    qsub_simulation_arg         = [sub_cmd, "-N", job_name,  "-o",  qsub_output_dir+"qsub_simulation_output_"+host+'_'+job_name+'_'+timestamp+".txt", "-e",  qsub_output_dir+"qsub_simulation_error_"+host+'_'+job_name+'_'+timestamp+".txt", "-V", util.slash(os.getenv('LAUNCHING_DIRECTORY'))+sim_script]
-    qsub_launching_arg          = [sub_cmd,  "-N", job_name,  "-o",  qsub_output_dir+"qsub_launching_output_"+host+'_'+job_name+'_'+timestamp+".txt", "-e",  qsub_output_dir+"qsub_launching_error_"+host+'_'+job_name+'_'+timestamp+".txt",  "-V", util.slash(os.getenv('LAUNCHING_DIRECTORY'))+launch_script]
+    qsub_simulation_arg         = [sub_cmd, "-N", job_name,  "-o",  qsub_output_dir+"qsub_simulation_output_"+host+'_'+job_name+'_'+timestamp+".txt", "-e",  qsub_output_dir+"qsub_simulation_error_"+host+'_'+job_name+'_'+timestamp+".txt", "-V", launching_directory +sim_script]
+    qsub_launching_arg          = [sub_cmd,  "-N", job_name,  "-o",  qsub_output_dir+"qsub_launching_output_"+host+'_'+job_name+'_'+timestamp+".txt", "-e",  qsub_output_dir+"qsub_launching_error_"+host+'_'+job_name+'_'+timestamp+".txt",  "-V", launching_directory+launch_script]
     launch (simulation_script, simulation_batch_root, launching_script,simulation_directory,launching_directory, input_file, qsub_simulation_arg, qsub_launching_arg, dependency_switch, log)

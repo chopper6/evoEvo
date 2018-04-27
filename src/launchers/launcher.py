@@ -129,20 +129,21 @@ def setup ():
     log = open (os.path.join (util.slash(os.getenv('LAUNCHING_DIRECTORY')), "launcher_batch.log" ), "a") 
     if len(sys.argv) < 2 or not  (os.path.isfile (str(sys.argv[1])))  :
         log.write ("Usage: python3 launcher_vX.py [/absolute/path/to/input/file.txt (containing paths to configs files)]\nExiting..\n")
-        sys.exit(1)  
-    input_file   = str(sys.argv[1])
+        sys.exit(1)
     job_name    =  input_file.split('/')[-1]
     job_name    = job_name[0:min(10,len(job_name))]
     
     return log, input_file, job_name, timestamp
 ################################################################################################################################################
 
-if __name__ == "__main__":       
-    log, input_file, job_name, timestamp = setup ()
-    log.write("\n======================================\n"+time.strftime("%B-%d-%Y-h%Hm%Ms%S")+"\n======================================\n")
+if __name__ == "__main__":
 
     simulation_script, simulation_batch_root, launching_script, simulation_directory, launching_directory, input_base_dir = cluster_paths.get()
+    input_file   = str(sys.argv[1])
     input_file = input_base_dir + input_file
+
+    log, input_file, job_name, timestamp = setup ()
+    log.write("\n======================================\n"+time.strftime("%B-%d-%Y-h%Hm%Ms%S")+"\n======================================\n")
 
     configs = util.cleanPaths(input_file)
     if len(configs) == 0:

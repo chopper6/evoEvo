@@ -251,15 +251,18 @@ def report_timing(t_start, gen, output_dir, report_freq=.001):
 
 if __name__ == "__main__":
     # note that phone calls this directly
+    # could add a base dirr to make arg1 shorter
+
     rank = 0 #ie master only
 
     config_file = sys.argv[1]
-    num_workers = 1
+    num_workers = sys.argv[2]
 
     configs = init.load_sim_configs(config_file, rank, num_workers)
     orig_output_dir = configs['output_directory']
     num_sims = int(configs['num_sims'])
     assert(num_sims == 1) #not ready for more
+    assert(configs['debug'] == True) #otherwise need more workers
 
     log_text = 'Evolve_root(): in dir ' + str(os.getcwd()) + ', config file = ' + str(config_file) + ', num_workers = ' + str(num_workers) + "\n"
 

@@ -32,6 +32,8 @@ def load_sim_configs (param_file, rank):
         #this is now checked further up in evolve_root
         #if (configs['number_of_workers'] != num_workers): util.cluster_print(configs['output_directory'],"\nWARNING in init.load_sim_configs(): mpi #workers != config #workers! " + str(configs['number_of_workers']) + " vs " + str(num_workers) + "\n")  # not sure why this doesn't correctly get # config workers...
 
+    if (configs['stop_condition'] == 'size'):
+        assert(configs['grow_mutation_frequency'] > 0)
     return configs
 
 

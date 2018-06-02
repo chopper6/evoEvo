@@ -12,7 +12,10 @@ def evolve_master(configs):
     biased = util.boool(configs['biased'])
     num_sims = int(configs['num_sims'])
 
-    population, gen, size, advice, BD_table, num_survive, keep_running = init_run(configs)
+    init_data = init_run(configs)
+    if not init_data: return #for example if run already done
+
+    population, gen, size, advice, BD_table, num_survive, keep_running = init_data
 
     while keep_running:
         t_start = time.time()
@@ -69,7 +72,7 @@ def init_run(configs):
 
         if (gen == 'Done'):
             util.cluster_print(output_dir, "Run already finished, exiting...\n")
-            return
+            return None
 
         elif (gen > 2): #IS CONTINUATION RUN
             gen = int(gen)-2 #latest may not have finished
@@ -98,7 +101,8 @@ def init_run(configs):
         gen, size = 0, start_size
         keep_running = util.test_stop_condition(size, gen, configs)
 
-    return population, gen, size, advice, BD_table, num_survive, keep_running
+    init_data =  population, gen, size, advice, BD_table, num_survive, keep_running
+    return init_data
 
 
 def init_dirs(num_workers, output_dir):

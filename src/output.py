@@ -38,6 +38,7 @@ def final_master_info(population, gen, configs):
     pickle_file = output_dir + "/nets_pickled/" + str(gen)
     with open(pickle_file, 'wb') as file: pickle.dump(population[0].net, file)
     popn_data(population, output_dir, gen)
+    deg_distrib_csv(output_dir, population, gen)
     #draw_nets.basic(population, output_dir, total_gens)
 
     if util.boool(configs['biased']):

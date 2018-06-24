@@ -232,11 +232,11 @@ def features_over_size(dirr, net_info, titles, mins, maxs, use_lims):
 def degree_distrib_change(dirr):
     deg_file_name = dirr + "/degree_distrib.csv"
 
-    if not os.path.exists(dirr + "/undirected_degree_distribution/"):
-        os.makedirs(dirr + "/undirected_degree_distribution/")
+    if not os.path.exists(dirr + "/degree_distribution_change/"):
+        os.makedirs(dirr + "/degree_distribution_change/")
 
     all_lines = [Line.strip() for Line in (open(deg_file_name, 'r')).readlines()]
-    #titles = all_lines[0]
+    titles = all_lines[0]
 
     # Get starting degree distribution
     line = all_lines[1]
@@ -260,16 +260,14 @@ def degree_distrib_change(dirr):
     end_col = '#0099cc'
 
     plt.loglog(start_deg, start_freq, basex=10, basey=10, linestyle = '', c=start_col, alpha=0.8, markersize=7, marker='o')
-    plt.loglog(end_deg, end_freq, basex=10, basey=10, linestyle='', c=start_col, alpha=0.8, markersize=7, marker='o')
+    plt.loglog(end_deg, end_freq, basex=10, basey=10, linestyle='', c=end_col, alpha=0.8, markersize=7, marker='o')
     #plt.scatter(end_deg, end_freq, c=end_col, alpha=0.8, s=40, marker='o')
 
     ax = matplotlib.pyplot.gca()
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
-    ax.set_xlim([1,16])
-    ax.set_ylim([1,200])
-    ax.set_yticks([0,50,100,150,200])
-    ax.set_xticks([0,2,4,6,8,10,12,14,16])
+    ax.set_xlim([1,1000])
+    ax.set_ylim([1,1000])
 
     plt.tick_params(  # http://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes.tick_params
         axis='both',  # changes apply to the x-axis
@@ -283,9 +281,8 @@ def degree_distrib_change(dirr):
     plt.xlabel('Degree')
     plt.ylabel('Number of Nodes with Given Degree')
     plt.title('Change in Degree Distribution')
-    plt.savefig(dirr + "/undirected_degree_distribution/degree_change.png", dpi=300)
+    plt.savefig(dirr + "/degree_distribution_change/in_degree_change.png", dpi=300)
     plt.clf()
-
 
 
 def features_over_time(dirr, net_info, titles, mins, maxs, use_lims):

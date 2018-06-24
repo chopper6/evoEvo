@@ -49,8 +49,7 @@ def parseConfigs(input_file):
 
 
 ################################################################################################################################################
-def launch(simulation_script, simulation_batch_root, launching_script, simulation_directory, launching_directory,
-           input_file, qsub_simulation_arg, qsub_launching_arg, dependency_switch, log):
+def launch(simulation_script, simulation_batch_root, launching_script, simulation_directory, launching_directory,input_file, qsub_simulation_arg, qsub_launching_arg, dependency_switch, log):
     os.environ['EVOEVO_SIMULATION_SCRIPT'] = simulation_script
     os.environ['EVOEVO_SIMULATION_BATCH_ROOT'] = simulation_batch_root
     os.environ['EVOEVO_LAUNCHING_SCRIPT'] = launching_script
@@ -68,22 +67,16 @@ def launch(simulation_script, simulation_batch_root, launching_script, simulatio
     print("os.environ['SIMULATION_CONFIGS']  = " + os.getenv('SIMULATION_CONFIGS'))
     print("Please wait ..")
     simulation_job_id = (
-    subprocess.Popen(qsub_simulation_arg, stdout=subprocess.PIPE, universal_newlines=True)).stdout.read().replace('\n',
-                                                                                                                  '').strip()
-    log.write(
-        "\nSimulation job dispatched .. " + simulation_job_id + "\nI will wait 1 minute before dispatching the Launching job, Please wait ...")
+    subprocess.Popen(qsub_simulation_arg, stdout=subprocess.PIPE, universal_newlines=True)).stdout.read().replace('\n','').strip()
+    log.write( "\nSimulation job dispatched .. " + simulation_job_id + "\nI will wait 1 minute before dispatching the Launching job, Please wait ...")
     print(" ".join(qsub_simulation_arg))
     log.write("\n\n" + " ".join(qsub_simulation_arg))
-    print(
-        "Simulation job dispatched ..: " + simulation_job_id + "\nI will wait 1 minute before dispatching the Launching job, Please wait ...")
+    print("Simulation job dispatched ..: " + simulation_job_id + "\nI will wait 1 minute before dispatching the Launching job, Please wait ...")
     log.flush()
     time.sleep(60)
-    launching_job_id = (
-    subprocess.Popen(qsub_launching_arg + [dependency_switch, "depend=afterany:" + simulation_job_id.split(".")[0]],
-                     stdout=subprocess.PIPE, universal_newlines=True)).stdout.read().replace('\n', '').strip()
+    launching_job_id = (subprocess.Popen(qsub_launching_arg + [dependency_switch, "depend=afterany:" + simulation_job_id.split(".")[0]],stdout=subprocess.PIPE, universal_newlines=True)).stdout.read().replace('\n', '').strip()
     log.write("\nLaunch job dispatched .. " + launching_job_id + "\n")
-    log.write("\n\n" + " ".join(
-        qsub_launching_arg + [dependency_switch, "depend=afterany:" + simulation_job_id.split(".")[0]]))
+    log.write("\n\n" + " ".join(qsub_launching_arg + [dependency_switch, "depend=afterany:" + simulation_job_id.split(".")[0]]))
     print(" ".join(qsub_launching_arg + [dependency_switch, "depend=afterany:" + simulation_job_id.split(".")[0]]))
     print("Launch job dispatched .. " + launching_job_id + "\n")
     log.flush()
@@ -155,6 +148,7 @@ if __name__ == "__main__":
 
     qsub_simulation_arg = [sub_cmd, "-N", job_name, "-o",qsub_output_dir + "qsub_simulation_output_" + host + '_' + job_name + '_' + timestamp + ".txt", "-e", qsub_output_dir + "qsub_simulation_error_" + host + '_' + job_name + '_' + timestamp + ".txt", "-V", util.slash(os.getenv('EVOEVO_LAUNCHING_DIRECTORY')) + sim_script]
     qsub_launching_arg = [sub_cmd, "-N", job_name, "-o", qsub_output_dir + "qsub_launching_output_" + host + '_' + job_name + '_' + timestamp + ".txt","-e", qsub_output_dir + "qsub_launching_error_" + host + '_' + job_name + '_' + timestamp + ".txt", "-V", util.slash(os.getenv('EVOEVO_LAUNCHING_DIRECTORY')) + launch_script]
+
     simulation_batch_root = os.getenv('EVOEVO_SIMULATION_BATCH_ROOT')
     simulation_script = os.getenv('EVOEVO_SIMULATION_SCRIPT')
     launching_script = os.getenv('EVOEVO_LAUNCHING_SCRIPT')

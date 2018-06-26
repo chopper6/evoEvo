@@ -49,15 +49,15 @@ def parseConfigs(input_file):
 
 
 ################################################################################################################################################
-def launch(simulation_script, simulation_batch_root, launching_script, simulation_directory, launching_directory,input_file, qsub_simulation_arg, qsub_launching_arg, dependency_switch, log):
+def launch(simulation_script, simulation_root, launching_script, simulation_directory, launching_directory,input_file, qsub_simulation_arg, qsub_launching_arg, dependency_switch, log):
     os.environ['EVOEVO_SIMULATION_SCRIPT'] = simulation_script
-    os.environ['EVOEVO_SIMULATION_BATCH_ROOT'] = simulation_batch_root
+    os.environ['EVOEVO_SIMULATION_ROOT'] = simulation_root
     os.environ['EVOEVO_LAUNCHING_SCRIPT'] = launching_script
     os.environ['EVOEVO_SIMULATION_DIRECTORY'] = simulation_directory
     os.environ['EVOEVO_LAUNCHING_DIRECTORY'] = launching_directory
     os.environ['SIMULATION_CONFIGS'] = input_file
     log.write("\nos.environ['EVOEVO_SIMULATION_SCRIPT']   = " + os.getenv('EVOEVO_SIMULATION_SCRIPT'))
-    log.write("\nos.environ['EVOEVO_SIMULATION_BATCH_ROOT']   = " + os.getenv('EVOEVO_SIMULATION_BATCH_ROOT'))
+    log.write("\nos.environ['EVOEVO_SIMULATION_ROOT']   = " + os.getenv('EVOEVO_SIMULATION_ROOT'))
     log.write("\nos.environ['EVOEVO_LAUNCHING_SCRIPT']    = " + os.getenv('EVOEVO_LAUNCHING_SCRIPT'))
     log.write("\nos.environ['EVOEVO_SIMULATION_DIRECTORY']= " + os.getenv('EVOEVO_SIMULATION_DIRECTORY'))
     log.write("\nos.environ['EVOEVO_LAUNCHING_DIRECTORY'] = " + os.getenv('EVOEVO_LAUNCHING_DIRECTORY'))
@@ -149,10 +149,10 @@ if __name__ == "__main__":
     qsub_simulation_arg = [sub_cmd, "-N", job_name, "-o",qsub_output_dir + "qsub_simulation_output_" + host + '_' + job_name + '_' + timestamp + ".txt", "-e", qsub_output_dir + "qsub_simulation_error_" + host + '_' + job_name + '_' + timestamp + ".txt", "-V", util.slash(os.getenv('EVOEVO_LAUNCHING_DIRECTORY')) + sim_script]
     qsub_launching_arg = [sub_cmd, "-N", job_name, "-o", qsub_output_dir + "qsub_launching_output_" + host + '_' + job_name + '_' + timestamp + ".txt","-e", qsub_output_dir + "qsub_launching_error_" + host + '_' + job_name + '_' + timestamp + ".txt", "-V", util.slash(os.getenv('EVOEVO_LAUNCHING_DIRECTORY')) + launch_script]
 
-    simulation_batch_root = os.getenv('EVOEVO_SIMULATION_BATCH_ROOT')
+    simulation_root = os.getenv('EVOEVO_SIMULATION_ROOT')
     simulation_script = os.getenv('EVOEVO_SIMULATION_SCRIPT')
     launching_script = os.getenv('EVOEVO_LAUNCHING_SCRIPT')
     simulation_directory = os.getenv('EVOEVO_SIMULATION_DIRECTORY')
     launching_directory = os.getenv('EVOEVO_LAUNCHING_DIRECTORY')
 
-    launch(simulation_script, simulation_batch_root, launching_script, simulation_directory, launching_directory, input_file, qsub_simulation_arg, qsub_launching_arg, dependency_switch, log)
+    launch(simulation_script, simulation_root, launching_script, simulation_directory, launching_directory, input_file, qsub_simulation_arg, qsub_launching_arg, dependency_switch, log)

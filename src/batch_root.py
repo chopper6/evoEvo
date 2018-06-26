@@ -1,4 +1,5 @@
 import sys,os,subprocess,time
+import evolve
 #sys.path.insert(0, os.getenv('lib'))
 
 size, input_file = None,None
@@ -19,13 +20,14 @@ for config_file in CONFIG_FILES:
         sys.stdout.write (' ... PREVIOUSLY DONE '+time.strftime("%B-%d-%Y-h%Hm%Ms%S")+'\n')
         sys.stdout.flush()
         continue
+
     # mpirun --mca mpi_warn_on_fork 0 -n 32 python3 $SIMULATION_SCRIPTv4 $SIMULATION_CONFIGSv4
-    sim_script = os.getenv('SIMULATION_SCRIPT')
-    #sim_script = '/home/chopper/src/evolve.py' #TODO: check this, but i think it is no longer needed
+    sim_script = os.getenv('EVOEVO_SIMULATION_SCRIPT')
     cmd      = ['mpirun','--mca','mpi_warn_on_fork','0','-n',str(size),'python3', sim_script, config_file]
     if 'mpl' in sim_script.split('/')[-1]:
         cmd = ['python3', sim_script, config_file]
     success  = (subprocess.Popen (cmd, stdout=subprocess.PIPE, universal_newlines=True)).stdout.read()
+
     if success:
         CONFIG_FILES[i-1] = '# [DONE] '+config_file
         with open (input_file,'w') as f:

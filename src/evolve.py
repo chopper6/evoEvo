@@ -1,15 +1,17 @@
 #!/usr/bin/python3
 import os,sys,csv,shutil
 from mpi4py import MPI
-os.environ['src'] = '/home/2014/choppe1/Documents/evoEvo/src' #NOTE: needed only for yamaska/rupert
-sys.path.insert(0, os.getenv('src'))
 import init, util, plot_nets
 import numpy as np
 from time import sleep
 
 # WARNING: MULTIPLE SIMULATIONS MAY BE OUTDATED
 
-def evolve(rank, num_workers, config_file):
+def evolve(config_file):
+
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    num_workers = comm.Get_size()-1  # master not incld
 
     configs = init.load_sim_configs(config_file, rank)
     orig_output_dir = configs['output_directory']
@@ -22,7 +24,7 @@ def evolve(rank, num_workers, config_file):
 
     for i in range(num_sims):
 
-        init_sim(configs, num_sims, i, orig_output_dir)
+        init_sim(configs, num_sims, i, orig_output_dir,rank)
 
         if rank == 0:  # MASTER
             log_text = 'Evolve_root(): in dir ' + str(os.getcwd()) + ', config file = ' + str(config_file) + ', num_workers = ' + str(num_workers) + "\n"
@@ -38,16 +40,23 @@ def evolve(rank, num_workers, config_file):
     if (num_sims > 1 and rank==0): close_out_mult_sims(num_sims, orig_output_dir)
 
 
-def init_sim(configs, num_sims, sim_num, orig_output_dir):
+    if (rank==0):
+        comm.Abort()
+        print("\nMaster Thread Exiting Evolution.\n")
+
+
+
+def init_sim(configs, num_sims, sim_num, orig_output_dir, rank):
     if (num_sims > 1 and sim_num == 0):  # check where to pick up the run
         this_dir = False
+        curr_dir=0
         while (not this_dir):
 
             if (sim_num >= num_sims):
                 util.cluster_print(orig_output_dir, "All simulations already finished, exiting...\n")
-                return
+                return 1
 
-            configs['output_directory'] = orig_output_dir + "_" + str(i)
+            configs['output_directory'] = orig_output_dir + "_" + str(curr_dir)
             this_dir = True  # remains true if any of the following fail
 
             if os.path.exists(configs['output_directory'] + "/progress.txt"):
@@ -56,6 +65,8 @@ def init_sim(configs, num_sims, sim_num, orig_output_dir):
                     if (line.strip() == 'Done' or line.strip() == 'done'):
                         this_dir = False
                         sim_num += 1
+
+            curr_dir+=1
 
     if (num_sims > 1):
         configs['output_directory'] = orig_output_dir + "sim_" + str(sim_num) + "/"
@@ -113,13 +124,7 @@ def extract_and_combine(output_dir, num_sims):
 
 if __name__ == "__main__":
     # note that yamaska and rupert should call this directly
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    num_workers = comm.Get_size()-1  # master not incld
+    # guillimin calls through batch_root
     config_file = sys.argv[1]
+    evolve(config_file)
 
-    evolve(rank, num_workers, config_file)
-
-    if (rank==0):
-        comm.Abort()
-        print("\nExiting Evolution.\n")

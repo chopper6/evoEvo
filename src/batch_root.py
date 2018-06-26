@@ -1,5 +1,4 @@
 import sys,os,subprocess,time
-import evolve
 #sys.path.insert(0, os.getenv('lib'))
 
 size, input_file = None,None

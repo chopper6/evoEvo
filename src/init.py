@@ -1,5 +1,4 @@
 import sys, os, time, math
-sys.path.insert(0, os.getenv('lib'))
 import util
 
 #--------------------------------------------------------------------------------------------------
@@ -33,7 +32,7 @@ def load_sim_configs (param_file, rank):
                 continue
 
         #this is now checked further up in evolve_root
-        #if (configs['number_of_workers'] != num_workers): util.cluster_print(configs['output_directory'],"\nWARNING in init.load_sim_configs(): mpi #workers != config #workers! " + str(configs['number_of_workers']) + " vs " + str(num_workers) + "\n")  # not sure why this doesn't correctly get # config workers...
+        #if (int(configs['number_of_workers']) != num_workers): util.cluster_print(configs['output_directory'],"\nWARNING in init.load_sim_configs(): mpi #workers != config #workers! " + str(configs['number_of_workers']) + " vs " + str(num_workers) + "\n")  # not sure why this doesn't correctly get # config workers...
 
     if (configs['stop_condition'] == 'size'):
         assert(int(configs['grow_mutation_frequency']) > 0)

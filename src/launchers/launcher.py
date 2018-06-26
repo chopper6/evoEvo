@@ -1,6 +1,4 @@
 import os, sys, subprocess, time, socket
-sys.path.insert(0, "/home/chopper/evoEvo/src/")
-sys.path.insert(0, "/home/chopper/evoEvo/src/launchers/")
 import init, util
 
 ################################################################################################################################################

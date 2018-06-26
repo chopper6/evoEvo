@@ -47,7 +47,10 @@ def init_population(init_type, start_size, pop_size, configs):
             num_add = int(edge_node_ratio * 8)
             mutate.add_edges(init_net, num_add, configs)
             mutate.add_nodes(init_net, start_size - 8, configs)
-            if (len(init_net.edges()) == num_edges + 1): mutate.rm_edges(init_net, 1, configs)
+
+            #correct for off-by-one-errors since rounding occurs twice
+            if (len(init_net.edges()) == num_edges+1): mutate.rm_edges(init_net, 1, configs)
+            if (len(init_net.edges()) == num_edges-1): mutate.add_edges(init_net, 1, configs)
 
         mutate.ensure_single_cc(init_net, configs)
         assert (len(init_net.edges()) == num_edges)

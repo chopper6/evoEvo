@@ -144,7 +144,7 @@ def distrib_workers(population, gen, worker_pop_size, num_survive, advice, BD_ta
             dump_file = output_dir + "to_workers/" + str(gen) + "/" + str(w)
             seed = population[0].copy()
             randSeeds = os.urandom(sysRand().randint(0, 1000000))
-            worker_args = [0, seed, worker_pop_size, min(worker_pop_size, num_survive), randSeeds, advice, BD_table, biases, configs]
+            worker_args = [w, seed, worker_pop_size, min(worker_pop_size, num_survive), randSeeds, advice, BD_table, biases, configs]
             with open(dump_file, 'wb') as file:
                 pickle.dump(worker_args, file)
             # pool.map_async(minion.evolve_minion, (dump_file,))

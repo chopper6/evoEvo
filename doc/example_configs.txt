@@ -9,9 +9,11 @@ single_cc               	= True
 pressure                 	= 100
 pressure_on           		= edges
 instance_states         	= experience
-state_distribution  		= uniform
 sampling_rounds_multiplier 	= .1
 sampling_rounds_max      	= None
+
+interval		= discrete | continuous
+env_distribution	= unfirom | normal
 
 
 # start and stop

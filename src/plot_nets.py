@@ -6,7 +6,8 @@ from decimal import Decimal
 
 
 ################## ORGANIZER FUNCTIONS ##################
-def single_run_plots (dirr):
+def single_run_plots (configs):
+    dirr = configs['output_directory']
     #plots features_over_time and degree_distrib
     #only uses most fit indiv in population
     if not os.path.exists(dirr):
@@ -15,7 +16,7 @@ def single_run_plots (dirr):
 
     net_info, titles = parse_info(dirr)
 
-    if not os.path.exists(dirr + "/images_by_size/"): os.makedirs(dirr + "/images_by_size/")
+    if not os.path.exists(dirr + "/images_by_size/"): os.makedirs(dirr + "/images_by_size/") #TODO: make this more elegant
     if not os.path.exists(dirr + "/images_by_time/"): os.makedirs(dirr + "/images_by_time/")
 
     mins, maxs = 0,0
@@ -26,14 +27,24 @@ def single_run_plots (dirr):
     degree_distrib(dirr)
 
     print("Generating undirected degree distribution plots.")
-    plot_undir(dirr, False, None) #last two args for Biased and bias on, which haven't really been implemented
+    plot_undir(configs) #last two args for Biased and bias on, which haven't really been implemented
 
     print("Generating degree change plot.\n")
     degree_distrib_change(dirr) #may require debugging
 
 
-def plot_undir(output_dir, biased, bias_on):
+def plot_undir(configs):
+
+    output_dir = configs['output_directory']
+    biased, bias_on = False, None #not implemented yet
+
     dirs = ["/undirected_degree_distribution/", "/undirected_degree_distribution/loglog/", "/undirected_degree_distribution/loglog%/"] #"/undirected_degree_distribution/scatter/", "/undirected_degree_distribution/scatter%/"]
+
+    if configs['interval'] == 'continuous':
+        print("Generating variance distribution plots too.\n")
+        dirs.append("/variance_distribution/")
+        dirs.append("/info_distribution/")
+
     for dirr in dirs:
         if not os.path.exists(output_dir + dirr):
             os.makedirs(output_dir + dirr)
@@ -42,10 +53,29 @@ def plot_undir(output_dir, biased, bias_on):
         for f in files:
             #print("plot_dir(): file " + str(f))
             undir_deg_distrib(root + "/" + f, output_dir + "/undirected_degree_distribution/", f, biased, bias_on)
-
+            variance_and_entropy_distrib(root + "/" + f, output_dir, f)
 
 
 ################## IMAGE GENERATION FUNCTIONS ##################
+
+def variance_and_entropy_distrib(net_file, destin_dir, title):
+
+    net = nx.read_edgelist(net_file, nodetype=int, create_using=nx.DiGraph())
+
+    color_choice = 'purple'
+
+    for feature in ['info','variance']:
+        H = []
+        vals = []
+        for n in net.nodes():
+            if (feature == 'info'): vals.append(net.node[n]['fitness'])
+            elif (feature == 'variance'): vals.append(net.node[n]['var'])
+
+    #not sure what to plot yet...
+    return
+
+
+
 def undir_deg_distrib(net_file, destin_path, title, biased, bias_on):
 
     if (re.match(re.compile("[a-zA-Z0-9]*pickle"), net_file)):

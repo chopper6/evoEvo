@@ -5,11 +5,9 @@ def pressurize(configs, Net, advice, BD_table):
     sampling_rounds_multiplier = float(configs['sampling_rounds_multiplier']) #FRACTION of curr number of EDGES
     if (util.is_it_none(configs['sampling_rounds_max']) == None): max_sampling_rounds = None
     else: max_sampling_rounds = int(configs['sampling_rounds_max'])
-    fitness_metric = str(configs['fitness_metric'])
     instance_states = str(configs['instance_states'])
     biased = util.boool(configs['biased'])
     scale_node_fitness = util.boool(configs['scale_node_fitness'])
-    directed = util.boool(configs['directed'])
 
     net = Net.net #not great syntax, but Net is an individual in a population, whereas net is it's graph representation
 
@@ -21,13 +19,13 @@ def pressurize(configs, Net, advice, BD_table):
         fitness_score = probabilistic.calc_fitness(net, BD_table, configs)
 
     elif (instance_states == 'experience'):
-        fitness.reset_fitness(net)
+        fitness.reset_nodes(net, configs)
         for i in range(num_samples_relative):
-            fitness.reset_node_spins(net)
+            instances.reset_states(net, configs)
             instances.experience(net, configs)
-            fitness.calc_node_fitness(net, fitness_metric, directed)
+            fitness.calc_node_fitness(net, configs)
 
-        fitness.node_normz(net, num_samples_relative)
+        fitness.node_normz(net, num_samples_relative, configs)
         fitness_score = fitness.node_product(net, scale_node_fitness)
 
     else:

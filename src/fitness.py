@@ -1,6 +1,6 @@
 import math
 from operator import attrgetter
-import node_fitness
+import node_fitness, util
 
 def eval_fitness(population, fitness_direction):
     #determines fitness of each individual and orders the population by fitness
@@ -10,17 +10,39 @@ def eval_fitness(population, fitness_direction):
 
     return population
 
-def calc_node_fitness(net, fitness_metric, directed):
-    if directed:
-        for n in net.nodes():
-            up_in, up_out, down_in, down_out = net.node[n]['up_in'], net.node[n]['up_out'], net.node[n]['down_in'], net.node[n]['down_out']
-            net.node[n]['fitness'] += node_fitness.calc_directed(fitness_metric, up_in, up_out, down_in, down_out)
+def calc_node_fitness(net, configs):
+    directed = util.boool(configs['directed'])
+    fitness_metric = str(configs['fitness_metric'])
+    interval = configs['interval']
 
-    else:
-        for n in net.nodes():
-            up, down = net.node[n]['up'], net.node[n]['down']
-            net.node[n]['fitness'] += node_fitness.calc_undirected(fitness_metric, up,down)
+    if interval == 'discrete':
+        if directed:
+            for n in net.nodes():
+                up_in, up_out, down_in, down_out = net.node[n]['up_in'], net.node[n]['up_out'], net.node[n]['down_in'], net.node[n]['down_out']
+                net.node[n]['fitness'] += node_fitness.calc_directed(fitness_metric, up_in, up_out, down_in, down_out)
 
+        else:
+            for n in net.nodes():
+                up, down = net.node[n]['up'], net.node[n]['down']
+                net.node[n]['fitness'] += node_fitness.calc_undirected(fitness_metric, up,down)
+
+
+    elif interval == 'continuous':
+        assert(not directed)
+        temp_switch = configs['temp_switch']
+
+        for n in net.nodes():
+            states = []
+            for in_edge in net.in_edges(n):
+                if net[in_edge[0]][in_edge[1]]['state'] is not None:
+                    states.append(net[in_edge[0]][in_edge[1]]['state'])
+            for out_edge in net.out_edges(n):
+                if net[out_edge[0]][out_edge[1]]['state'] is not None:
+                    states.append(net[out_edge[0]][out_edge[1]]['state'])
+
+            info, var = node_fitness.calc_continuous(states, temp_switch)
+            net.node[n]['fitness'] += info
+            net.node[n]['var'] += var
 
 def node_product(net, scale_node_fitness):
     fitness_score = 0
@@ -44,20 +66,20 @@ def node_product(net, scale_node_fitness):
     return fitness_score
 
 
-def node_normz(net, denom):
+def node_normz(net, denom, configs):
+    interval = configs['interval']
     if (denom != 0):
         for n in net.nodes():
             net.node[n]['fitness'] /= float(denom)
+            if (interval == 'continuous'): net.node[n]['var'] /= float(denom)
 
 
-def reset_fitness(net):
+def reset_node_fitness(net, configs):
+    interval = configs['interval']
+
     for n in net.nodes():
         net.node[n]['fitness'] = 0
+        if (interval=='continuous'): net.node[n]['var'] = 0
 
-
-def reset_node_spins(net):
-    for n in net.nodes():
-        net.node[n]['up'] = 0
-        net.node[n]['down'] = 0
 
 

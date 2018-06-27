@@ -96,6 +96,7 @@ def calc_fitness(net, BD_table, configs):
 
 
 def build_BD_table(configs, max_deg=100):
+    assert (False) #obsolete
     # assumes no conservation score and bernouille pr distribution
     # incld log-normz
     directed = util.boool(configs['directed'])
@@ -206,9 +207,9 @@ def probabilistic_experience(net, global_ben_bias, distribn, biased, biased_on, 
         ben_pr = None
         if (distribn == 'set'): ben_pr = .5 + global_ben_bias
         if (distribn == 'uniform'):
-            ben_pr = random.uniform(0, 1) + global_ben_bias
+            ben_pr = rd.uniform(0, 1) + global_ben_bias
         elif (distribn == 'normal'):
-            ben_pr = random.normalvariate(0, 1)
+            ben_pr = rd.normalvariate(0, 1)
             ben_pr = (ben_pr + .5) / 2 + global_ben_bias
 
         edge_ben = ben_pr + indiv_bias

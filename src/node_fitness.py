@@ -9,6 +9,35 @@ def calc_undirected (fitness_metric, up, down):
     else: print("ERROR in node_fitness.calc_undirected(): unknown fitness metric: " + str(fitness_metric))
 
 
+def calc_continuous (states, temp_switch):
+    mean = sum(states)/len(states)
+    var = 0
+
+    for state in states:
+        var += math.pow((mean-state),2)
+
+    if var == 0:
+        info = 1
+        return info
+
+    entropy = 0
+    pdf_part = 1/math.sqrt(2*math.pi*var)
+    for state in states:
+        pr = pdf_part*math.exp(-math.pow((mean-state),2)/float(2*var)) #based on normal distribution
+
+        if(temp_switch == 'logpr'): entropy -= math.log(pr)
+        elif(temp_switch == 'prlogpr'): entropy -= pr*math.log(pr)
+        else: assert(False)
+        #I think, instead of pr*math.log(pr)
+        #may be different log base, such as #states
+
+    info = 1-entropy
+    print("[node_fitness.py] info = " + str(info))
+    assert(info >= 0 and info <= 1)
+
+    return info, var
+
+
 def calc_directed(fitness_metric, up_in, up_out, down_in, down_out):
     # currently experimenting with this
 

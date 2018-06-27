@@ -74,7 +74,7 @@ def node_normz(net, denom, configs):
             if (interval == 'continuous'): net.node[n]['var'] /= float(denom)
 
 
-def reset_node_fitness(net, configs):
+def reset_nodes(net, configs):
     interval = configs['interval']
 
     for n in net.nodes():

@@ -33,7 +33,6 @@ def experience(net, configs):
             elif env_distrib == 'normal':
                 env_state = rd.gauss(0,1)
             net[edge[0]][edge[1]]['state'] = env_state
-            if (rd.random()< .01): print("[instances.py] ex edge state = " + str(env_state))
 
 
     elif (interval == 'discrete'):

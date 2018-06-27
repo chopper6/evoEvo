@@ -24,7 +24,7 @@ def calc_continuous (states, temp_switch):
     pdf_part = 1/math.sqrt(2*math.pi*var)
     for state in states:
         pr = pdf_part*math.exp(-math.pow((mean-state),2)/float(2*var)) #based on normal distribution
-
+        print("[node_fitness.py] pr state = " + str(pr) + ", mean = " + str(mean) + ", var = " + str(var) + ", state = " + str(state))
         if(temp_switch == 'logpr'): entropy -= math.log(pr)
         elif(temp_switch == 'prlogpr'): entropy -= pr*math.log(pr)
         else: assert(False)
@@ -33,7 +33,7 @@ def calc_continuous (states, temp_switch):
 
     info = 1-entropy
     print("[node_fitness.py] info = " + str(info))
-    assert(info >= 0 and info <= 1)
+    #assert(info >= 0 and info <= 1)
 
     return info, var
 

@@ -1,4 +1,4 @@
-output_directory         = /gs/scratch/chopper/001_evoEvo_begins
+output_directory         = /gs/scratch/chopper/evoEvo/001/simple_grow
 
 # general
 debug                     	= False
@@ -16,9 +16,9 @@ sampling_rounds_max      	= None
 
 # start and stop
 initial_net_type        = random
-starting_size           = 400
-stop_condition		= generation
-ending_size             = 20
+starting_size           = 8
+stop_condition		= size
+ending_size             = 800
 max_generations         = 800
 edge_to_node_ratio      = 2
 
@@ -31,8 +31,9 @@ num_worker_nets         = 1
 percent_survive         = 10
 
 # output
-num_data_output     	= 20
-num_net_output        	= 2
+num_data_output     	= 40
+num_net_output        	= 8
+
 
 # fitness
 fitness_metric 		= info
@@ -50,10 +51,10 @@ bias_distribution        = uniform
 # mutation
 add_edge_mutation_frequency     = 0
 remove_edge_mutation_frequency  = 0
-rewire_mutation_frequency       = 1
+rewire_mutation_frequency       = 0
 sign_mutation_frequency         = 0
 reverse_edge_mutation_frequency = 0
-grow_mutation_frequency         = 0
+grow_mutation_frequency         = 1
 shrink_mutation_frequency       = 0
 
 # partially implemented 

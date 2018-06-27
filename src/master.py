@@ -74,7 +74,7 @@ def init_run(configs):
             util.cluster_print(output_dir, "Run already finished, exiting...\n")
             return None
 
-        elif (gen > 2): #IS CONTINUATION RUN
+        elif (int(gen) > 2): #IS CONTINUATION RUN
             gen = int(gen)-2 #latest may not have finished
             population = parse_worker_popn(num_workers, gen, output_dir, num_survive, fitness_direction)
             size = len(population[0].net.nodes())

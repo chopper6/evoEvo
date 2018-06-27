@@ -40,7 +40,7 @@ def calc_node_fitness(net, configs):
                 if net[out_edge[0]][out_edge[1]]['state'] is not None:
                     states.append(net[out_edge[0]][out_edge[1]]['state'])
 
-            info, var = node_fitness.calc_continuous(states, temp_switch)
+            info, var = node_fitness.calc_continuous(states, fitness_metric)
             net.node[n]['fitness'] += info
             net.node[n]['var'] += var
 

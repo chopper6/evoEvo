@@ -9,7 +9,7 @@ def calc_undirected (fitness_metric, up, down):
     else: print("ERROR in node_fitness.calc_undirected(): unknown fitness metric: " + str(fitness_metric))
 
 
-def calc_continuous (states, temp_switch):
+def calc_continuous (states, fitness_metric):
     mean = sum(states)/len(states)
     var = 0
 
@@ -17,25 +17,43 @@ def calc_continuous (states, temp_switch):
         var += math.pow((mean-state),2)
 
     if var == 0:
-        info = 1
-        return info
+        fitness = 1
+        return fitness
 
-    entropy = 0
-    pdf_part = 1/math.sqrt(2*math.pi*var)
-    for state in states:
-        pr = pdf_part*math.exp(-math.pow((mean-state),2)/float(2*var)) #based on normal distribution
-        print("[node_fitness.py] pr state = " + str(pr) + ", mean = " + str(mean) + ", var = " + str(var) + ", state = " + str(state))
-        if(temp_switch == 'logpr'): entropy -= math.log(pr)
-        elif(temp_switch == 'prlogpr'): entropy -= pr*math.log(pr)
-        else: assert(False)
-        #I think, instead of pr*math.log(pr)
-        #may be different log base, such as #states
+    fitness = None
 
-    info = 1-entropy
-    print("[node_fitness.py] info = " + str(info))
+    if (fitness_metric == 'KL-divergence'): #don't like that this is depd on mean...
+        # distance from normal distribution with same mean and var = 1
+        divergence = .5*(var-math.log(var)-1)
+        print("divergence = " + str(divergence))
+        fitness = 1-divergence
+
+    elif (fitness_metric == 'variance'):
+        fitness = var
+
+
+    elif (fitness_metric == 'entropish'):
+        fitness = 1/math.pow(math.e, 1/var)
+        assert(fitness >= 0 and fitness <= 1)
+
+
+    elif (fitness_metric == 'first_guess'):
+        entropy=0
+        pdf_part = 1 / math.sqrt(2 * math.pi * var)
+        for state in states:
+            pr = pdf_part*math.exp(-math.pow((mean-state),2)/float(2*var)) #based on normal distribution
+            print("[node_fitness.py] pr state = " + str(pr) + ", mean = " + str(mean) + ", var = " + str(var) + ", state = " + str(state))
+            entropy -= math.log(pr) #
+            #instead of pr*math.log(pr)
+            #may be different log base, such as #states
+
+        info = 1-entropy
+        fitness = info
+
+    print("[node_fitness.py] node fitness = " + str(fitness))
     #assert(info >= 0 and info <= 1)
 
-    return info, var
+    return fitness, var
 
 
 def calc_directed(fitness_metric, up_in, up_out, down_in, down_out):

@@ -1,4 +1,5 @@
 import os, sys, subprocess, time, socket
+sys.path.insert(0, os.getenv('EVOEVO_SIMULATION_DIRECTORY'))
 import init, util
 
 ################################################################################################################################################

@@ -29,7 +29,6 @@ def calc_node_fitness(net, configs):
 
     elif interval == 'continuous':
         assert(not directed)
-        temp_switch = configs['temp_switch']
 
         for n in net.nodes():
             states = []
@@ -40,9 +39,9 @@ def calc_node_fitness(net, configs):
                 if net[out_edge[0]][out_edge[1]]['state'] is not None:
                     states.append(net[out_edge[0]][out_edge[1]]['state'])
 
-            info, var = node_fitness.calc_continuous(states, fitness_metric)
-            net.node[n]['fitness'] += info
-            net.node[n]['var'] += var
+            fitness = node_fitness.calc_continuous(states, fitness_metric)
+            net.node[n]['fitness'] += fitness
+            # later add net.node[n]['var'] += var 
 
 def node_product(net, scale_node_fitness):
     fitness_score = 0
@@ -57,7 +56,7 @@ def node_product(net, scale_node_fitness):
                 Inode = net.node[n]['fitness']
                 fitness_score += -1*math.log(net.node[n]['fitness'])
             else:
-                fitness_score += -1*math.log(net.node[n]['fitness'],2)
+                fitness_score += -1*math.log(net.node[n]['fitness'])
 
     if (num_over != 0 or num_under != 0):
         print("# I < 0 = " + str(num_under) + "\t # I > 1 = " + str(num_over) + "\n")

@@ -33,7 +33,9 @@ def calc_continuous (states, fitness_metric):
 
 
     elif (fitness_metric == 'entropish'):
-        fitness = 1/math.pow(math.e, 1/var)
+        if (var < .01): entropish = 0
+        entropish = 1/math.pow(math.e, 1/var)
+        fitness = 1 - entropish
         assert(fitness >= 0 and fitness <= 1)
 
 
@@ -53,7 +55,7 @@ def calc_continuous (states, fitness_metric):
     print("[node_fitness.py] node fitness = " + str(fitness))
     #assert(info >= 0 and info <= 1)
 
-    return fitness, var
+    return fitness   #later return var too
 
 
 def calc_directed(fitness_metric, up_in, up_out, down_in, down_out):

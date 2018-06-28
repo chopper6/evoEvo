@@ -53,7 +53,7 @@ def plot_undir(configs):
         for f in files:
             #print("plot_dir(): file " + str(f))
             undir_deg_distrib(root + "/" + f, output_dir + "/undirected_degree_distribution/", f, biased, bias_on)
-            variance_and_entropy_distrib(root + "/" + f, output_dir, f)
+            #LATER: variance_and_entropy_distrib(root + "/" + f, output_dir, f)
 
 
 ################## IMAGE GENERATION FUNCTIONS ##################
@@ -68,7 +68,7 @@ def variance_and_entropy_distrib(net_file, destin_dir, title):
         H = []
         vals = []
         for n in net.nodes():
-            if (feature == 'info'): vals.append(net.node[n]['fitness'])
+            if (feature == 'info'): vals.append(net.node[n]['fitness']) #note that may not be recorded in edgelist
             elif (feature == 'variance'): vals.append(net.node[n]['var'])
 
     #not sure what to plot yet...

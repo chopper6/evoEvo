@@ -34,7 +34,7 @@ def calc_continuous (states, fitness_metric):
 
     elif (fitness_metric == 'entropish'):
         if (var < .01): entropish = 0
-        entropish = 1/math.pow(math.e, 1/var)
+        else: entropish = 1/math.pow(math.e, 1/var)
         fitness = 1 - entropish
         assert(fitness >= 0 and fitness <= 1)
 
@@ -44,7 +44,7 @@ def calc_continuous (states, fitness_metric):
         pdf_part = 1 / math.sqrt(2 * math.pi * var)
         for state in states:
             pr = pdf_part*math.exp(-math.pow((mean-state),2)/float(2*var)) #based on normal distribution
-            print("[node_fitness.py] pr state = " + str(pr) + ", mean = " + str(mean) + ", var = " + str(var) + ", state = " + str(state))
+            #print("[node_fitness.py] pr state = " + str(pr) + ", mean = " + str(mean) + ", var = " + str(var) + ", state = " + str(state))
             entropy -= math.log(pr) #
             #instead of pr*math.log(pr)
             #may be different log base, such as #states
@@ -52,7 +52,7 @@ def calc_continuous (states, fitness_metric):
         info = 1-entropy
         fitness = info
 
-    print("[node_fitness.py] node fitness = " + str(fitness))
+    #print("[node_fitness.py] node fitness = " + str(fitness))
     #assert(info >= 0 and info <= 1)
 
     return fitness   #later return var too

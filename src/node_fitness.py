@@ -20,6 +20,7 @@ def calc_continuous (states, fitness_metric):
         fitness = 1
         return fitness
 
+    var /= len(states)-1
     fitness = None
 
     if (fitness_metric == 'KL-divergence'): #don't like that this is depd on mean...

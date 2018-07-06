@@ -1,6 +1,6 @@
 import instances, node_fitness, fitness, util, probabilistic, reservoir
 
-def pressurize(configs, Net, advice, BD_table):
+def pressurize(configs, net, advice, BD_table):
     # configs:
     sampling_rounds_multiplier = float(configs['sampling_rounds_multiplier']) #FRACTION of curr number of EDGES
     if (util.is_it_none(configs['sampling_rounds_max']) == None): max_sampling_rounds = None
@@ -10,8 +10,6 @@ def pressurize(configs, Net, advice, BD_table):
     scale_node_fitness = util.boool(configs['scale_node_fitness'])
     directed = util.boool(configs['directed'])
     interval = configs['interval']
-
-    net = Net.net #not great syntax, but Net is an individual in a population, whereas net is it's graph representation
 
     num_samples_relative = max(1, int(len(net.edges())*sampling_rounds_multiplier) )
     if (max_sampling_rounds): num_samples_relative = min(num_samples_relative, max_sampling_rounds)
@@ -29,7 +27,7 @@ def pressurize(configs, Net, advice, BD_table):
                 err += instance_err
             fitness.calc_node_fitness(net, configs)
 
-        Net.error = err / len(num_samples_relative)
+        net.graph['error'] = err / len(num_samples_relative)
         fitness.node_normz(net, num_samples_relative, configs)
         fitness_score = fitness.node_product(net, scale_node_fitness)
 
@@ -53,5 +51,5 @@ def pressurize(configs, Net, advice, BD_table):
         print("ERROR in pressurize: Unknown instance_source " + str(instance_states))
         return
 
-    Net.fitness = fitness_score
+    net.graph['fitness'] = fitness_score
 

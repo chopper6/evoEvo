@@ -8,6 +8,14 @@ def eval_fitness(population, fitness_direction):
     elif (fitness_direction == 'min'):  population = sorted(population,key=attrgetter('fitness'))
     else: print("ERROR in fitness.eval_fitness(): unknown fitness_direction " + str(fitness_direction) + ", population not sorted.")
 
+    #temp for debug purposes
+    print("\nIn fitness line 11: order of " + str(fitness_direction) + " sorted population:")
+    for p in population:
+        print(p.graph['fitness'])
+    if (fitness_direction == 'min'): assert(population[0].graph['fitness'] < population[1].graph['fitness'] )
+    elif (fitness_direction == 'max'): assert(population[0].graph['fitness'] > population[1].graph['fitness'] )
+    print("\n")
+
     return population
 
 def calc_node_fitness(net, configs):

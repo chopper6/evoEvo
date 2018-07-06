@@ -2,32 +2,13 @@ import pickle, networkx as nx
 import random as rd
 import init, mutate, bias, util
 
-# maybe rename to reduce confusion
-class Net:
-    def __init__(self, net, id):
-        self.fitness = 0
-        self.net = net.copy()
-        #assert(self.net != net)
-        self.id = id  #not curr used
-        self.error = 0 #should be None but meh
-
-    def copy(self):
-        copy = Net(self.net, self.id)
-        assert(copy.net.graph['input_nodes'] and copy.net.graph['output_nodes'][0]) #temp for direct model
-        copy.fitness = self.fitness
-        copy.error = self.error
-
-        #assert (copy != self and copy.net != self.net)
-        #assert (copy.fitness_parts != self.fitness_parts)
-        return copy
-
-
 def init_population(init_type, start_size, pop_size, configs):
     edge_node_ratio = float(configs['edge_to_node_ratio'])
     num_edges = int(start_size*edge_node_ratio)
     directed = util.boool(configs['directed'])
     num_input_nodes = int(configs['num_input_nodes'])
     num_output_nodes = int(configs['num_output_nodes'])
+    varied_init_population = util.boool(configs['varied_init_population'])
 
     population = None #those warnings are annoying
 
@@ -36,54 +17,68 @@ def init_population(init_type, start_size, pop_size, configs):
     if directed: assert(init_type == 'load' or init_type == 'pickle load' or init_type == 'random')
 
     if (init_type == "load"):
-        population = [Net(nx.read_edgelist(configs['network_file'], nodetype=int, create_using=nx.DiGraph()), i) for i
-                      in range(pop_size)]
+        population = [nx.read_edgelist(configs['network_file'], nodetype=int, create_using=nx.DiGraph()) for i in range(pop_size)]
 
     elif (init_type == "pickle load"):
         pickled_net = pickle.load(configs['network_file'])
-        population = [Net(pickled_net.copy(), i) for i in range(pop_size)]
+        population = [pickled_net.copy() for i in range(pop_size)]
 
     elif (init_type == 'random'):
 
-        if (start_size <= 20 and not directed):
-            init_net = nx.empty_graph(start_size, create_using=nx.DiGraph())
-            num_add = int(edge_node_ratio * start_size)
-            mutate.add_edges(init_net, num_add, configs)
+        if varied_init_population: reps = pop_size
+        else: reps = 1
 
-        else:  # otherwise rewire till connected is intractable, grow without selection instead
-            init_net = nx.empty_graph(8, create_using=nx.DiGraph())
+        for rep in range(reps):
 
-            if directed:
-                init_net.graph['input_nodes'] = []
-                init_net.graph['output_nodes'] = []
-                for n in init_net.nodes():
-                    init_net.node[n]['layer'] = 'hidden'
+            if (start_size <= 20 and not directed):
+                population[rep] = nx.empty_graph(start_size, create_using=nx.DiGraph())
+                num_add = int(edge_node_ratio * start_size)
+                mutate.add_edges(population[rep], num_add, configs)
 
-            num_add = int(edge_node_ratio * 8)
-            mutate.add_edges(init_net, num_add, configs)
+            else:  # otherwise rewire till connected is intractable, grow without selection instead
+                population[rep] = nx.empty_graph(8, create_using=nx.DiGraph())
+                assert(start_size >= 8)
 
-            if directed:
-                # TODO: possibly better with more starting nodes?
-                mutate.add_nodes(init_net, num_input_nodes, configs, layer='input')
-                mutate.add_nodes(init_net, num_output_nodes, configs, layer='output')
+                if directed:
+                    population[rep].graph['input_nodes'] = []
+                    population[rep].graph['output_nodes'] = []
+                    for n in population[rep].nodes():
+                        population[rep].node[n]['layer'] = 'hidden'
 
-            mutate.add_nodes(init_net, start_size - 8, configs)
+                num_add = int(edge_node_ratio * 8)
+                mutate.add_edges(population[rep], num_add, configs)
 
-            #correct for off-by-one-errors since rounding occurs twice
-            if (len(init_net.edges()) == num_edges+1): mutate.rm_edges(init_net, 1, configs)
-            if (len(init_net.edges()) == num_edges-1): mutate.add_edges(init_net, 1, configs)
+                if directed:
+                    # TODO: possibly better with more starting nodes?
+                    mutate.add_nodes(population[rep], num_input_nodes, configs, layer='input')
+                    mutate.add_nodes(population[rep], num_output_nodes, configs, layer='output')
 
-            #attempt to patch bias introduced into input and output wiring...
-            if directed:
-                num_rewire = start_size*10
-                mutate.rewire(init_net, num_rewire, configs)
+                mutate.add_nodes(population[rep], start_size - 8, configs)
 
-        mutate.ensure_single_cc(init_net, configs)
-        assert (len(init_net.edges()) == num_edges)
-        assert (len(init_net.nodes()) == start_size)
+                #correct for off-by-one-errors since rounding occurs twice
+                if (len(population[rep].edges()) == num_edges+1): mutate.rm_edges(population[rep], 1, configs)
+                if (len(population[rep].edges()) == num_edges-1): mutate.add_edges(population[rep], 1, configs)
 
-        population = [Net(init_net.copy(), i) for i in range(pop_size)]
-        #instead have a varied population?
+                #attempt to patch bias introduced into input and output wiring...
+                if directed:
+                    num_rewire = start_size*10
+                    mutate.rewire(population[rep], num_rewire, configs)
+
+            mutate.ensure_single_cc(population[rep], configs)
+            if not directed:
+                assert (len(population[rep].edges()) == num_edges)
+                assert (len(population[rep].nodes()) == start_size)
+
+            else:
+                actual_size = start_size+num_input_nodes+num_output_nodes
+                actual_num_edges = num_edges + int((num_input_nodes+num_output_nodes)*edge_node_ratio)
+                assert (len(population[rep].edges()) == actual_num_edges)
+                assert (len(population[rep].nodes()) == actual_size)
+
+            population[rep].graph['fitness'] = 0
+            population[rep].graph['error'] = 0
+
+        if not varied_init_population: population = [population[0].copy() for i in range(pop_size)]
 
 
     else:
@@ -91,6 +86,7 @@ def init_population(init_type, start_size, pop_size, configs):
         return
 
     if util.boool(configs['biased']):
+        assert(not directed)
         if (configs['bias_on'] == 'nodes'): bias.assign_node_bias(population, configs['bias_distribution'])
         elif (configs['bias_on'] == 'edges'): bias.assign_edge_bias(population, configs['bias_distribution'])
         else: print("ERROR in net_generator(): unknown bias_on: " + str (configs['bias_on']))
@@ -125,90 +121,3 @@ def assign_edge_weight(configs):
     elif distrib == 'uniform': return rd.uniform(-1,1)
 
     else: assert(False)
-
-
-# OBSOLETE, poss use for init edge weights
-def sign_edges(population):
-    for p in range(len(population)):
-        edge_list = population[p].net.edges()
-        for edge in edge_list:
-            sign = rd.randint(0, 1)
-            if (sign == 0):     sign = -1
-            population[p].net[edge[0]][edge[1]]['sign'] = sign
-
-
-def sign_edges_single(net):
-    edge_list = net.edges()
-    for edge in edge_list:
-        sign = rd.randint(0, 1)
-        if (sign == 0):     sign = -1
-        net[edge[0]][edge[1]]['sign'] = sign
-
-
-def double_edges(population):
-    for p in range(len(population)):
-        net = population[p].net
-        edges = net.edges()
-        for edge in edges:
-            net.add_edge(edge[1], edge[0])  # add reverse edge
-
-
-
-def other_saved_init_nets(init_type, pop_size, start_size):
-
-    population = None
-
-    ####################### OTHER NET TYPES, POSSIBLY OUTDATED ########################################
-    if (init_type == 'shell'):
-        population = [Net(nx.DiGraph(), i) for i in range(pop_size)]  # change to generate, based on start_size
-
-    elif (init_type == 'erdos-renyi'):
-        num_cc = 2
-        num_tries = 0
-        while(num_cc != 1):
-            num_tries += 1
-            init_net = (nx.erdos_renyi_graph(start_size,.035, directed=True, seed=None))
-            num_added = 0
-            for node in init_net.nodes():
-                if (init_net.degree(node) == 0):
-                    pre_edges = len(init_net.edges())
-                    num_added += 1
-                    sign = rd.randint(0, 1)
-                    if (sign == 0):     sign = -1
-                    node2 = node
-                    while (node2 == node):
-                        node2 = rd.sample(init_net.nodes(), 1)
-                        node2 = node2[0]
-                    if (rd.random() < .5): init_net.add_edge(node, node2, sign=sign)
-                    else: init_net.add_edge(node2, node, sign=sign)
-                    assert (len(init_net.edges()) > pre_edges)
-                else:
-                    if (init_net.in_edges(node) + init_net.out_edges(node) == 0): print("ERROR in net_generator(): hit a 0 deg node that is unrecognized.")
-
-            net_undir = init_net.to_undirected()
-            num_cc = nx.number_connected_components(net_undir)
-
-        print("Number of added edges to avoid 0 degree = " + str(num_added) + ", num attempts to create suitable net = " + str(num_cc) + ".\n")
-        population = [Net(init_net.copy(), i) for i in range(pop_size)]
-
-    elif (init_type == 'empty'):
-        population = [Net(nx.empty_graph(start_size, create_using=nx.DiGraph()), i) for i in range(pop_size)]
-
-    elif (init_type == 'complete'):
-        #crazy high run time due to about n^n edges
-        population = [Net(nx.complete_graph(start_size, create_using=nx.DiGraph()), i) for i in range(pop_size)]
-
-    elif (init_type == 'cycle'):
-        population = [Net(nx.cycle_graph(start_size, create_using=nx.DiGraph()), i) for i in range(pop_size)]
-
-    elif (init_type == 'star'):
-        population = [Net(nx.star_graph(start_size-1), i) for i in range(pop_size)]
-        custom_to_directed(population)
-
-    elif (init_type == 'scale-free'):  # curr does not work, since can't go to undirected for output
-        population = [Net(nx.scale_free_graph(start_size, beta=.7, gamma=.15, alpha=.15),i) for i in range(pop_size)]
-    elif (init_type == 'barabasi-albert'):
-        population = [Net(nx.barabasi_albert_graph(start_size, 2),i) for i in range(pop_size)]
-        custom_to_directed(population)
-
-    return population

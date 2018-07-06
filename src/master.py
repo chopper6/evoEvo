@@ -57,6 +57,7 @@ def init_run(configs):
     init_type = str(configs['initial_net_type'])
     start_size = int(configs['starting_size'])
     fitness_direction = str(configs['fitness_direction'])
+    varied_init_population = util.boool(configs['varied_init_population'])
 
     population, gen, size, advice, BD_table, keep_running = None, None, None, None, None, None #avoiding annoying warnings
 
@@ -96,7 +97,10 @@ def init_run(configs):
             BD_table = None
 
         #init fitness eval
-        pressurize.pressurize(configs, population[0], advice, BD_table)
+        if varied_init_population:
+            for p in population:
+                pressurize.pressurize(configs, p, advice, BD_table)
+        else: pressurize.pressurize(configs, population[0], advice, BD_table)
 
         gen, size = 0, start_size
         keep_running = util.test_stop_condition(size, gen, configs)

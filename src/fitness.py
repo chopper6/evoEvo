@@ -24,7 +24,7 @@ def calc_node_fitness(net, configs):
         else:
             for n in net.nodes():
                 up, down = net.node[n]['up'], net.node[n]['down']
-                net.node[n]['fitness'] += node_fitness.calc_undirected(fitness_metric, up, down)
+                net.node[n]['fitness'] += node_fitness.calc_discrete_undirected(fitness_metric, up, down)
 
 
     elif interval == 'continuous':

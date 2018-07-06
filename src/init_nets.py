@@ -45,13 +45,18 @@ def init_population(init_type, start_size, pop_size, configs):
 
     elif (init_type == 'random'):
 
-        if (start_size <= 20):
+        if (start_size <= 20 and not directed):
             init_net = nx.empty_graph(start_size, create_using=nx.DiGraph())
             num_add = int(edge_node_ratio * start_size)
             mutate.add_edges(init_net, num_add, configs)
 
         else:  # otherwise rewire till connected is intractable, grow without selection instead
             init_net = nx.empty_graph(8, create_using=nx.DiGraph())
+
+            if directed:
+                for n in init_net.nodes():
+                    init_net.node[n]['layer'] = 'hidden'
+
             num_add = int(edge_node_ratio * 8)
             mutate.add_edges(init_net, num_add, configs)
 

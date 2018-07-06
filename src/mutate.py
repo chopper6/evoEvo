@@ -54,9 +54,9 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
         if biases and bias_on == 'nodes': bias.assign_a_node_bias(net, new_node, configs['bias_distribution'], given_bias=biases[i])
 
         if directed:
-            if not layer: new_node['layer'] = 'hidden'
+            if not layer: net.node[new_node]['layer'] = 'hidden'
             else:
-                new_node['layer'] = layer
+                net.node[new_node]['layer'] = layer
                 if layer=='input': net['input_nodes'].append(new_node)
                 elif layer=='output': net['output_nodes'].append(new_node)
 
@@ -179,11 +179,11 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
 
         if directed:
             input_output_check = True
-            if node1['layer'] == 'input' or node2['layer'] == 'output': input_output_check = False
+            if net.node[node1]['layer'] == 'input' or net.node[node2]['layer'] == 'output': input_output_check = False
 
             if not net.has_edge(node1, node2) and input_output_check:
                 net.add_edge(node1, node2, sign=sign)
-                net[node1][node2]['weight'] = init_nets.assign_edge_weight()
+                net[node1][node2]['weight'] = init_nets.assign_edge_weight(configs)
         else:
             if not net.has_edge(node1, node2) and not net.has_edge(node2, node1):
                 net.add_edge(node1, node2, sign=sign)

@@ -13,7 +13,7 @@ class Net:
 
     def copy(self):
         copy = Net(self.net, self.id)
-        assert(copy.net['input_nodes'] and copy.net['output_nodes'][0]) #temp for direct model
+        assert(copy.net.graph['input_nodes'] and copy.net.graph['output_nodes'][0]) #temp for direct model
         copy.fitness = self.fitness
         copy.error = self.error
 

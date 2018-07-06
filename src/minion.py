@@ -75,8 +75,10 @@ def evolve_minion(worker_file, gen, rank, output_dir):
     output_dir, fitness_direction, population = init_minion(configs, randSeed, seed, pop_size)
 
     for p in range(pop_size):
-        assert(p.net.input_nodes[0] != None)
-        assert(p.net.output_nodes[0] != None)
+
+        #temp
+        assert(p.net.graph['input_nodes'][0] != None)
+        assert(p.net.graph['output_nodes'][0] != None)
         mutate.mutate(configs, population[p].net, biases=biases)
         pressurize.pressurize(configs, population[p], advice, BD_table)
 

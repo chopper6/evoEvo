@@ -46,7 +46,7 @@ def apply_input(net, configs):
     # later change to a config
 
     if input_states == 'control':
-        for input_node in net.input_nodes:
+        for input_node in net.graph['input_nodes']:
             input_node['state'] = 1
 
 
@@ -64,7 +64,7 @@ def linear_reg(net, configs):
     ideal_outputs = 'control'
     err = 0
 
-    for output_node in net.output_nodes:
+    for output_node in net.graph['output_nodes']:
         if output_node['state'] == None:
             # input hasn't reached output yet
             return None

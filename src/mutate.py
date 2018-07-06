@@ -58,7 +58,7 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
             else:
                 net.node[new_node]['layer'] = layer
                 if layer=='input': net.graph['input_nodes'].append(new_node)
-                elif layer=='output': net{'output_nodes'}.append(new_node)
+                elif layer=='output': net.graph['output_nodes'].append(new_node)
 
         # ADD EDGE TO NEW NODE TO KEEP CONNECTED
         if biases and bias_on=='edges': add_this_edge(net, configs, node1=new_node, given_bias=biases[i])

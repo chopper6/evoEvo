@@ -51,9 +51,11 @@ def init_population(init_type, start_size, pop_size, configs):
             mutate.add_edges(init_net, num_add, configs)
 
         else:  # otherwise rewire till connected is intractable, grow without selection instead
-            init_net = nx.empty_graph(8, create_using=nx.DiGraph(input_nodes=[], output_nodes=[]))
+            init_net = nx.empty_graph(8, create_using=nx.DiGraph())
 
             if directed:
+                init_net.graph['input_nodes'] = []
+                init_net.graph['output_nodes'] = []
                 for n in init_net.nodes():
                     init_net.node[n]['layer'] = 'hidden'
 

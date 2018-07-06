@@ -18,6 +18,10 @@ def previously_in_pressurize():
     return get_rid_of_hashes
 
 
+def prev_in_master():
+    if (configs['instance_states'] == 'probabilistic'):
+        BD_table = probabilistic.build_BD_table(configs)
+
 def calc_fitness(net, BD_table, configs):
     # also uses log-likelihood normz
 

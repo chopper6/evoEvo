@@ -1,7 +1,7 @@
 import os, pickle, time, shutil, sys
 from random import SystemRandom as sysRand
 from time import sleep
-import fitness, minion, output, plot_nets, init_nets, pressurize, util, init, probabilistic, bias
+import fitness, minion, output, plot_nets, init_nets, pressurize, util, init, bias
 
 
 #MASTER EVOLUTION
@@ -91,21 +91,17 @@ def init_run(configs):
 
         population = init_nets.init_population(init_type, start_size, pop_size, configs)
         advice = init.build_advice(population[0], configs)
-        if (configs['instance_states'] == 'probabilistic'):
-            BD_table = probabilistic.build_BD_table(configs)
-        else:
-            BD_table = None
 
         #init fitness eval
         if varied_init_population:
             for p in population:
-                pressurize.pressurize(configs, p, advice, BD_table)
-        else: pressurize.pressurize(configs, population[0], advice, BD_table)
+                pressurize.pressurize(configs, p, advice)
+        else: pressurize.pressurize(configs, population[0], advice)
 
         gen, size = 0, start_size
         keep_running = util.test_stop_condition(size, gen, configs)
 
-    init_data =  population, gen, size, advice, BD_table, num_survive, keep_running
+    init_data =  population, gen, size, advice, num_survive, keep_running
     return init_data
 
 

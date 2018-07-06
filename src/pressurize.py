@@ -1,4 +1,4 @@
-import instances, node_fitness, fitness, util, probabilistic, reservoir
+import instances, node_fitness, fitness, util, reservoir
 
 def pressurize(configs, net, advice, BD_table):
     # configs:

@@ -77,16 +77,16 @@ def evolve_minion(worker_file, gen, rank, output_dir):
     for p in range(pop_size):
 
         #temp
-        assert(p.net.graph['input_nodes'][0] != None)
-        assert(p.net.graph['output_nodes'][0] != None)
-        mutate.mutate(configs, population[p].net, biases=biases)
+        assert(p.graph['input_nodes'][0] != None)
+        assert(p.graph['output_nodes'][0] != None)
+        mutate.mutate(configs, population[p], biases=biases)
         pressurize.pressurize(configs, population[p], advice, BD_table)
 
     population = sort_popn(population, fitness_direction)
     write_out_worker(output_dir + "/to_master/" + str(gen) + "/" + str(rank), population, num_return)
     report_timing(t_start, rank, gen, output_dir)
 
-    return len(population[0].net.nodes())
+    return len(population[0].nodes())
 
 
 

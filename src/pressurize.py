@@ -5,8 +5,6 @@ def pressurize(configs, net, advice, BD_table):
     sampling_rounds_multiplier = float(configs['sampling_rounds_multiplier']) #FRACTION of curr number of EDGES
     if (util.is_it_none(configs['sampling_rounds_max']) == None): max_sampling_rounds = None
     else: max_sampling_rounds = int(configs['sampling_rounds_max'])
-    instance_states = str(configs['instance_states'])
-    biased = util.boool(configs['biased'])
     scale_node_fitness = util.boool(configs['scale_node_fitness'])
     directed = util.boool(configs['directed'])
     interval = configs['interval']
@@ -16,7 +14,7 @@ def pressurize(configs, net, advice, BD_table):
 
 
     if directed:
-        assert (interval == 'continuous' and instance_states == 'experience')
+        assert (interval == 'continuous')
 
         err = 0 #err for base (1*) problem
         fitness.reset_nodes(net, configs)
@@ -31,13 +29,8 @@ def pressurize(configs, net, advice, BD_table):
         fitness.node_normz(net, num_samples_relative, configs)
         fitness_score = fitness.node_product(net, scale_node_fitness)
 
+    else:
 
-    elif (instance_states == 'probabilistic'): #NOTE: does not work well, but keeping for future tinkering
-        assert(not biased or not configs['bias_on']=='nodes')
-        fitness_score = probabilistic.calc_fitness(net, BD_table, configs)
-
-
-    elif (instance_states == 'experience'):
         fitness.reset_nodes(net, configs)
         for i in range(num_samples_relative):
             instances.reset_states(net, configs)
@@ -47,9 +40,6 @@ def pressurize(configs, net, advice, BD_table):
         fitness.node_normz(net, num_samples_relative, configs)
         fitness_score = fitness.node_product(net, scale_node_fitness)
 
-    else:
-        print("ERROR in pressurize: Unknown instance_source " + str(instance_states))
-        return
 
     net.graph['fitness'] = fitness_score
 

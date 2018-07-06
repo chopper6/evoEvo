@@ -23,14 +23,14 @@ def master_info(population, gen, size, pop_size, num_survive, advice, BD_table, 
     if (num_data_output > 0):
         if (gen % int(end / num_data_output) == 0):
             popn_data(population, output_dir, gen)
-            util.cluster_print(output_dir, "Master at gen " + str(gen) + ", with net size = " + str(size) + " nodes and " + str(len(population[0].net.edges())) + " edges, " + str(num_survive) + "<=" + str(len(population)) + " survive out of " + str(pop_size))
+            util.cluster_print(output_dir, "Master at gen " + str(gen) + ", with net size = " + str(size) + " nodes and " + str(len(population[0].edges())) + " edges, " + str(num_survive) + "<=" + str(len(population)) + " survive out of " + str(pop_size))
 
     if (num_net_output > 0):
         if (gen % int(end / num_net_output) == 0):
-            nx.write_edgelist(population[0].net, output_dir + "nets_nx/" + str(gen))
+            nx.write_edgelist(population[0], output_dir + "nets_nx/" + str(gen))
             pickle_file = output_dir + "/nets_pickled/" + str(gen)
             with open(pickle_file, 'wb') as file:
-                pickle.dump(population[0].net, file)
+                pickle.dump(population[0], file)
             deg_distrib_csv(output_dir, population, gen)
 
 
@@ -38,16 +38,16 @@ def master_info(population, gen, size, pop_size, num_survive, advice, BD_table, 
 def final_master_info(population, gen, configs):
     output_dir = configs['output_directory']
 
-    nx.write_edgelist(population[0].net, output_dir+"/nets_nx/"+str(gen))
+    nx.write_edgelist(population[0], output_dir+"/nets_nx/"+str(gen))
     pickle_file = output_dir + "/nets_pickled/" + str(gen)
-    with open(pickle_file, 'wb') as file: pickle.dump(population[0].net, file)
+    with open(pickle_file, 'wb') as file: pickle.dump(population[0], file)
     popn_data(population, output_dir, gen)
     deg_distrib_csv(output_dir, population, gen)
     #draw_nets.basic(population, output_dir, total_gens)
 
     if util.boool(configs['biased']):
         util.cluster_print(output_dir,"Pickling biases.")
-        bias.pickle_bias(population[0].net, output_dir+"/bias", configs['bias_on'])
+        bias.pickle_bias(population[0], output_dir+"/bias", configs['bias_on'])
 
 
 
@@ -70,7 +70,7 @@ def init_csv(out_dir, configs):
 
 def popn_data(population, output_dir, gen):
 
-    if (population[0].net.edges()):
+    if (population[0].edges()):
         output_csv = output_dir + "/net_data.csv"
 
         with open(output_csv, 'a') as output_file:
@@ -80,9 +80,9 @@ def popn_data(population, output_dir, gen):
             mean_fitness = np.mean(all_fitness)
             var_fitness = np.var(all_fitness)
 
-            Net = population[0] #most fit net
-            net = Net.net
-            nets_info = [gen, len(net.nodes()), Net.fitness, sum(net.degree().values())/len(net.nodes()),len(net.edges())/len(net.nodes()), mean_fitness, var_fitness, Net.fitness/float(len(net.edges())), Net.fitness/float(len(net.nodes())), Net.error]
+            net = population[0] #most fit net
+            nets_info = [gen, len(net.nodes()), net.graph['fitness'], sum(net.degree().values())/len(net.nodes()),len(net.edges())/len(net.nodes()),
+                         mean_fitness, var_fitness, net.graph['fitness']/float(len(net.edges())), net.graph['fitness']/float(len(net.nodes())), net.graph['error']]
 
             output.writerow(nets_info)
 
@@ -93,9 +93,9 @@ def deg_distrib_csv(output_dir, population, gen):
 
         distrib_info = []
         distrib_info.append(gen)
-        distrib_info.append(len(population[0].net.nodes()))
+        distrib_info.append(len(population[0].nodes()))
 
-        in_degrees, out_degrees = list(population[0].net.in_degree().values()), list(population[0].net.out_degree().values())
+        in_degrees, out_degrees = list(population[0].in_degree().values()), list(population[0].out_degree().values())
 
         indegs, indegs_freqs = np.unique(in_degrees, return_counts=True)
         indegs = np.array2string(indegs).replace('\n', '')
@@ -109,7 +109,7 @@ def deg_distrib_csv(output_dir, population, gen):
         distrib_info.append(outdegs)
         distrib_info.append(outdegs_freqs)
 
-        degrees = list(population[0].net.degree().values())
+        degrees = list(population[0].degree().values())
         degs, freqs = np.unique(degrees, return_counts=True)
         degs = np.array2string(degs).replace('\n', '')
         freqs = np.array2string(freqs).replace('\n', '')

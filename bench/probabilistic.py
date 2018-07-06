@@ -9,6 +9,15 @@ import util
 #                                                           #
 #############################################################
 
+def previously_in_pressurize():
+    #elif (instance_states == 'probabilistic'):  # NOTE: does not work well, but keeping for future tinkering
+    #assert (not biased or not configs['bias_on'] == 'nodes')
+    #fitness_score = probabilistic.calc_fitness(net, BD_table, configs)
+
+    get_rid_of_hashes = True
+    return get_rid_of_hashes
+
+
 def calc_fitness(net, BD_table, configs):
     # also uses log-likelihood normz
 

@@ -31,7 +31,7 @@ def evolve_master(configs):
         report_timing(t_start, gen, output_dir)
         population = watch(configs, gen, num_survive)
 
-        size = len(population[0].net.nodes())
+        size = len(population[0].nodes())
         gen += 1
 
         keep_running = util.test_stop_condition(size, gen, configs)
@@ -78,7 +78,7 @@ def init_run(configs):
         elif (int(gen) > 2): #IS CONTINUATION RUN
             gen = int(gen)-2 #latest may not have finished
             population = parse_worker_popn(num_workers, gen, output_dir, num_survive, fitness_direction)
-            size = len(population[0].net.nodes())
+            size = len(population[0].nodes())
             gen += 1
 
             keep_running = util.test_stop_condition(size, gen, configs)
@@ -90,7 +90,7 @@ def init_run(configs):
         # draw_nets.init(output_dir)
 
         population = init_nets.init_population(init_type, start_size, pop_size, configs)
-        advice = init.build_advice(population[0].net, configs)
+        advice = init.build_advice(population[0], configs)
         if (configs['instance_states'] == 'probabilistic'):
             BD_table = probabilistic.build_BD_table(configs)
         else:

@@ -103,15 +103,15 @@ def custom_to_directed(population):
     #note that highly connected graphs should merge directing and signing edges to one loop
 
     for p in range(len(population)):
-        edge_list = population[p].net.edges()
-        del population[p].net
+        edge_list = population[p].edges()
+        del population[p]
 
-        population[p].net = nx.DiGraph(edge_list)
-        edge_list = population[p].net.edges()
+        population[p] = nx.DiGraph(edge_list)
+        edge_list = population[p].edges()
         for edge in edge_list:
             if (rd.random() < .5):  #50% chance of reverse edge
-                population[p].net.remove_edge(edge[0], edge[1])
-                population[p].net.add_edge(edge[1], edge[0])
+                population[p].remove_edge(edge[0], edge[1])
+                population[p].add_edge(edge[1], edge[0])
 
 
 def assign_edge_weight(configs):

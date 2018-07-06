@@ -1,5 +1,5 @@
 import random as rd, networkx as nx
-import bias, util
+import bias, util, init_nets
 
 def mutate(configs, net, biases = None):
     # mutation operations: rm edge, add edge, rewire an edge, change edge sign, reverse edge direction
@@ -19,7 +19,7 @@ def mutate(configs, net, biases = None):
 
     # REWIRE EDGE
     num_rewire = num_mutations(rewire_freq)
-    rewire(net, num_rewire, configs['biased'], configs['bias_on'], configs['output_directory'], configs)
+    rewire(net, num_rewire, configs)
 
     # CHANGE EDGE SIGN
     # WARNING: poss outdated
@@ -32,10 +32,11 @@ def mutate(configs, net, biases = None):
 
 
 ################################ MUTATIONS ################################
-def add_nodes(net, num_add, configs, biases=None):
+def add_nodes(net, num_add, configs, biases=None, layer = None):
 
     biased = util.boool(configs['biased'])
     bias_on = configs['bias_on']
+    directed = util.boool(configs['directed'])
 
     if biases: assert(biased)
     # note that the converse may not be true: net_generator will mutate first and add biases later
@@ -52,9 +53,16 @@ def add_nodes(net, num_add, configs, biases=None):
 
         if biases and bias_on == 'nodes': bias.assign_a_node_bias(net, new_node, configs['bias_distribution'], given_bias=biases[i])
 
+        if directed:
+            if not layer: new_node['layer'] = 'hidden'
+            else:
+                new_node['layer'] = layer
+                if layer=='input': net['input_nodes'].append(new_node)
+                elif layer=='output': net['output_nodes'].append(new_node)
+
         # ADD EDGE TO NEW NODE TO KEEP CONNECTED
-        if biases and bias_on=='edges': add_this_edge(net, configs, node1=new_node, random_direction=True, given_bias=biases[i])
-        else: add_this_edge(net, configs, node1=new_node, random_direction=True)
+        if biases and bias_on=='edges': add_this_edge(net, configs, node1=new_node, given_bias=biases[i])
+        else: add_this_edge(net, configs, node1=new_node)
 
     # MAINTAIN NODE_EDGE RATIO
     num_edge_add = int(num_add * float(configs['edge_to_node_ratio'])) - num_add
@@ -65,11 +73,11 @@ def add_nodes(net, num_add, configs, biases=None):
 
 
 def shrink(net, num_shrink, configs):
-    #WARNING: poss outdated
+    #WARNING: outdated, ex directed
+    assert(False)
 
     pre_size = len(net.nodes())
     for i in range(num_shrink):
-        assert(False) #should use SHRINK w/o revising
 
         #REMOVE NODE
         node = rd.sample(net.nodes(), 1)
@@ -87,8 +95,7 @@ def shrink(net, num_shrink, configs):
         else: add_edges(net, -1*change_in_edges, configs)
 
 
-def rewire(net, num_rewire, bias, bias_on, dirr, configs):
-
+def rewire(net, num_rewire, configs):
     single_cc = util.boool(configs['single_cc'])
     edge_node_ratio = float(configs['edge_to_node_ratio'])
 
@@ -102,7 +109,10 @@ def rewire(net, num_rewire, bias, bias_on, dirr, configs):
         add_this_edge(net, configs, given_bias=orig_biases[0])
 
 
+
 def change_edge_sign(net, num_sign):
+    # WARNING: poss outdated
+
     for i in range(num_sign):
         pre_edges = len(net.edges())
         post_edges = pre_edges + 1
@@ -134,9 +144,11 @@ def add_edges(net, num_add, configs, biases=None):
         if (num_cc != 1): ensure_single_cc(net, configs)
 
 
-def add_this_edge(net, configs, node1=None, node2=None, sign=None, random_direction=False, given_bias=None):
+def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=None):
 
     directed = util.boool(configs['directed'])
+    if directed: random_direction = True
+    else: random_direction = False
     bias_on = configs['bias_on']
 
     node1_set, node2_set = node1, node2 #to save their states
@@ -166,8 +178,12 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, random_direct
                 node1=node3
 
         if directed:
-            if not net.has_edge(node1, node2):
+            input_output_check = True
+            if node1['layer'] == 'input' or node2['layer'] == 'output': input_output_check = False
+
+            if not net.has_edge(node1, node2) and input_output_check:
                 net.add_edge(node1, node2, sign=sign)
+                net[node1][node2]['weight'] = init_nets.assign_edge_weight()
         else:
             if not net.has_edge(node1, node2) and not net.has_edge(node2, node1):
                 net.add_edge(node1, node2, sign=sign)

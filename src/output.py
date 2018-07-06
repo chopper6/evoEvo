@@ -49,7 +49,7 @@ def final_master_info(population, gen, configs):
 
 def init_csv(out_dir, configs):
  
-    net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Mean Fitness, Variance in Fitness, Fitness_Div_#Edges, Fitness_Div_#Nodes\n"
+    net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Mean Fitness, Variance in Fitness, Fitness_Div_#Edges, Fitness_Div_#Nodes, Error of Base Problem\n"
     deg_distrib_title = "Generation, Net Size, In Degrees, In Degree Frequencies, Out Degrees, Out Degree Frequencies, Degs, Deg Freqs\n"
 
     with open(out_dir+"/net_data.csv",'w') as csv_out:
@@ -78,7 +78,7 @@ def popn_data(population, output_dir, gen):
 
             Net = population[0] #most fit net
             net = Net.net
-            nets_info = [gen, len(net.nodes()), Net.fitness, sum(net.degree().values())/len(net.nodes()),len(net.edges())/len(net.nodes()), mean_fitness, var_fitness, Net.fitness/float(len(net.edges())), Net.fitness/float(len(net.nodes()))]
+            nets_info = [gen, len(net.nodes()), Net.fitness, sum(net.degree().values())/len(net.nodes()),len(net.edges())/len(net.nodes()), mean_fitness, var_fitness, Net.fitness/float(len(net.edges())), Net.fitness/float(len(net.nodes())), Net.error]
 
             output.writerow(nets_info)
 

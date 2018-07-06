@@ -1,65 +1,69 @@
 import math
 
-def calc_undirected (fitness_metric, up, down):
-    if (up+down==0): return 0
+def calc_discrete_directed (net, node, fitness_metric):
+    num0, num1 = 0, 0
+
+    for e in net.node[node].in_edges():
+        if e[0]['state'] == 0: num0 += 1
+        elif e[0]['state'] == 1: num1 += 1
+
+    if (num0 + num1 ==0): return 0
 
     elif (fitness_metric == 'info'):
+        return 1-shannon_entropy(num0,num1)
+
+    else: print("ERROR in node_fitness.calc_discrete_directed(): unknown fitness metric: " + str(fitness_metric))
+
+
+def calc_discrete_undirected (fitness_metric, up, down):
+    if (up + down ==0): return 0
+
+    if (fitness_metric == 'info'):
         return 1-shannon_entropy(up,down)
 
-    else: print("ERROR in node_fitness.calc_undirected(): unknown fitness metric: " + str(fitness_metric))
+    else: print("ERROR in node_fitness.calc_discrete_undirected(): unknown fitness metric: " + str(fitness_metric))
 
 
-def calc_continuous (states, fitness_metric):
+
+def calc_continuous (states, fitness_metric, distrib_lng=1):
     mean = sum(states)/len(states)
-    var = 0
+    var, entropish = 0, 0
+    # may have to change distrib_lng if, for ex. states can be in [-1,1]
 
     for state in states:
         var += math.pow((mean-state),2)
+        pr = 1-abs(mean-state)/ float(distrib_lng)
+        assert(pr >= 0 and pr <= 1)
+        if pr != 0:
+            entropish -= math.log2(pr)
+
+    if (len(states) > 1): var /= len(states) - 1
+    if (len(states) > 0): entropish /= len(states)
 
     if var == 0:
         fitness = 1
         return fitness
 
-    var /= len(states)-1
     fitness = None
 
-    if (fitness_metric == 'KL-divergence'): #don't like that this is depd on mean...
-        # distance from normal distribution with same mean and var = 1
-        divergence = .5*(var-math.log(var)-1)
-        print("divergence = " + str(divergence))
-        fitness = 1-divergence
+    if (fitness_metric == 'entropish'):
+        return entropish
 
     elif (fitness_metric == 'variance'):
         fitness = var
 
-
-    elif (fitness_metric == 'entropish'):
+    elif (fitness_metric == 'entropish_old'):
         if (var < .01): entropish = 0
         else: entropish = 1/math.pow(math.e, 1/var)
         fitness = 1 - entropish
         assert(fitness >= 0 and fitness <= 1)
 
-
-    elif (fitness_metric == 'first_guess'):
-        entropy=0
-        pdf_part = 1 / math.sqrt(2 * math.pi * var)
-        for state in states:
-            pr = pdf_part*math.exp(-math.pow((mean-state),2)/float(2*var)) #based on normal distribution
-            #print("[node_fitness.py] pr state = " + str(pr) + ", mean = " + str(mean) + ", var = " + str(var) + ", state = " + str(state))
-            entropy -= math.log(pr) #
-            #instead of pr*math.log(pr)
-            #may be different log base, such as #states
-
-        info = 1-entropy
-        fitness = info
-
-    #print("[node_fitness.py] node fitness = " + str(fitness))
-    #assert(info >= 0 and info <= 1)
-
-    return fitness   #later return var too
+    return fitness
 
 
 def calc_directed(fitness_metric, up_in, up_out, down_in, down_out):
+    assert(False)
+    # shouldn't be using
     # currently experimenting with this
 
     if (fitness_metric == 'entropy_conserved'):

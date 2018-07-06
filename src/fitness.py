@@ -16,15 +16,15 @@ def calc_node_fitness(net, configs):
     interval = configs['interval']
 
     if interval == 'discrete':
+
         if directed:
             for n in net.nodes():
-                up_in, up_out, down_in, down_out = net.node[n]['up_in'], net.node[n]['up_out'], net.node[n]['down_in'], net.node[n]['down_out']
-                net.node[n]['fitness'] += node_fitness.calc_directed(fitness_metric, up_in, up_out, down_in, down_out)
+                net.node[n]['fitness'] += node_fitness.calc_discrete_directed(net, n, fitness_metric)
 
         else:
             for n in net.nodes():
                 up, down = net.node[n]['up'], net.node[n]['down']
-                net.node[n]['fitness'] += node_fitness.calc_undirected(fitness_metric, up,down)
+                net.node[n]['fitness'] += node_fitness.calc_undirected(fitness_metric, up, down)
 
 
     elif interval == 'continuous':
@@ -42,6 +42,7 @@ def calc_node_fitness(net, configs):
             fitness = node_fitness.calc_continuous(states, fitness_metric)
             net.node[n]['fitness'] += fitness
             # later add net.node[n]['var'] += var 
+
 
 def node_product(net, scale_node_fitness):
     fitness_score = 0
@@ -66,19 +67,14 @@ def node_product(net, scale_node_fitness):
 
 
 def node_normz(net, denom, configs):
-    interval = configs['interval']
     if (denom != 0):
         for n in net.nodes():
             net.node[n]['fitness'] /= float(denom)
-            if (interval == 'continuous'): net.node[n]['var'] /= float(denom)
 
 
 def reset_nodes(net, configs):
-    interval = configs['interval']
-
     for n in net.nodes():
         net.node[n]['fitness'] = 0
-        if (interval=='continuous'): net.node[n]['var'] = 0
 
 
 

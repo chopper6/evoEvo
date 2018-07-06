@@ -51,7 +51,7 @@ def init_population(init_type, start_size, pop_size, configs):
             mutate.add_edges(init_net, num_add, configs)
 
         else:  # otherwise rewire till connected is intractable, grow without selection instead
-            init_net = nx.empty_graph(8, create_using=nx.DiGraph())
+            init_net = nx.empty_graph(8, create_using=nx.DiGraph(input_nodes=[], output_nodes=[]))
 
             if directed:
                 for n in init_net.nodes():
@@ -62,8 +62,6 @@ def init_population(init_type, start_size, pop_size, configs):
 
             if directed:
                 # TODO: possibly better with more starting nodes?
-                init_net['input_nodes'] = [] #may not work
-                init_net['output_nodes'] = []
                 mutate.add_nodes(init_net, num_input_nodes, configs, layer='input')
                 mutate.add_nodes(init_net, num_output_nodes, configs, layer='output')
 

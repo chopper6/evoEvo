@@ -27,6 +27,7 @@ def init_population(init_type, start_size, pop_size, configs):
 
         if varied_init_population: reps = pop_size
         else: reps = 1
+        population = [None for i in range(pop_size)]
 
         for rep in range(reps):
 

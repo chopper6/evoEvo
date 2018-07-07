@@ -64,6 +64,7 @@ def linear_reg(net, outputs, configs):
 
     if ideal_outputs == 'control':
         targets = [1 for i in range(len(net.graph['output_nodes']))]
+        print(net.graph['output_nodes'])
     else: assert(False)
 
     print("\nreservoir.linear_reg:\n")
@@ -100,6 +101,7 @@ def receive_output(net):
             return None
 
         outputs[i] = [net.node[in_edge[0]]['state'] for in_edge in net.in_edges(output_node)]
+        print('receive_output outputs = ' + str(outputs[i]))
 
     return outputs
 

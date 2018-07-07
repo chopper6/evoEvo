@@ -46,8 +46,7 @@ def apply_input(net, configs):
     if input_states == 'control':
         for input_node in net.graph['input_nodes']:
             net.node[input_node]['state'] = 1
-            assert(len(net.node(input_node).in_edges) == 0)
-
+            assert(not net.in_edges(input_node))
 
 def lvl_1_learning(net, configs):
 
@@ -69,11 +68,11 @@ def linear_reg(net, configs):
             return None
 
         if ideal_outputs == 'control':
-            assert(len(net.node(output_node).out_edges) == 0)
+            assert(not net.out_edges(output_node))
             target = 1
 
         # calc least squares solution
-        x = [in_edge[0]['state'] for in_edge in output_node.in_edges()]
+        x = [net.node[in_edge[0]]['state'] for in_edge in net.in_edges(output_node)]
         w_soln = np_leastsq(x,target)
         sum = 0
         for i in range(len(x)):

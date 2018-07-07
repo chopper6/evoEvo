@@ -94,7 +94,7 @@ def gen_rd_nets(pop_size, configs):
 
     if not varied_init_population:
         population = [population[0].copy() for i in range(pop_size)]
-        double_check(population[0], configs)
+        double_check([population[0]], configs)
 
     else:
         double_check(population, configs)

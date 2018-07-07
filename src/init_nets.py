@@ -78,6 +78,8 @@ def init_population(init_type, start_size, pop_size, configs):
 
             population[rep].graph['fitness'] = 0
             population[rep].graph['error'] = 0
+            for n in population[rep].nodes():
+                population[rep].node[n]['state'] = None
 
         if not varied_init_population: population = [population[0].copy() for i in range(pop_size)]
 

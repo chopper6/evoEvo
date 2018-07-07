@@ -64,6 +64,7 @@ def gen_rd_nets(pop_size, configs):
             mutate.add_edges(population[rep], num_add, configs)
 
             # input and output layers
+            assert(num_input_nodes > 0 and num_output_nodes > 0)
             population[rep].graph['input_nodes'] = []
             population[rep].graph['output_nodes'] = []
             mutate.add_nodes(population[rep], num_input_nodes, configs, layer='input')

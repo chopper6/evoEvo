@@ -7,11 +7,9 @@ def step(net, configs):
 
     apply_input(net, configs)
     step_fwd(net, configs)
-    err = linear_reg(net, configs)
+    outputs = receive_output(net)
 
-    lvl_1_learning(net, configs) #TODO: add this fn() and see if err decreases
-
-    return err
+    return outputs
 
 
 def activation(net, node, configs):
@@ -48,6 +46,7 @@ def apply_input(net, configs):
             net.node[input_node]['state'] = 1
             assert(not net.in_edges(input_node))
 
+
 def lvl_1_learning(net, configs):
 
     # TODO: add this
@@ -57,31 +56,52 @@ def lvl_1_learning(net, configs):
     # can be greedy, naive_EA, or none
 
 
-def linear_reg(net, configs):
+def linear_reg(net, outputs, configs):
 
-    ideal_outputs = 'control'
+    ideal_outputs = 'control' #later as param
     err = 0
+    targets = None #those annoying errors
 
-    for output_node in net.graph['output_nodes']:
-        if net.node[output_node]['state'] == None:
-            # input hasn't reached output yet
-            return None
+    if ideal_outputs == 'control':
+        targets = [1 for i in range(len(net.graph['output_nodes']))]
+    else: assert(False)
 
-        if ideal_outputs == 'control':
-            assert(not net.out_edges(output_node))
-            target = 1
+    print("\nreservoir.linear_reg:\n")
+    print("outputs = " + str(outputs))
+    print("targets = " + str(targets) + "\n")
 
-        # calc least squares solution
-        x = [net.node[in_edge[0]]['state'] for in_edge in net.in_edges(output_node)]
-        w_soln = np_leastsq(x,target)
-        sum = 0
-        for i in range(len(x)):
-            sum += x[i]*w_soln[i]
-        err += math.pow(sum-target, 2)
+    # calc least squares solution
+    w_soln = np_leastsq(outputs,targets)
+    #assert(len(w_soln) == len(net.graph['output_nodes']))
+
+    print("lin reg output = " + str(w_soln))
+    '''
+    sum = 0
+    for i in range(len(outputs)):
+        for j
+        sum += x[i]*w_soln[i]
+    err += math.pow(sum-target, 2)
 
     err /= len(net.graph['output_nodes'])
+    '''
     return err
 
+
+def receive_output(net):
+
+    outputs = [None for i in range(len(net.graph['output_nodes']))]
+    sorted_output_nodes = sorted(net.graph['output_nodes']) #fn doesn't matter as long as its ocnsistent
+    i = 0
+    for output_node in sorted_output_nodes:
+        assert (not net.out_edges(output_node))
+
+        if net.node[output_node]['state'] == None:
+            # input hasn't reached all outputs yet
+            return None
+
+        outputs[i] = [net.node[in_edge[0]]['state'] for in_edge in net.in_edges(output_node)]
+
+    return outputs
 
 def step_fwd(net, configs):
 

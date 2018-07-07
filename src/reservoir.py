@@ -47,7 +47,7 @@ def apply_input(net, configs):
 
     if input_states == 'control':
         for input_node in net.graph['input_nodes']:
-            input_node['state'] = 1
+            net.node[input_node]['state'] = 1
 
 
 def lvl_1_learning(net, configs):
@@ -65,7 +65,7 @@ def linear_reg(net, configs):
     err = 0
 
     for output_node in net.graph['output_nodes']:
-        if output_node['state'] == None:
+        if net.node[output_node]['state'] == None:
             # input hasn't reached output yet
             return None
 

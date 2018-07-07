@@ -103,6 +103,7 @@ def receive_output(net):
         outputs[i] = [net.node[in_edge[0]]['state'] for in_edge in net.in_edges(output_node)]
         print('receive_output outputs = ' + str(outputs[i]))
 
+    if len(outputs)==1: outputs = outputs[0]
     return outputs
 
 def step_fwd(net, configs):

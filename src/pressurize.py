@@ -14,7 +14,6 @@ def pressurize(configs, net, advice):
 
 
     if directed:
-        assert (interval == 'continuous')
 
         err = 0 #err for base (1*) problem
         fitness.reset_nodes(net, configs)

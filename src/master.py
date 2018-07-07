@@ -59,7 +59,7 @@ def init_run(configs):
     fitness_direction = str(configs['fitness_direction'])
     varied_init_population = util.boool(configs['varied_init_population'])
 
-    population, gen, size, advice, keep_running = None, None, None, None, None, None #avoiding annoying warnings
+    population, gen, size, advice, keep_running = None, None, None, None, None #avoiding annoying warnings
 
     pop_size, num_survive = curr_gen_params(start_size, None, configs)
     util.cluster_print(output_dir,"Master init: num survive: " + str(num_survive) + " out of total popn of " + str(pop_size))

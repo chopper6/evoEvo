@@ -76,7 +76,7 @@ def popn_data(population, output_dir, gen):
         with open(output_csv, 'a') as output_file:
             output = csv.writer(output_file)
 
-            all_fitness = np.array([population[p].fitness for p in range(len(population))])
+            all_fitness = np.array([population[p].graph['fitness'] for p in range(len(population))])
             mean_fitness = np.mean(all_fitness)
             var_fitness = np.var(all_fitness)
 

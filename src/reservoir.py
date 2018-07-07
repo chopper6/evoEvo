@@ -24,7 +24,7 @@ def activation(net, node, configs):
     # curr 2nd gen neurons
 
     sum, num_active = 0, 0
-    for edge in node.in_edges():
+    for edge in net.in_edges(node):
         if net.node[edge[0]]['state'] != None:
             edge_val = net.node[edge[0]]['state'] * net[edge[0]][edge[1]]['weight']
             assert(edge_val >= 0 and edge_val <= 1)

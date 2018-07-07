@@ -24,7 +24,7 @@ def pressurize(configs, net, advice):
                 err += instance_err
             fitness.calc_node_fitness(net, configs)
 
-        net.graph['error'] = err / len(num_samples_relative)
+        net.graph['error'] = err / float(num_samples_relative)
         fitness.node_normz(net, num_samples_relative, configs)
         fitness_score = fitness.node_product(net, scale_node_fitness)
 

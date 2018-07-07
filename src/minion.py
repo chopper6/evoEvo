@@ -75,12 +75,12 @@ def evolve_minion(worker_file, gen, rank, output_dir):
     output_dir, fitness_direction, population = init_minion(configs, randSeed, seed, pop_size)
 
     for p in range(pop_size):
-
+        net = population[p]
         #temp
-        assert(p.graph['input_nodes'][0] != None)
-        assert(p.graph['output_nodes'][0] != None)
-        mutate.mutate(configs, population[p], biases=biases)
-        pressurize.pressurize(configs, population[p], advice)
+        assert(net.graph['input_nodes'][0] != None)
+        assert(net.graph['output_nodes'][0] != None)
+        mutate.mutate(configs, net, biases=biases)
+        pressurize.pressurize(configs, net, advice)
 
     population = sort_popn(population, fitness_direction)
     write_out_worker(output_dir + "/to_master/" + str(gen) + "/" + str(rank), population, num_return)

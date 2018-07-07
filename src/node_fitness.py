@@ -3,9 +3,9 @@ import math
 def calc_discrete_directed (net, node, fitness_metric):
     num0, num1 = 0, 0
 
-    for e in net.node[node].in_edges():
-        if e[0]['state'] == 0: num0 += 1
-        elif e[0]['state'] == 1: num1 += 1
+    for e in net.in_edges(node):
+        if net.node[e[0]]['state'] == 0: num0 += 1
+        elif net.node[e[0]]['state'] == 1: num1 += 1
 
     if (num0 + num1 ==0): return 0
 

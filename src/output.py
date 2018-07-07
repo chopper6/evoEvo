@@ -4,7 +4,7 @@ import util, pressurize, bias
 np.set_printoptions(formatter={'int_kind': lambda x:' {0:d}'.format(x)})
 
 
-def master_info(population, gen, size, pop_size, num_survive, advice, BD_table, configs):
+def master_info(population, gen, size, pop_size, num_survive, advice, configs):
     output_dir = configs['output_directory']
     num_data_output = int(configs['num_data_output'])
     num_net_output = int(configs['num_net_output'])

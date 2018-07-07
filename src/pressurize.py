@@ -1,6 +1,6 @@
 import instances, node_fitness, fitness, util, reservoir
 
-def pressurize(configs, net, advice, BD_table):
+def pressurize(configs, net, advice):
     # configs:
     sampling_rounds_multiplier = float(configs['sampling_rounds_multiplier']) #FRACTION of curr number of EDGES
     if (util.is_it_none(configs['sampling_rounds_max']) == None): max_sampling_rounds = None

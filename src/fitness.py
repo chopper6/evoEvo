@@ -4,8 +4,9 @@ import node_fitness, util
 
 def eval_fitness(population, fitness_direction):
     #determines fitness of each individual and orders the population by fitness
-    if (fitness_direction == 'max'): population = sorted(population,key=attrgetter('fitness'), reverse=True)
-    elif (fitness_direction == 'min'):  population = sorted(population,key=attrgetter('fitness'))
+
+    if (fitness_direction == 'max'): population = sorted(population,key=fitness_key, reverse=True)
+    elif (fitness_direction == 'min'):  population = sorted(population,key=fitness_key)
     else: print("ERROR in fitness.eval_fitness(): unknown fitness_direction " + str(fitness_direction) + ", population not sorted.")
 
     #temp for debug purposes
@@ -17,6 +18,12 @@ def eval_fitness(population, fitness_direction):
     print("\n")
 
     return population
+
+
+
+def fitness_key(net):
+    return net.graph['fitness']
+
 
 def calc_node_fitness(net, configs):
     directed = util.boool(configs['directed'])

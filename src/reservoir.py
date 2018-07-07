@@ -87,4 +87,4 @@ def step_fwd(net, configs):
 
     for n in net.nodes():
         net.node[n]['prev_state'] = net.node[n]['state']
-        net.node[n]['state'] = activation(net, node, configs)
+        net.node[n]['state'] = activation(net, n, configs)

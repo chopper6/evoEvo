@@ -13,8 +13,9 @@ def eval_fitness(population, fitness_direction):
     print("\nIn fitness line 11: order of " + str(fitness_direction) + " sorted population:")
     for p in population:
         print(p.graph['fitness'])
-    if (fitness_direction == 'min'): assert(population[0].graph['fitness'] < population[1].graph['fitness'] )
-    elif (fitness_direction == 'max'): assert(population[0].graph['fitness'] > population[1].graph['fitness'] )
+    if (len(population) > 1):
+        if (fitness_direction == 'min'): assert(population[0].graph['fitness'] <= population[1].graph['fitness'] )
+        elif (fitness_direction == 'max'): assert(population[0].graph['fitness'] >= population[1].graph['fitness'] )
     print("\n")
 
     return population

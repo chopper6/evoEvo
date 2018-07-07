@@ -1,5 +1,13 @@
+import networkx as nx, mutate
 
 # OBSOLETE, poss use for init edge weights
+def old_rd_init(start_size, population, directed, edge_node_ratio, configs):
+    if (start_size <= 20 and not directed):
+        population = nx.empty_graph(start_size, create_using=nx.DiGraph())
+        num_add = int(edge_node_ratio * start_size)
+        mutate.add_edges(population, num_add, configs)
+
+
 def sign_edges(population):
     for p in range(len(population)):
         edge_list = population[p].net.edges()

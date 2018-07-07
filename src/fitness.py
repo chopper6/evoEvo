@@ -73,6 +73,7 @@ def node_product(net, scale_node_fitness):
                 Inode = net.node[n]['fitness']
                 fitness_score += -1*math.log(net.node[n]['fitness'])
             else:
+                # NOTE THAT THIS SEEMS TO INVERT THE MEANING, IE INFO --> ENTROPY : MAX --> MIN
                 fitness_score += -1*math.log(net.node[n]['fitness'])
 
     if (num_over != 0 or num_under != 0):

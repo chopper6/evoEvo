@@ -8,8 +8,6 @@ def step(net, configs):
     apply_input(net, configs)
     step_fwd(net, configs)
     err = linear_reg(net, configs)
-    # handle if err = None?
-    # TODO: put err somewhere
 
     lvl_1_learning(net, configs) #TODO: add this fn() and see if err decreases
 
@@ -17,7 +15,7 @@ def step(net, configs):
 
 
 def activation(net, node, configs):
-    # curr linear activation with static bias
+    # curr linear activation with static bias (which is ~ thresh)
     # could add a few diff activation fns()
     # tech should exclude input_nodes, but shouldn't matter
 
@@ -25,9 +23,10 @@ def activation(net, node, configs):
 
     sum, num_active = 0, 0
     for edge in net.in_edges(node):
-        if net.node[edge[0]]['state'] != None:
-            edge_val = net.node[edge[0]]['state'] * net[edge[0]][edge[1]]['weight']
-            assert(edge_val >= 0 and edge_val <= 1)
+        #use previous state, since state is reserved for the new iteration
+        if net.node[edge[0]]['prev_state'] != None:
+            edge_val = net.node[edge[0]]['prev_state'] * net[edge[0]][edge[1]]['weight']
+            assert(edge_val >= -1 and edge_val <= 1)     # assumes weights in [-1,1]
             sum += edge_val
             num_active += 1
 
@@ -35,7 +34,6 @@ def activation(net, node, configs):
     if num_active == 0: return None
 
     # threshold comparison
-    # assumes weights in [-1,1]
     if sum > 0: return 1
     else: return 0
 
@@ -48,6 +46,7 @@ def apply_input(net, configs):
     if input_states == 'control':
         for input_node in net.graph['input_nodes']:
             net.node[input_node]['state'] = 1
+            assert(len(net.node(input_node).in_edges) == 0)
 
 
 def lvl_1_learning(net, configs):
@@ -70,6 +69,7 @@ def linear_reg(net, configs):
             return None
 
         if ideal_outputs == 'control':
+            assert(len(net.node(output_node).out_edges) == 0)
             target = 1
 
         # calc least squares solution
@@ -80,6 +80,7 @@ def linear_reg(net, configs):
             sum += x[i]*w_soln[i]
         err += math.pow(sum-target, 2)
 
+    err /= len(net.graph['output_nodes'])
     return err
 
 
@@ -87,4 +88,5 @@ def step_fwd(net, configs):
 
     for n in net.nodes():
         net.node[n]['prev_state'] = net.node[n]['state']
+    for n in net.nodes():
         net.node[n]['state'] = activation(net, n, configs)

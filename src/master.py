@@ -54,7 +54,6 @@ def evolve_master(configs):
 def init_run(configs):
     num_workers = int(configs['number_of_workers'])
     output_dir = configs['output_directory']
-    init_type = str(configs['initial_net_type'])
     start_size = int(configs['starting_size'])
     fitness_direction = str(configs['fitness_direction'])
     varied_init_population = util.boool(configs['varied_init_population'])
@@ -89,7 +88,7 @@ def init_run(configs):
         output.init_csv(output_dir, configs)
         # draw_nets.init(output_dir)
 
-        population = init_nets.init_population(init_type, start_size, pop_size, configs)
+        population = init_nets.init_population(pop_size, configs)
         advice = init.build_advice(population[0], configs)
 
         #init fitness eval

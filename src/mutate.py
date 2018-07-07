@@ -45,8 +45,8 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
     for i in range(num_add):
         pre_size = post_size = len(net.nodes())
         while (pre_size == post_size):
-            new_node = rd.randint(0, len(net.nodes()) * 1000)  # hope to hit number that doesn't already exist
-            if new_node not in net.nodes(): #could be slowing things down...
+            new_node = rd.randint(0, len(net.nodes()) * 10000)  # hope to hit number that doesn't already exist
+            if new_node not in net.nodes(): #could slow things down...
                 net.add_node(new_node)
                 post_size = len(net.nodes())
                 assert(pre_size < post_size)
@@ -180,11 +180,12 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
 
         if directed:
             input_output_check = True
-            if net.node[node1]['layer'] == 'input' or net.node[node2]['layer'] == 'output': input_output_check = False
+            if net.node[node2]['layer'] == 'input' or net.node[node1]['layer'] == 'output': input_output_check = False
 
             if not net.has_edge(node1, node2) and input_output_check:
                 net.add_edge(node1, node2, sign=sign)
                 net[node1][node2]['weight'] = init_nets.assign_edge_weight(configs)
+
         else:
             if not net.has_edge(node1, node2) and not net.has_edge(node2, node1):
                 net.add_edge(node1, node2, sign=sign)
@@ -253,6 +254,8 @@ def num_mutations(base_mutn_freq):
 def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_orig=None):
     #rewires [node1, node2] at the expense of a random, non deg1 edge
 
+    # note that allowing multiple connected components may actually improve EA by increasing neutral mutation space
+
     single_cc = util.boool(configs['single_cc'])
 
     if single_cc:
@@ -264,8 +267,9 @@ def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_
         num_cc = nx.number_connected_components(net_undir)
 
         if (num_cc != 1): #rm_edge() will recursively check #COULD CAUSE AN ERR
+            components = list(nx.connected_components(net_undir))
+
             if not node1 and node1 != 0:
-                components = list(nx.connected_components(net_undir))
                 c1 = components[0]
                 node1 = rd.sample(c1, 1)
                 node1 = node1[0]

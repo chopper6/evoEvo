@@ -7,7 +7,6 @@ def pressurize(configs, net, advice):
     else: max_sampling_rounds = int(configs['sampling_rounds_max'])
     scale_node_fitness = util.boool(configs['scale_node_fitness'])
     directed = util.boool(configs['directed'])
-    interval = configs['interval']
 
     num_samples_relative = max(1, int(len(net.edges())*sampling_rounds_multiplier) )
     if (max_sampling_rounds): num_samples_relative = min(num_samples_relative, max_sampling_rounds)
@@ -18,7 +17,7 @@ def pressurize(configs, net, advice):
         err = 0 #err for base (1*) problem
         fitness.reset_nodes(net, configs)
         for i in range(num_samples_relative):
-            # note that node states not reset
+            # note that node states are not reset
             instance_err = reservoir.step(net, configs)
             if instance_err != None:
                 err += instance_err

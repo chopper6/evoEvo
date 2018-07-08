@@ -45,18 +45,26 @@ def calc_node_fitness(net, configs):
 
     elif interval == 'continuous':
 
-        for n in net.nodes():
-            states = []
-            for in_edge in net.in_edges(n):
-                if net[in_edge[0]][in_edge[1]]['state'] is not None:
-                    states.append(net[in_edge[0]][in_edge[1]]['state'])
-            for out_edge in net.out_edges(n):
-                if net[out_edge[0]][out_edge[1]]['state'] is not None:
-                    states.append(net[out_edge[0]][out_edge[1]]['state'])
+        if directed:
+            for n in net.nodes():
+                states = []
+                for in_edge in net.in_edges(n):
+                    if net.node[in_edge[0]]['state'] is not None:
+                        states.append(net.node[in_edge[0]]['state'])
 
-            fitness = node_fitness.calc_continuous(states, fitness_metric)
-            net.node[n]['fitness'] += fitness
-            # later add net.node[n]['var'] += var 
+        else:
+            for n in net.nodes():
+                states = []
+                for in_edge in net.in_edges(n):
+                    if net[in_edge[0]][in_edge[1]]['state'] is not None:
+                        states.append(net[in_edge[0]][in_edge[1]]['state'])
+                for out_edge in net.out_edges(n):
+                    if net[out_edge[0]][out_edge[1]]['state'] is not None:
+                        states.append(net[out_edge[0]][out_edge[1]]['state'])
+
+                fitness = node_fitness.calc_continuous(states, fitness_metric)
+                net.node[n]['fitness'] += fitness
+                # later add net.node[n]['var'] += var
 
 
 def node_product(net, scale_node_fitness):

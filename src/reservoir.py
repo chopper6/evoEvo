@@ -88,7 +88,7 @@ def stochastic_backprop(net, configs):
             output = net.node[output_node]['state']
             err = math.pow(targets[i]-output,2)
             MSE += err
-            print('\nreceive_output outputs = ' + str(output) + ", with err " + str(err))
+            print('\nbackprop(): output of node = ' + str(output) + ", with err " + str(err))
 
             # assumes sigmoid
             # TODO: add bias

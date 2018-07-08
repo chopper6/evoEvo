@@ -14,19 +14,14 @@ def pressurize(configs, net, advice):
 
     if directed:
 
-        outputs = []
+        err = 0
         fitness.reset_nodes(net, configs)
         for i in range(num_samples_relative):
             # note that node states are not reset
-            output = reservoir.step(net, configs)
-            if output: outputs.append(output)
+            err = reservoir.step(net, configs)
             fitness.calc_node_fitness(net, configs)
 
-        # note this means that lvl 1 learning occurs at same rate
-        # instead it should likely occur much faster
-        net.graph['error'] = reservoir.linear_reg(net, outputs, configs)
-        reservoir.lvl_1_learning(net, configs)  # TODO: add this fn() and see if err decreases
-
+        net.graph['error'] = err / num_samples_relative
         fitness.node_normz(net, num_samples_relative, configs)
         fitness_score = fitness.node_product(net, scale_node_fitness)
 

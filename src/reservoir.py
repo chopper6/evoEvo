@@ -1,5 +1,6 @@
 import math
 from numpy.linalg import lstsq as np_leastsq
+import numpy as np
 
 
 def step(net, configs):
@@ -7,9 +8,10 @@ def step(net, configs):
 
     apply_input(net, configs)
     step_fwd(net, configs)
-    outputs = receive_output(net)
+    MSE = stochastic_backprop (net, configs)
+    lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases
 
-    return outputs
+    return MSE
 
 
 def activation(net, node, configs):
@@ -47,7 +49,7 @@ def apply_input(net, configs):
             assert(not net.in_edges(input_node))
 
 
-def lvl_1_learning(net, configs):
+def lvl_1_reservoir_learning(net, configs):
 
     # TODO: add this
     return
@@ -55,56 +57,47 @@ def lvl_1_learning(net, configs):
     #learning = configs['lvl_1_learning']
     # can be greedy, naive_EA, or none
 
+def stochastic_backprop(net, configs):
+    # TODO: add params for activation fn, ideal_outputs, learning_rate
 
-def linear_reg(net, outputs, configs):
-
-    ideal_outputs = 'control' #later as param
-    err = 0
-    targets = None #those annoying errors
+    ideal_outputs = 'control'
+    MSE, targets = 0, None #targets just bc of annoying ass warnings
+    learning_rate = .1
 
     if ideal_outputs == 'control':
         targets = [1 for i in range(len(net.graph['output_nodes']))]
-        print(net.graph['output_nodes'])
     else: assert(False)
 
-    print("\nreservoir.linear_reg:\n")
-    print("outputs = " + str(outputs))
-    print("targets = " + str(targets) + "\n")
-
-    # calc least squares solution
-    w_soln = np_leastsq(outputs,targets)
-    #assert(len(w_soln) == len(net.graph['output_nodes']))
-
-    print("lin reg output = " + str(w_soln))
-    '''
-    sum = 0
-    for i in range(len(outputs)):
-        for j
-        sum += x[i]*w_soln[i]
-    err += math.pow(sum-target, 2)
-
-    err /= len(net.graph['output_nodes'])
-    '''
-    return err
-
-
-def receive_output(net):
-
-    outputs = [None for i in range(len(net.graph['output_nodes']))]
-    sorted_output_nodes = sorted(net.graph['output_nodes']) #fn doesn't matter as long as its ocnsistent
+    sorted_output_nodes = sorted(net.graph['output_nodes']) #fn doesn't matter as long as its consistent
     i = 0
+    num_active_outputs = len(sorted_output_nodes)
     for output_node in sorted_output_nodes:
         assert (not net.out_edges(output_node))
 
-        if net.node[output_node]['state'] == None:
+        if net.node[output_node]['state'] != None:
             # input hasn't reached all outputs yet
-            return None
+            #return None --> now correct what is available
 
-        outputs[i] = [net.node[in_edge[0]]['state'] for in_edge in net.in_edges(output_node)]
-        print('receive_output outputs = ' + str(outputs[i]))
+            output = net.node[output_node]['state']
+            err = math.pow(targets[i]-output,2)
+            MSE += err
+            print('\nreceive_output outputs = ' + str(output) + ", with err " + str(err))
 
-    if len(outputs)==1: outputs = outputs[0]
-    return outputs
+            # assumes sigmoid
+            # TODO: add bias
+            delta = (targets[i]-output)*output*(1-output)
+            for in_edge in net.in_edges(output_node):
+                weight_contribution = net.node[in_edge[0]]['state']*net[in_edge[0]][in_edge[1]]['weight']
+                partial_err = delta * weight_contribution
+                print("delta = " + str(delta) + ", weight_contrib = " + str(weight_contribution) + ", curr_weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
+                net[in_edge[0]][in_edge[1]]['weight'] -= partial_err*learning_rate
+                print("now weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
+
+        else: num_active_outputs -= 1
+
+    if (num_active_outputs >0): MSE /= 2*num_active_outputs
+    return MSE
+
 
 def step_fwd(net, configs):
 

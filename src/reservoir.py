@@ -47,13 +47,14 @@ def activation(net, node, configs):
 
 def apply_input(net, configs):
 
-    input_states = 'control'
-    # later change to a config
+    base_problem = configs['base_problem']
 
-    if input_states == 'control':
+    if base_problem  == 'control':
         for input_node in net.graph['input_nodes']:
             net.node[input_node]['state'] = 1
             assert(not net.in_edges(input_node))
+
+    else: assert(False)
 
 
 def lvl_1_reservoir_learning(net, configs):
@@ -65,13 +66,13 @@ def lvl_1_reservoir_learning(net, configs):
     # can be greedy, naive_EA, or none
 
 def stochastic_backprop(net, configs):
-    # TODO: add params for activation fn, ideal_outputs, learning_rate
 
-    ideal_outputs = 'control'
+    base_problem = configs['base_problem']
+    learning_rate = float(configs['learning_rate'])
+
     MSE, targets = 0, None #targets just bc of annoying ass warnings
-    learning_rate = .1
 
-    if ideal_outputs == 'control':
+    if base_problem == 'control':
         targets = [1 for i in range(len(net.graph['output_nodes']))]
     else: assert(False)
 

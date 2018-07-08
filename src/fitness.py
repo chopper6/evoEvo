@@ -52,6 +52,10 @@ def calc_node_fitness(net, configs):
                     if net.node[in_edge[0]]['state'] is not None:
                         states.append(net.node[in_edge[0]]['state'])
 
+
+                fitness = node_fitness.calc_continuous(states, fitness_metric)
+                net.node[n]['fitness'] += fitness
+
         else:
             for n in net.nodes():
                 states = []

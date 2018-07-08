@@ -19,6 +19,8 @@ def activation(net, node, configs):
     # could add a few diff activation fns()
     # tech should exclude input_nodes, but shouldn't matter
 
+    activation_fn = configs['activation_function']
+
     # curr 2nd gen neurons
 
     sum, num_active = 0, 0
@@ -33,10 +35,15 @@ def activation(net, node, configs):
     #if num_active > 0: sum /= num_active #don't normalize like this, since will always be < 1
     if num_active == 0: return None
 
-    # threshold comparison
-    if sum > 0: return 1
-    else: return 0
+    if activation_fn == 'linear':
+        # threshold comparison
+        if sum > 0: return 1
+        else: return 0
 
+    elif activation_fn == 'sigmoid':
+        return 1/(1+math.exp(-(sum)))
+
+    else: assert(False)
 
 def apply_input(net, configs):
 
@@ -87,11 +94,12 @@ def stochastic_backprop(net, configs):
             # TODO: add bias
             delta = (targets[i]-output)*output*(1-output)
             for in_edge in net.in_edges(output_node):
-                weight_contribution = net.node[in_edge[0]]['state']*net[in_edge[0]][in_edge[1]]['weight']
-                partial_err = delta * weight_contribution
-                print("delta = " + str(delta) + ", weight_contrib = " + str(weight_contribution) + ", curr_weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
-                net[in_edge[0]][in_edge[1]]['weight'] -= partial_err*learning_rate
-                print("now weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
+                if net.node[in_edge[0]]['state']:
+                    weight_contribution = net.node[in_edge[0]]['state']*net[in_edge[0]][in_edge[1]]['weight']
+                    partial_err = delta * weight_contribution
+                    print("delta = " + str(delta) + ", weight_contrib = " + str(weight_contribution) + ", curr_weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
+                    net[in_edge[0]][in_edge[1]]['weight'] -= partial_err*learning_rate
+                    print("now weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
 
         else: num_active_outputs -= 1
 

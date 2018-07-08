@@ -44,7 +44,6 @@ def calc_node_fitness(net, configs):
 
 
     elif interval == 'continuous':
-        assert(not directed)
 
         for n in net.nodes():
             states = []

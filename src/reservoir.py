@@ -89,7 +89,7 @@ def stochastic_backprop(net, configs):
             output = net.node[output_node]['state']
             err = math.pow(targets[i]-output,2)
             MSE += err
-            print('\nbackprop(): output of node = ' + str(output) + ", with err " + str(err))
+            #print('\nbackprop(): output of node = ' + str(output) + ", with err " + str(err))
 
             # assumes sigmoid
             # TODO: add bias
@@ -98,9 +98,9 @@ def stochastic_backprop(net, configs):
                 if net.node[in_edge[0]]['state']:
                     weight_contribution = net.node[in_edge[0]]['state']*net[in_edge[0]][in_edge[1]]['weight']
                     partial_err = delta * weight_contribution
-                    print("delta = " + str(delta) + ", weight_contrib = " + str(weight_contribution) + ", curr_weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
+                    #print("delta = " + str(delta) + ", weight_contrib = " + str(weight_contribution) + ", curr_weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
                     net[in_edge[0]][in_edge[1]]['weight'] -= partial_err*learning_rate
-                    print("now weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
+                    #print("now weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
 
         else: num_active_outputs -= 1
 

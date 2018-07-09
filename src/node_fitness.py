@@ -25,6 +25,10 @@ def calc_discrete_undirected (fitness_metric, up, down):
 
 
 def calc_continuous (states, fitness_metric, distrib_lng=1):
+    if len(states)==0: 
+        fitness = 1
+        return fitness
+
     mean = sum(states)/len(states)
     var, entropish = 0, 0
     # may have to change distrib_lng if, for ex. states can be in [-1,1]

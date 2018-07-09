@@ -22,7 +22,8 @@ def activation(net, node, configs):
 
     # curr 2nd gen neurons
 
-    sum, num_active = 0, 0
+    sum = 0
+    num_active = 0
     for edge in net.in_edges(node):
         #use previous state, since state is reserved for the new iteration
         if net.node[edge[0]]['prev_state'] != None:
@@ -30,9 +31,11 @@ def activation(net, node, configs):
             assert(edge_val >= -1 and edge_val <= 1)     # assumes weights in [-1,1]
             sum += edge_val
             num_active += 1
+        sum += net.node[node]['neuron_bias']
 
     #if num_active > 0: sum /= num_active #don't normalize like this, since will always be < 1
     if num_active == 0: return None
+    # does bias should take care of this?????????
 
     if activation_fn == 'linear':
         # threshold comparison
@@ -139,7 +142,6 @@ def stochastic_backprop(net, configs, ideal_output):
             #print('\nbackprop(): output of node = ' + str(output) + ", with err " + str(err))
 
             # assumes sigmoid
-            # TODO: add bias
             delta = (ideal_output[i]-output)*output*(1-output)
             for in_edge in net.in_edges(output_node):
                 if net.node[in_edge[0]]['state']:
@@ -149,7 +151,13 @@ def stochastic_backprop(net, configs, ideal_output):
                     net[in_edge[0]][in_edge[1]]['weight'] -= partial_err*learning_rate
                     #print("now weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
 
+            # calc for bias
+            partial_err = delta * net.node[output_node]['neuron_bias']
+            net.node[output_node]['neuron_bias'] -= partial_err*learning_rate
+
         else: num_active_outputs -= 1
+
+    if num_active_outputs == 0: return None
 
     if (num_active_outputs >0): MSE /= 2*num_active_outputs
     return MSE

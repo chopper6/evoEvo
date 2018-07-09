@@ -77,7 +77,7 @@ def gen_rd_nets(pop_size, configs):
             num_rewire = start_size * 10
             mutate.rewire(population[rep], num_rewire, configs)
 
-            init_directed_attributes(population)
+            init_directed_attributes(population, configs)
 
 
         else:
@@ -125,14 +125,17 @@ def double_check(population, configs):
             assert (len(p.nodes()) == actual_size)
 
 
-def init_directed_attributes(population):
+def init_directed_attributes(population, configs):
     for p in population:
 
         p.graph['fitness'] = 0
         p.graph['error'] = 0
+
+        ''' THESE SHOULD ALREADY BE ADDED
         for n in p.nodes():
             p.node[n]['state'] = None
-
+            p.node[n]['neuron_bias'] = assign_edge_weight(configs)
+        '''
 
 
 def custom_to_directed(population):

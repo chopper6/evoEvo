@@ -14,17 +14,21 @@ def pressurize(configs, net, gen):
 
     if directed:
 
-        total_err = 0
+        total_err, num_outputs = 0, 0
         fitness.reset_nodes(net, configs)
         for i in range(num_samples_relative):
             # note that node states are not reset
             err = reservoir.step(net, configs)
-            total_err += err
+            if (err != None):
+                total_err += err
+                num_outputs += 1
             fitness.calc_node_fitness(net, configs)
             output.write_base_err(configs, gen, i, err)
 
-        net.graph['error'] = total_err / num_samples_relative
-        fitness.node_normz(net, num_samples_relative, configs)
+        if num_outputs==0:  net.graph['error'] = None
+        else:               net.graph['error'] = total_err / num_outputs
+
+        fitness.node_normz(net, num_samples_relative, configs) #TODO: may be later nodes with more 'None' instances
         fitness_score = fitness.node_product(net, scale_node_fitness)
 
     else:

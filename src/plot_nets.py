@@ -185,20 +185,32 @@ def base_problem_error(dirr):
 
     all_lines = [Line.strip() for Line in (open(err_file_name, 'r')).readlines()]
     titles = all_lines[0]
+
+    # plot all errors
     t, err, xticks, xtick_labels = [], [], [], []
 
-    i, curr_gen = 0, -1
+    i, curr_gen = 0, -2
+    # awk, but note that first pressurize is gen "-1"
+
+    last_line = all_lines[-1]
+    last_line = last_line.replace('[', '').replace(']', '').replace("\n", '')
+    last_line = last_line.split(',')
+    last_gen = int(last_line[0])
+
     for line in all_lines[1:]:
         t.append(i)
         line = line.replace('[', '').replace(']', '').replace("\n", '')
         line = line.split(',')
-        err.append(float(line[2]))
-        gen = int(line[0])+1 #offset
-        if gen != curr_gen:
-            xticks.append(i)
-            xtick_labels.append(gen)
-            curr_gen = gen
-        i += 1
+        err.append(line[2])
+        if not (err==None or err=="None"):
+            err = float(err)
+            gen = int(line[0])+1 #offset
+            if gen != curr_gen:
+                if int(((gen+2)/float(last_gen+2))*100) % 10 == 0:
+                    xticks.append(i)
+                    xtick_labels.append(gen)
+                curr_gen = gen
+            i += 1
 
     plt.plot(t, err)
 
@@ -208,6 +220,70 @@ def base_problem_error(dirr):
     plt.xticks(xticks, xtick_labels)
     plt.savefig(dirr + "/base_problem/error_plot.png")
     plt.clf()
+
+
+    # plot 1st gen errors
+    if len(all_lines) > 2:
+        t, err = [], []
+
+        i = 0
+        # awk, but note that first pressurize is gen "-1"
+
+        for line in all_lines[1:]:
+            t.append(i)
+            line = line.replace('[', '').replace(']', '').replace("\n", '')
+            line = line.split(',')
+            err.append(line[2])
+
+            gen = int(line[0]) + 1  # offset
+            if gen == 1:
+                if not (err==None or err=="None"):
+                    err = float(err)
+                    i += 1
+            elif gen == 2: break
+
+        xticks = [int(int(i))*j/10 for j in range(10)]
+
+        plt.plot(t, err)
+
+        plt.ylabel("Mean Squared Error")
+        plt.title("Base Problem Error over Time")
+        plt.xlabel("Generation")
+        plt.xticks(xticks, xticks)
+        plt.savefig(dirr + "/base_problem/Gen1_error_plot.png")
+        plt.clf()
+
+    # plot last gen errors
+    if len(all_lines) > 2:
+        t, err = [], []
+
+        i = 0
+        # awk, but note that first pressurize is gen "-1"
+
+        for line in all_lines[1:]:
+            t.append(i)
+            line = line.replace('[', '').replace(']', '').replace("\n", '')
+            line = line.split(',')
+            err.append(line[2])
+
+            gen = int(line[0]) + 1  # offset
+            if gen == last_gen:
+                if not (err==None or err=="None"):
+                    err = float(err)
+                    i += 1
+
+        xticks = [int(int(i))*j/10 for j in range(10)]
+
+        plt.plot(t, err)
+
+        plt.ylabel("Mean Squared Error")
+        plt.title("Base Problem Error over Time")
+        plt.xlabel("Generation")
+        plt.xticks(xticks, xticks)
+        plt.savefig(dirr + "/base_problem/Gen" + str(last_gen) + "_error_plot.png")
+        plt.clf()
+
+
 
 
 def degree_distrib(dirr):

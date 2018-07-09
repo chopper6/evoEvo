@@ -54,7 +54,7 @@ def write_base_err(configs, gen, iter, err):
     output_dir = configs['output_directory']
 
     with open(output_dir+"/base_problem/error.csv",'a') as csv_out:
-        csv_out.write(str(gen) + "," + str(iter) + "," + str(err))
+        csv_out.write(str(gen) + "," + str(iter) + "," + str(err) + "\n")
 
 
 
@@ -62,7 +62,7 @@ def init_csv(out_dir, configs):
  
     net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Mean Fitness, Variance in Fitness, Fitness_Div_#Edges, Fitness_Div_#Nodes, Error of Base Problem\n"
     deg_distrib_title = "Generation, Net Size, In Degrees, In Degree Frequencies, Out Degrees, Out Degree Frequencies, Degs, Deg Freqs\n"
-    err_file_title = "Generation, Iteration, Error (MSE)"
+    err_file_title = "Generation, Iteration, Error (MSE)\n"
 
 
     with open(out_dir+"/net_data.csv",'w') as csv_out:

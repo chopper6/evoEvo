@@ -15,18 +15,18 @@ def evolve_master(configs):
     init_data = init_run(configs)
     if not init_data: return #for example if run already done
 
-    population, gen, size, advice, num_survive, keep_running = init_data
+    population, gen, size, num_survive, keep_running = init_data
 
     while keep_running:
         t_start = time.time()
         pop_size, num_survive = curr_gen_params(size, num_survive, configs)
-        output.master_info(population, gen, size, pop_size, num_survive, advice, configs)
+        output.master_info(population, gen, size, pop_size, num_survive, configs)
         write_mpi_info(output_dir, gen)
 
         if biased: biases = bias.gen_biases(configs) #all nets must have same bias to have comparable fitness
         else: biases = None
 
-        distrib_workers(population, gen, worker_pop_size, num_survive, advice, biases, configs)
+        distrib_workers(population, gen, worker_pop_size, num_survive, biases, configs)
 
         report_timing(t_start, gen, output_dir)
         population = watch(configs, gen, num_survive)
@@ -58,7 +58,7 @@ def init_run(configs):
     fitness_direction = str(configs['fitness_direction'])
     varied_init_population = util.boool(configs['varied_init_population'])
 
-    population, gen, size, advice, keep_running = None, None, None, None, None #avoiding annoying warnings
+    population, gen, size, keep_running = None, None, None, None #avoiding annoying warnings
 
     pop_size, num_survive = curr_gen_params(start_size, None, configs)
     util.cluster_print(output_dir,"Master init: num survive: " + str(num_survive) + " out of total popn of " + str(pop_size))
@@ -89,18 +89,17 @@ def init_run(configs):
         # draw_nets.init(output_dir)
 
         population = init_nets.init_population(pop_size, configs)
-        advice = init.build_advice(population[0], configs)
 
         #init fitness eval
         if varied_init_population:
             for p in population:
-                pressurize.pressurize(configs, p, advice)
-        else: pressurize.pressurize(configs, population[0], advice)
+                pressurize.pressurize(configs, p, gen)
+        else: pressurize.pressurize(configs, population[0], gen)
 
         gen, size = 0, start_size
         keep_running = util.test_stop_condition(size, gen, configs)
 
-    init_data =  population, gen, size, advice, num_survive, keep_running
+    init_data =  population, gen, size, num_survive, keep_running
     return init_data
 
 
@@ -108,7 +107,7 @@ def init_dirs(num_workers, output_dir):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    dirs = ["/nets_nx/", "/bias/", "/to_workers/", "/to_master/", "/nets_pickled/"]
+    dirs = ["/nets_nx/", "/bias/", "/to_workers/", "/to_master/", "/nets_pickled/", "/base_problem/"]
     for dirr in dirs:
         if not os.path.exists(output_dir + dirr):
             os.makedirs(output_dir+dirr)
@@ -133,7 +132,7 @@ def write_mpi_info(output_dir, gen):
         shutil.rmtree(output_dir + "/to_workers/" + str(prev_gen))
 
 
-def distrib_workers(population, gen, worker_pop_size, num_survive, advice, biases, configs):
+def distrib_workers(population, gen, worker_pop_size, num_survive, biases, configs):
     num_workers = int(configs['number_of_workers'])
     output_dir = configs['output_directory']
     debug = util.boool(configs['debug'])
@@ -143,7 +142,7 @@ def distrib_workers(population, gen, worker_pop_size, num_survive, advice, biase
             dump_file = output_dir + "to_workers/" + str(gen) + "/" + str(w)
             seed = population[0].copy()
             randSeeds = os.urandom(sysRand().randint(0, 1000000))
-            worker_args = [w, seed, worker_pop_size, min(worker_pop_size, num_survive), randSeeds, advice, biases, configs]
+            worker_args = [w, seed, worker_pop_size, min(worker_pop_size, num_survive), randSeeds, biases, configs]
             with open(dump_file, 'wb') as file:
                 pickle.dump(worker_args, file)
             # pool.map_async(minion.evolve_minion, (dump_file,))
@@ -156,7 +155,7 @@ def distrib_workers(population, gen, worker_pop_size, num_survive, advice, biase
             seed = population[w % num_survive].copy()
             randSeeds = os.urandom(sysRand().randint(0, 1000000))
             assert (seed != population[w % num_survive])
-            worker_args = [w, seed, worker_pop_size, min(worker_pop_size, num_survive), randSeeds, advice, biases, configs]
+            worker_args = [w, seed, worker_pop_size, min(worker_pop_size, num_survive), randSeeds, biases, configs]
             with open(dump_file, 'wb') as file:
                 pickle.dump(worker_args, file)
 

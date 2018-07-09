@@ -16,8 +16,10 @@ def single_run_plots (configs):
 
     net_info, titles = parse_info(dirr)
 
-    if not os.path.exists(dirr + "/images_by_size/"): os.makedirs(dirr + "/images_by_size/") #TODO: make this more elegant
-    if not os.path.exists(dirr + "/images_by_time/"): os.makedirs(dirr + "/images_by_time/")
+    img_dirs = ["/images_by_size/", "/images_by_time/", "/images_by_time_logScaled/"]
+    for img_dir in img_dirs:
+        if not os.path.exists(dirr + img_dir):
+            os.makedirs(dirr + img_dir)
 
     mins, maxs = 0,0
     features_over_size(dirr, net_info, titles, mins, maxs, False)
@@ -25,6 +27,9 @@ def single_run_plots (configs):
 
     print("Generating directed degree distribution plots.")
     degree_distrib(dirr)
+
+    print("Generating base error plots.")
+    base_problem_error(dirr)
 
     print("Generating undirected degree distribution plots.")
     plot_undir(configs) #last two args for Biased and bias on, which haven't really been implemented
@@ -173,11 +178,41 @@ def undir_deg_distrib(net_file, destin_path, title, biased, bias_on):
         #plt.title('Degree Distribution of ' + str(title) + ' vs Simulation')
 
         plt.tight_layout()
-        plt.savefig(destin_path + "/" + type + "/" + title + ".png", dpi=300,bbox='tight') # http://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure.savefig
+        plt.savefig(destin_path + "/" + type + "_" + title + ".png", dpi=300,bbox='tight') # http://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure.savefig
         plt.clf()
         plt.cla()
         plt.close()
 
+
+
+def base_problem_error(dirr):
+    err_file_name = dirr + "/base_problem/error.csv"
+
+    all_lines = [Line.strip() for Line in (open(err_file_name, 'r')).readlines()]
+    titles = all_lines[0]
+    t, err, xticks, xtick_labels = [], [], [], []
+
+    i, curr_gen = 0, -1
+    for line in all_lines[1:]:
+        t.append(i)
+        line = line.replace('[', '').replace(']', '').replace("\n", '')
+        line = line.split(',')
+        err.append(float(line[2]))
+        gen = int(line[0])
+        if gen != curr_gen:
+            xticks.append(i)
+            xtick_labels.append(gen)
+            curr_gen = gen
+        i += 1
+
+    plt.plot(t, err)
+
+    plt.ylabel("Mean Squared Error")
+    plt.title("Base Problem Error over Time")
+    plt.xlabel("Generation")
+    plt.xticks(xticks, xtick_labels)
+    plt.savefig("base_problem/error_plot.png")
+    plt.clf()
 
 
 def degree_distrib(dirr):
@@ -317,6 +352,9 @@ def degree_distrib_change(dirr):
 
 def features_over_time(dirr, net_info, titles, mins, maxs, use_lims):
     img_dirr = dirr + "/images_by_time/"
+    logscaled_img_dirr = dirr + "/images_by_time_logScaled/"
+
+    # regular images
     for i in range(len(titles)):
         num_outputs = len(net_info)
         ydata = []
@@ -339,35 +377,34 @@ def features_over_time(dirr, net_info, titles, mins, maxs, use_lims):
         plt.savefig(img_dirr + str(titles[i]) + ".png")
         plt.clf()
 
-        if (titles[i] == ' Fitness'): #redo, this time log-scaled
-            num_outputs = len(net_info)
-            ydata = []
-            xdata = []
-            for j in range(num_outputs):
-                ydata.append(net_info[j, i])
-                xdata.append(net_info[j, 0])
+        # logScaled images, may not always make sense
+        num_outputs = len(net_info)
+        ydata = []
+        xdata = []
+        for j in range(num_outputs):
+            ydata.append(net_info[j, i])
+            xdata.append(net_info[j, 0])
 
-            ydata2 = []
-            for y in ydata:
-                if (y==0): ydata2.append(0)
-                elif(y<0): ydata2.append(-100)
-                else: ydata2.append(Decimal(math.log(Decimal(y),10)))
-            ydata = ydata2
-            titles[i] += ' Log-Scaled'
+        ydata2 = []
+        for y in ydata:
+            if (y==0): ydata2.append(0)
+            elif(y<0): ydata2.append(-100)
+            else: ydata2.append(Decimal(math.log(Decimal(y),10)))
+        ydata = ydata2
 
-            x_ticks = []
-            max_gen = xdata[-1]
-            for j in range(0, 11):
-                x_ticks.append(int((max_gen / 10) * j))
-            plt.plot(xdata, ydata)
+        x_ticks = []
+        max_gen = xdata[-1]
+        for j in range(0, 11):
+            x_ticks.append(int((max_gen / 10) * j))
+        plt.plot(xdata, ydata)
 
-            plt.ylabel(titles[i])
-            plt.title(titles[i])
-            if (use_lims == True): plt.ylim(mins[i], maxs[i])
-            plt.xlabel("Generation")
-            plt.xticks(x_ticks, x_ticks)
-            plt.savefig(img_dirr + str(titles[i]) + ".png")
-            plt.clf()
+        plt.ylabel(titles[i])
+        plt.title(titles[i])
+        if (use_lims == True): plt.ylim(mins[i], maxs[i])
+        plt.xlabel("Generation")
+        plt.xticks(x_ticks, x_ticks)
+        plt.savefig(logscaled_img_dirr + str(titles[i]) + ".png")
+        plt.clf()
 
     return
 

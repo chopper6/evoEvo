@@ -1,6 +1,6 @@
-import instances, node_fitness, fitness, util, reservoir
+import instances, node_fitness, fitness, util, reservoir, output
 
-def pressurize(configs, net, advice):
+def pressurize(configs, net, gen):
     # configs:
     sampling_rounds_multiplier = float(configs['sampling_rounds_multiplier']) #FRACTION of curr number of EDGES
     if (util.is_it_none(configs['sampling_rounds_max']) == None): max_sampling_rounds = None
@@ -14,15 +14,16 @@ def pressurize(configs, net, advice):
 
     if directed:
 
-        err = 0
+        total_err = 0
         fitness.reset_nodes(net, configs)
         for i in range(num_samples_relative):
             # note that node states are not reset
             err = reservoir.step(net, configs)
-            print("pressurize(): at iteration " + str(i) + " MSE = " + str(err))
+            total_err += err
             fitness.calc_node_fitness(net, configs)
+            output.write_base_err(configs, gen, i, err)
 
-        net.graph['error'] = err / num_samples_relative
+        net.graph['error'] = total_err / num_samples_relative
         fitness.node_normz(net, num_samples_relative, configs)
         fitness_score = fitness.node_product(net, scale_node_fitness)
 

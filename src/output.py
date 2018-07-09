@@ -50,16 +50,27 @@ def final_master_info(population, gen, configs):
         bias.pickle_bias(population[0], output_dir+"/bias", configs['bias_on'])
 
 
+def write_base_err(configs, gen, iter, err):
+    output_dir = configs['output_directory']
+
+    with open(output_dir+"/base_problem/error.csv",'w') as csv_out:
+        csv_out.write([gen, iter, err])
+
+
 
 def init_csv(out_dir, configs):
  
     net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Mean Fitness, Variance in Fitness, Fitness_Div_#Edges, Fitness_Div_#Nodes, Error of Base Problem\n"
     deg_distrib_title = "Generation, Net Size, In Degrees, In Degree Frequencies, Out Degrees, Out Degree Frequencies, Degs, Deg Freqs\n"
+    err_file_title = "Generation, Iteration, Error (MSE)"
+
 
     with open(out_dir+"/net_data.csv",'w') as csv_out:
         csv_out.write(net_data_title)
     with open(out_dir+"/degree_distrib.csv",'w') as csv_out:
-        csv_out.write(deg_distrib_title) #just blanking the file
+        csv_out.write(deg_distrib_title)
+    with open(out_dir+"/base_problem/error.csv",'w') as csv_out:
+        csv_out.write(err_file_title)
 
     out_configs = out_dir + "/configs_used.csv"
 
@@ -76,7 +87,7 @@ def popn_data(population, output_dir, gen):
         with open(output_csv, 'a') as output_file:
             output = csv.writer(output_file)
 
-            all_fitness = np.array([population[p].graph['fitness'] for p in range(len(population))])
+            all_fitness = np.array([population[p].graph['fitness']/len(population[p].nodes()) for p in range(len(population))])
             mean_fitness = np.mean(all_fitness)
             var_fitness = np.var(all_fitness)
 

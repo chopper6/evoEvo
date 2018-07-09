@@ -1,5 +1,4 @@
-import sys, os, time, math
-import util
+import os, time
 
 #--------------------------------------------------------------------------------------------------
 def load_sim_configs (param_file, rank):
@@ -39,24 +38,3 @@ def load_sim_configs (param_file, rank):
     return configs
 
 
-#--------------------------------------------------------------------------------------------------
-def build_advice(net, configs):
-    if (configs['advice_creation'] == 'once'):
-        #assumes no growth
-        advice_upon = configs['advice_upon']
-        biased = util.boool(configs['biased'])
-        bias_on = str(configs['bias_on'])
-        pressure = math.ceil((float(configs['PT_pairs_dict'][1][0]) / 100.0))
-        samples, sample_size = None, None
-
-        if (advice_upon == 'nodes'):
-            samples = net.nodes()
-            sample_size = int(pressure * len(net.nodes()))
-        elif (advice_upon == 'edges'):
-            samples = [[str(node_i), str(node_j)] for node_i in net.nodes() for node_j in net.nodes()]  # all possible edges
-            #samples = net.edges()
-            sample_size = int(pressure * len(net.edges())) #sample size based on all existing edges
-        advice = util.advice (net, util.sample_p_elements(samples,sample_size), biased, advice_upon, bias_on)
-    else: advice = None #will generate during reduction each time instead
-
-    return advice

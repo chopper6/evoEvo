@@ -91,6 +91,7 @@ def init_run(configs):
         population = init_nets.init_population(pop_size, configs)
 
         #init fitness eval
+        gen = -1 #for plotting purposes
         if varied_init_population:
             for p in population:
                 pressurize.pressurize(configs, p, gen)

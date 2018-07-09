@@ -193,7 +193,7 @@ def base_problem_error(dirr):
         line = line.replace('[', '').replace(']', '').replace("\n", '')
         line = line.split(',')
         err.append(float(line[2]))
-        gen = int(line[0])
+        gen = int(line[0])+1 #offset
         if gen != curr_gen:
             xticks.append(i)
             xtick_labels.append(gen)

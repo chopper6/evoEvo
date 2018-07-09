@@ -28,7 +28,11 @@ def activation(net, node, configs):
         #use previous state, since state is reserved for the new iteration
         if net.node[edge[0]]['prev_state'] != None:
             edge_val = net.node[edge[0]]['prev_state'] * net[edge[0]][edge[1]]['weight']
-            assert(edge_val >= -1 and edge_val <= 1)     # assumes weights in [-1,1]
+
+            # ensure edge bounds, poss change later
+            net[edge[0]][edge[1]]['weight'] = min(net[edge[0]][edge[1]]['weight'], 1)
+            net[edge[0]][edge[1]]['weight'] = max(net[edge[0]][edge[1]]['weight'], -1) 
+            #assert(edge_val >= -1 and edge_val <= 1)     # assumes weights in [-1,1]
             sum += edge_val
             num_active += 1
         sum += net.node[node]['neuron_bias']
@@ -140,7 +144,7 @@ def stochastic_backprop(net, configs, ideal_output):
             err = math.pow(ideal_output[i]-output,2)
             print("\nOutput Node = " + str(output) + ", resulting in err = " + str(err))
             MSE += err
-            #print('\nbackprop(): output of node = ' + str(output) + ", with err " + str(err))
+            print('\nbackprop(): output of node = ' + str(output) + ", with err " + str(err))
 
             # assumes sigmoid
             delta = (ideal_output[i]-output)*output*(1-output)
@@ -155,7 +159,7 @@ def stochastic_backprop(net, configs, ideal_output):
             # calc for bias
             partial_err = delta * net.node[output_node]['neuron_bias']
             print("old bias = " + str(net.node[output_node]['neuron_bias']) + ", its err contrib = " + str(partial_err))
-            net.node[output_node]['neuron_bias'] -= partial_err*learning_rate
+            net.node[output_node]['neuron_bias'] += partial_err*learning_rate
             print("new bias = " + str(net.node[output_node]['neuron_bias']))
 
         else: num_active_outputs -= 1

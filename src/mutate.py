@@ -188,7 +188,7 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
             input_output_check = True
             if net.node[node2]['layer'] == 'input' or net.node[node1]['layer'] == 'output': input_output_check = False
 
-            print("mutate.191(): layer of node1 = " + str(net.node[node1]['layer']) + ", layer of node2 = " +  str(net.node[node2]['layer']) + ", so input_output_check = " + str(input_output_check))
+            #print("mutate.191(): layer of node1 = " + str(net.node[node1]['layer']) + ", layer of node2 = " +  str(net.node[node2]['layer']) + ", so input_output_check = " + str(input_output_check))
 
             if not net.has_edge(node1, node2) and input_output_check:
                 net.add_edge(node1, node2, sign=sign)

@@ -132,12 +132,13 @@ def stochastic_backprop(net, configs, ideal_output):
     num_active_outputs = len(sorted_output_nodes)
     for output_node in sorted_output_nodes:
 
-        if net.node[output_node]['state'] != None: #TODO: apparently output_node['state'] is always None now...
+        if net.node[output_node]['state'] != None:
             # input hasn't reached all outputs yet
             #return None --> now correct what is available
 
             output = net.node[output_node]['state']
             err = math.pow(ideal_output[i]-output,2)
+            print("\nOutput Node = " + str(output) + ", resulting in err = " + str(err))
             MSE += err
             #print('\nbackprop(): output of node = ' + str(output) + ", with err " + str(err))
 
@@ -147,19 +148,23 @@ def stochastic_backprop(net, configs, ideal_output):
                 if net.node[in_edge[0]]['state']:
                     weight_contribution = net.node[in_edge[0]]['state']*net[in_edge[0]][in_edge[1]]['weight']
                     partial_err = delta * weight_contribution
-                    #print("delta = " + str(delta) + ", weight_contrib = " + str(weight_contribution) + ", curr_weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
+                    print("delta = " + str(delta) + ", weight_contrib = " + str(weight_contribution) + ", curr_weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
                     net[in_edge[0]][in_edge[1]]['weight'] -= partial_err*learning_rate
-                    #print("now weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
+                    print("now weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
 
             # calc for bias
             partial_err = delta * net.node[output_node]['neuron_bias']
+            print("old bias = " + str(net.node[output_node]['neuron_bias']) + ", its err contrib = " + str(partial_err))
             net.node[output_node]['neuron_bias'] -= partial_err*learning_rate
+            print("new bias = " + str(net.node[output_node]['neuron_bias']))
 
         else: num_active_outputs -= 1
 
     if num_active_outputs == 0: return None
 
-    if (num_active_outputs >0): MSE /= 2*num_active_outputs
+    if (num_active_outputs >0):
+        MSE /= 2*num_active_outputs
+        print("\nReturning MSE of " + str(MSE) + " with " + str(num_active_outputs) + " active outputs.\n")
     return MSE
 
 

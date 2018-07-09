@@ -19,6 +19,7 @@ def pressurize(configs, net, advice):
         for i in range(num_samples_relative):
             # note that node states are not reset
             err = reservoir.step(net, configs)
+            print("pressurize(): at iteration " + str(i) + " MSE = " + str(err))
             fitness.calc_node_fitness(net, configs)
 
         net.graph['error'] = err / num_samples_relative

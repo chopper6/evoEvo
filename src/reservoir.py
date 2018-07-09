@@ -50,7 +50,7 @@ def apply_input(net, input):
     assert(len(sorted_input_nodes) == len(input))
 
     for i in range(len(sorted_input_nodes)):
-        sorted_input_nodes[i]['state'] = input[i]
+        net.node[sorted_input_nodes[i]]['state'] = input[i]
 
 
 def lvl_1_reservoir_learning(net, configs):
@@ -128,9 +128,8 @@ def stochastic_backprop(net, configs, ideal_output):
     i = 0
     num_active_outputs = len(sorted_output_nodes)
     for output_node in sorted_output_nodes:
-        assert (not net.out_edges(output_node))
 
-        if output_node['state'] != None: #TODO: apparently output_node['state'] is always None now...
+        if net.node[output_node]['state'] != None: #TODO: apparently output_node['state'] is always None now...
             # input hasn't reached all outputs yet
             #return None --> now correct what is available
 

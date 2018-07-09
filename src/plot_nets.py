@@ -198,12 +198,13 @@ def base_problem_error(dirr):
     last_gen = int(last_line[0])
 
     for line in all_lines[1:]:
-        t.append(i)
         line = line.replace('[', '').replace(']', '').replace("\n", '')
         line = line.split(',')
-        err.append(line[2])
-        if not (err==None or err=="None"):
-            err = float(err)
+        an_err = line[2]
+        if an_err != None and an_err != "None" and an_err:
+            print(an_err)
+            err.append(float(an_err))
+            t.append(i)
             gen = int(line[0])+1 #offset
             if gen != curr_gen:
                 if int(((gen+2)/float(last_gen+2))*100) % 10 == 0:
@@ -230,15 +231,15 @@ def base_problem_error(dirr):
         # awk, but note that first pressurize is gen "-1"
 
         for line in all_lines[1:]:
-            t.append(i)
             line = line.replace('[', '').replace(']', '').replace("\n", '')
             line = line.split(',')
-            err.append(line[2])
+            an_err = line[2]
 
             gen = int(line[0]) + 1  # offset
             if gen == 1:
-                if not (err==None or err=="None"):
-                    err = float(err)
+                if an_err is not None and an_err is not "None":
+                    err.append(float(an_err))
+                    t.append(i)
                     i += 1
             elif gen == 2: break
 
@@ -261,15 +262,15 @@ def base_problem_error(dirr):
         # awk, but note that first pressurize is gen "-1"
 
         for line in all_lines[1:]:
-            t.append(i)
             line = line.replace('[', '').replace(']', '').replace("\n", '')
             line = line.split(',')
-            err.append(line[2])
+            an_err = line[2]
 
             gen = int(line[0]) + 1  # offset
             if gen == last_gen:
-                if not (err==None or err=="None"):
-                    err = float(err)
+                if an_err is not None and an_err is not "None":
+                    err.append(float(an_err))
+                    t.append(i)
                     i += 1
 
         xticks = [int(int(i))*j/10 for j in range(10)]

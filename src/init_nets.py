@@ -104,6 +104,8 @@ def gen_rd_nets(pop_size, configs):
 
 
 def double_check(population, configs):
+    #TODO: eventually cut this for time sake
+
     start_size = int(configs['starting_size'])
     edge_node_ratio = float(configs['edge_to_node_ratio'])
     num_edges = int(start_size*edge_node_ratio)

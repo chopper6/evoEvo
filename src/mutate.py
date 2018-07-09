@@ -148,6 +148,7 @@ def add_edges(net, num_add, configs, biases=None):
 def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=None):
 
     directed = util.boool(configs['directed'])
+    self_loops = util.boool(configs['self_loops'])
     if directed: random_direction = True
     else: random_direction = False
     bias_on = configs['bias_on']
@@ -167,10 +168,14 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
             node1 = node[0]
 
         if not node2_set and node2_set != 0:
-            node2 = node1
-            while (node2 == node1):
+            if self_loops:
                 node2 = rd.sample(net.nodes(), 1)
                 node2 = node2[0]
+            else: #make sure that edge is not to self
+                node2 = node1
+                while (node2 == node1):
+                    node2 = rd.sample(net.nodes(), 1)
+                    node2 = node2[0]
 
         if random_direction: #chance to swap nodes 1 & 2
             if (rd.random()<.5):

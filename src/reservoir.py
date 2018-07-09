@@ -1,6 +1,4 @@
 import math, random as rd
-from numpy.linalg import lstsq as np_leastsq
-import numpy as np
 
 
 def step(net, configs):
@@ -52,7 +50,7 @@ def apply_input(net, input):
     assert(len(sorted_input_nodes) == len(input))
 
     for i in range(len(sorted_input_nodes)):
-        sorted_input_nodes[i] = input[i]
+        sorted_input_nodes[i]['state'] = input[i]
 
 
 def lvl_1_reservoir_learning(net, configs):
@@ -120,11 +118,11 @@ def problem_instance(net, configs):
     return input, output
 
 
-def stochastic_backprop(net, configs, output):
+def stochastic_backprop(net, configs, ideal_output):
 
     learning_rate = float(configs['learning_rate'])
     assert(configs['activation_function'] == 'sigmoid')
-    MSE, targets = 0, None #targets just bc of annoying ass warnings
+    MSE  = 0
 
     sorted_output_nodes = sorted(net.graph['output_nodes']) #fn doesn't matter as long as its consistent
     i = 0
@@ -132,18 +130,18 @@ def stochastic_backprop(net, configs, output):
     for output_node in sorted_output_nodes:
         assert (not net.out_edges(output_node))
 
-        if net.node[output_node]['state'] != None:
+        if output_node['state'] != None: #TODO: apparently output_node['state'] is always None now...
             # input hasn't reached all outputs yet
             #return None --> now correct what is available
 
             output = net.node[output_node]['state']
-            err = math.pow(targets[i]-output,2)
+            err = math.pow(ideal_output[i]-output,2)
             MSE += err
             #print('\nbackprop(): output of node = ' + str(output) + ", with err " + str(err))
 
             # assumes sigmoid
             # TODO: add bias
-            delta = (targets[i]-output)*output*(1-output)
+            delta = (ideal_output[i]-output)*output*(1-output)
             for in_edge in net.in_edges(output_node):
                 if net.node[in_edge[0]]['state']:
                     weight_contribution = net.node[in_edge[0]]['state']*net[in_edge[0]][in_edge[1]]['weight']

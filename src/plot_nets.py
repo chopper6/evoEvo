@@ -202,7 +202,6 @@ def base_problem_error(dirr):
         line = line.split(',')
         an_err = line[2]
         if an_err != None and an_err != "None" and an_err:
-            print(an_err)
             err.append(float(an_err))
             t.append(i)
             gen = int(line[0])+1 #offset
@@ -237,7 +236,7 @@ def base_problem_error(dirr):
 
             gen = int(line[0]) + 1  # offset
             if gen == 1:
-                if an_err is not None and an_err is not "None":
+                if an_err != None and an_err != "None" and an_err:
                     err.append(float(an_err))
                     t.append(i)
                     i += 1
@@ -268,7 +267,8 @@ def base_problem_error(dirr):
 
             gen = int(line[0]) + 1  # offset
             if gen == last_gen:
-                if an_err is not None and an_err is not "None":
+                if an_err != None and an_err != "None" and an_err:
+                #poss: if an_err is not None and an_err is not "None":
                     err.append(float(an_err))
                     t.append(i)
                     i += 1

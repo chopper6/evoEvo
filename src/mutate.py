@@ -164,11 +164,11 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
     i=0
     while (pre_size == post_size):  # ensure that net adds
 
-        if not node1_set and node1_set != 0:
+        if not node1_set: #previous had: and node1_set != 0, not sure why, same below for node2...
             node = rd.sample(net.nodes(), 1)
             node1 = node[0]
 
-        if not node2_set and node2_set != 0:
+        if not node2_set:
             if self_loops:
                 node2 = rd.sample(net.nodes(), 1)
                 node2 = node2[0]
@@ -187,6 +187,8 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
         if directed:
             input_output_check = True
             if net.node[node2]['layer'] == 'input' or net.node[node1]['layer'] == 'output': input_output_check = False
+
+            print("mutate.191(): layer of node1 = " + str(net.node[node1]['layer']) + ", layer of node2 = " +  str(net.node[node2]['layer']) + ", so input_output_check = " + str(input_output_check))
 
             if not net.has_edge(node1, node2) and input_output_check:
                 net.add_edge(node1, node2, sign=sign)

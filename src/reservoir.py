@@ -146,10 +146,10 @@ def stochastic_backprop(net, configs, ideal_output):
             delta = (ideal_output[i]-output)*output*(1-output)
             for in_edge in net.in_edges(output_node):
                 if net.node[in_edge[0]]['state']:
-                    weight_contribution = net.node[in_edge[0]]['state']*net[in_edge[0]][in_edge[1]]['weight']
+                    weight_contribution = net.node[in_edge[0]]['state'] #*net[in_edge[0]][in_edge[1]]['weight']
                     partial_err = delta * weight_contribution
                     print("delta = " + str(delta) + ", weight_contrib = " + str(weight_contribution) + ", curr_weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
-                    net[in_edge[0]][in_edge[1]]['weight'] -= partial_err*learning_rate
+                    net[in_edge[0]][in_edge[1]]['weight'] += partial_err*learning_rate
                     print("now weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
 
             # calc for bias

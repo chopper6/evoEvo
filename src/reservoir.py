@@ -1,4 +1,4 @@
-import math
+import math, random as rd
 from numpy.linalg import lstsq as np_leastsq
 import numpy as np
 
@@ -6,9 +6,10 @@ import numpy as np
 def step(net, configs):
     # TODO: explicitly debug this section
 
-    apply_input(net, configs)
+    input, output = problem_instance(net, configs)
+    apply_input(net, input)
     step_fwd(net, configs)
-    MSE = stochastic_backprop (net, configs)
+    MSE = stochastic_backprop (net, configs, output)
     lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases
 
     return MSE
@@ -45,16 +46,13 @@ def activation(net, node, configs):
 
     else: assert(False)
 
-def apply_input(net, configs):
+def apply_input(net, input):
 
-    base_problem = configs['base_problem']
+    sorted_input_nodes = sorted(net.graph['input_nodes'])
+    assert(len(sorted_input_nodes) == len(input))
 
-    if base_problem  == 'control':
-        for input_node in net.graph['input_nodes']:
-            net.node[input_node]['state'] = 1
-            assert(not net.in_edges(input_node))
-
-    else: assert(False)
+    for i in range(len(sorted_input_nodes)):
+        sorted_input_nodes[i] = input[i]
 
 
 def lvl_1_reservoir_learning(net, configs):
@@ -65,16 +63,68 @@ def lvl_1_reservoir_learning(net, configs):
     #learning = configs['lvl_1_learning']
     # can be greedy, naive_EA, or none
 
-def stochastic_backprop(net, configs):
+
+def problem_instance(net, configs):
 
     base_problem = configs['base_problem']
-    learning_rate = float(configs['learning_rate'])
+    input, output = [],[]
 
-    MSE, targets = 0, None #targets just bc of annoying ass warnings
+    if base_problem  == 'control':
+        for input_node in net.graph['input_nodes']:
+            input.append(1)
+            assert(not net.in_edges(input_node))
+        for i in range(len(net.graph['output_nodes'])):
+            output.append(1)
 
-    if base_problem == 'control':
-        targets = [1 for i in range(len(net.graph['output_nodes']))]
+    elif base_problem  == 'control00':
+        for input_node in net.graph['input_nodes']:
+            input.append(0)
+            assert(not net.in_edges(input_node))
+        for i in range(len(net.graph['output_nodes'])):
+            output.append(0)
+
+    elif base_problem  == 'control10':
+        for input_node in net.graph['input_nodes']:
+            input.append(1)
+            assert(not net.in_edges(input_node))
+        for i in range(len(net.graph['output_nodes'])):
+            output.append(0)
+
+    elif base_problem == 'control01':
+        for input_node in net.graph['input_nodes']:
+            input.append(0)
+            assert (not net.in_edges(input_node))
+        for i in range(len(net.graph['output_nodes'])):
+            output.append(1)
+
+
+    elif base_problem  == 'XOR':
+        assert(len(net.graph['input_nodes']) == 2)
+        assert(len(net.graph['output_nodes']) == 1)
+
+        input.append(rd.choice([0,1]))
+        input.append(rd.choice([0,1]))
+
+        if (input[0] == 1 and input[1] == 0):     output.append(1)
+        elif (input[0] == 0 and input[1] == 1):   output.append(1)
+        else:                                     output.append(0)
+
+    elif base_problem  == 'meanAF':
+        for i in range(len(net.graph['input_nodes'])):
+            input.append(rd.choice([0,1]))
+        for i in range(len(net.graph['output_nodes'])):
+            input.append(rd.choice([0,1]))
+
     else: assert(False)
+
+    return input, output
+
+
+def stochastic_backprop(net, configs, output):
+
+    learning_rate = float(configs['learning_rate'])
+    assert(configs['activation_function'] == 'sigmoid')
+    MSE, targets = 0, None #targets just bc of annoying ass warnings
 
     sorted_output_nodes = sorted(net.graph['output_nodes']) #fn doesn't matter as long as its consistent
     i = 0

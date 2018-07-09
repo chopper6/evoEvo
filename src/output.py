@@ -4,7 +4,7 @@ import util, pressurize, bias
 np.set_printoptions(formatter={'int_kind': lambda x:' {0:d}'.format(x)})
 
 
-def master_info(population, gen, size, pop_size, num_survive, advice, configs):
+def master_info(population, gen, size, pop_size, num_survive, configs):
     output_dir = configs['output_directory']
     num_data_output = int(configs['num_data_output'])
     num_net_output = int(configs['num_net_output'])
@@ -53,8 +53,8 @@ def final_master_info(population, gen, configs):
 def write_base_err(configs, gen, iter, err):
     output_dir = configs['output_directory']
 
-    with open(output_dir+"/base_problem/error.csv",'w') as csv_out:
-        csv_out.write([gen, iter, err])
+    with open(output_dir+"/base_problem/error.csv",'a') as csv_out:
+        csv_out.write(str(gen) + "," + str(iter) + "," + str(err))
 
 
 

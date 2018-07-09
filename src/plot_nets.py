@@ -45,11 +45,6 @@ def plot_undir(configs):
 
     dirs = ["/undirected_degree_distribution/", "/undirected_degree_distribution/loglog/", "/undirected_degree_distribution/loglog%/"] #"/undirected_degree_distribution/scatter/", "/undirected_degree_distribution/scatter%/"]
 
-    if configs['interval'] == 'continuous':
-        print("Generating variance distribution plots too.\n")
-        dirs.append("/variance_distribution/")
-        dirs.append("/info_distribution/")
-
     for dirr in dirs:
         if not os.path.exists(output_dir + dirr):
             os.makedirs(output_dir + dirr)
@@ -211,7 +206,7 @@ def base_problem_error(dirr):
     plt.title("Base Problem Error over Time")
     plt.xlabel("Generation")
     plt.xticks(xticks, xtick_labels)
-    plt.savefig("base_problem/error_plot.png")
+    plt.savefig(dirr + "/base_problem/error_plot.png")
     plt.clf()
 
 

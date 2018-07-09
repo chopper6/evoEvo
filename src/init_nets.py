@@ -56,8 +56,7 @@ def gen_rd_nets(pop_size, configs):
         if directed:
             population[rep] = nx.empty_graph(8, create_using=nx.DiGraph())
 
-            for n in population[rep].nodes():
-                population[rep].node[n]['layer'] = 'hidden'
+            init_directed_attributes(population, configs)
 
             # init hidden layer
             num_add = int(edge_node_ratio * 8)
@@ -76,8 +75,6 @@ def gen_rd_nets(pop_size, configs):
             # attempt to patch bias introduced into input and output wiring
             num_rewire = start_size * 10
             mutate.rewire(population[rep], num_rewire, configs)
-
-            init_directed_attributes(population, configs)
 
 
         else:
@@ -131,11 +128,11 @@ def init_directed_attributes(population, configs):
         p.graph['fitness'] = 0
         p.graph['error'] = 0
 
-        ''' THESE SHOULD ALREADY BE ADDED
+        # THESSE SHOULD JUST BE FOR THE INITIAL NODES OF THE EMPTY GRAPH
         for n in p.nodes():
             p.node[n]['state'] = None
             p.node[n]['neuron_bias'] = assign_edge_weight(configs)
-        '''
+            p.node[n]['layer'] = 'hidden'
 
 
 def custom_to_directed(population):

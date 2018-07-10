@@ -2,6 +2,7 @@ import os, pickle, time, shutil, sys
 from random import SystemRandom as sysRand
 from time import sleep
 import fitness, minion, output, plot_nets, init_nets, pressurize, util, init, bias
+import networkx as nx, mutate
 
 
 #MASTER EVOLUTION
@@ -92,6 +93,10 @@ def init_run(configs):
 
         #init fitness eval
         gen = 0 #for plotting purposes
+
+
+        print(nx.is_connected(population[0]))
+        mutate.ensure_single_cc(population[0], configs)
         if varied_init_population:
             for p in population:
                 pressurize.pressurize(configs, p, gen)

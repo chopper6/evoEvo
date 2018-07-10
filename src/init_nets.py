@@ -121,6 +121,12 @@ def double_check(population, configs):
             assert (len(p.edges()) == actual_num_edges)
             assert (len(p.nodes()) == actual_size)
 
+        for i in p.graph['input_nodes']:
+            assert(not p.in_edges(i))
+
+        for o in p.graph['output_nodes']:
+            assert(not p.out_edges(o)) #but will shortly rm this condition
+
 
 def init_directed_attributes(population, configs):
     for p in population:
@@ -153,6 +159,18 @@ def custom_to_directed(population):
 
 
 def assign_edge_weight(configs):
+    #called by mutate
+
+    distrib = configs['init_weight_distrib']
+
+    if distrib == 'uniformPositive': return rd.uniform(0,1)
+
+    elif distrib == 'uniform': return rd.uniform(-1,1)
+
+    else: assert(False)
+
+
+def assign_bias_weight(configs):
     #called by mutate
 
     distrib = configs['init_weight_distrib']

@@ -52,15 +52,27 @@ def final_master_info(population, gen, configs):
 
 def write_base_err(configs, gen, iter, err):
     output_dir = configs['output_directory']
+    num_net_output = int(configs['num_net_output'])
+    stop_condition = configs['stop_condition']
 
-    with open(output_dir+"/base_problem/error.csv",'a') as csv_out:
-        csv_out.write(str(gen) + "," + str(iter) + "," + str(err) + "\n")
+    if (stop_condition == 'size'):
+        end = int(configs['ending_size'])
+        #this sort of assumes simulation starts near size 0
+    elif (stop_condition == 'generation'):
+        end = int(configs['max_generations'])
+    else: assert(False)
+
+    if (num_net_output > 0):
+        if (gen % int(end / num_net_output) == 0):
+
+            with open(output_dir+"/base_problem/error.csv",'a') as csv_out:
+                csv_out.write(str(gen) + "," + str(iter) + "," + str(err) + "\n")
 
 
 
 def init_csv(out_dir, configs):
  
-    net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Mean Fitness, Variance in Fitness, Fitness_Div_#Edges, Fitness_Div_#Nodes, Error of Base Problem\n"
+    net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Mean Fitness, Variance in Fitness, Fitness_Div_#Edges, Fitness_Div_#Nodes, Error of Base Problem, Diameter\n"
     deg_distrib_title = "Generation, Net Size, In Degrees, In Degree Frequencies, Out Degrees, Out Degree Frequencies, Degs, Deg Freqs\n"
     err_file_title = "Generation, Iteration, Error (MSE)\n"
 
@@ -93,7 +105,7 @@ def popn_data(population, output_dir, gen):
 
             net = population[0] #most fit net
             nets_info = [gen, len(net.nodes()), net.graph['fitness'], sum(net.degree().values())/len(net.nodes()),len(net.edges())/len(net.nodes()),
-                         mean_fitness, var_fitness, net.graph['fitness']/float(len(net.edges())), net.graph['fitness']/float(len(net.nodes())), net.graph['error']]
+                         mean_fitness, var_fitness, net.graph['fitness']/float(len(net.edges())), net.graph['fitness']/float(len(net.nodes())), net.graph['error'], nx.diameter(net)]
 
             output.writerow(nets_info)
 

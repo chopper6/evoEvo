@@ -1,4 +1,5 @@
 import instances, node_fitness, fitness, util, reservoir, output
+import networkx as nx
 
 def pressurize(configs, net, gen):
     # configs:
@@ -7,6 +8,7 @@ def pressurize(configs, net, gen):
     else: max_sampling_rounds = int(configs['sampling_rounds_max'])
     scale_node_fitness = util.boool(configs['scale_node_fitness'])
     directed = util.boool(configs['directed'])
+    feedfwd = util.boool(configs['feedforward'])
 
     num_samples_relative = max(1, int(len(net.edges())*sampling_rounds_multiplier) )
     if (max_sampling_rounds): num_samples_relative = min(num_samples_relative, max_sampling_rounds)
@@ -18,7 +20,10 @@ def pressurize(configs, net, gen):
         fitness.reset_nodes(net, configs)
         for i in range(num_samples_relative):
             # note that node states are not reset
-            err = reservoir.step(net, configs)
+            if not feedfwd: err = reservoir.step(net, configs)
+            else:
+                diameter = nx.diameter(net)
+                err = reservoir.feedfwd_step(net, configs, diameter)
             if (err != None):
                 total_err += err
                 num_outputs += 1

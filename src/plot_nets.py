@@ -29,7 +29,7 @@ def single_run_plots (configs):
     degree_distrib(dirr)
 
     print("Generating base error plots.")
-    base_problem_error(dirr)
+    base_problem_error(dirr, configs)
 
     print("Generating undirected degree distribution plots.")
     plot_undir(configs) #last two args for Biased and bias on, which haven't really been implemented
@@ -180,110 +180,40 @@ def undir_deg_distrib(net_file, destin_path, title, biased, bias_on):
 
 
 
-def base_problem_error(dirr):
+def base_problem_error(dirr, configs):
+
     err_file_name = dirr + "/base_problem/error.csv"
 
     all_lines = [Line.strip() for Line in (open(err_file_name, 'r')).readlines()]
-    titles = all_lines[0]
+    #titles = all_lines[0]
 
-    # plot all errors
-    t, err, xticks, xtick_labels = [], [], [], []
-
-    i, curr_gen = 0, -2
-    # awk, but note that first pressurize is gen "-1"
-
-    last_line = all_lines[-1]
-    last_line = last_line.replace('[', '').replace(']', '').replace("\n", '')
-    last_line = last_line.split(',')
-    last_gen = int(last_line[0])
+    i, curr_gen, t, err = 0, 0, [], []
 
     for line in all_lines[1:]:
+
         line = line.replace('[', '').replace(']', '').replace("\n", '')
         line = line.split(',')
         an_err = line[2]
         if an_err != None and an_err != "None" and an_err:
             err.append(float(an_err))
             t.append(i)
-            gen = int(line[0])+1 #offset
+            gen = int(line[0])
             if gen != curr_gen:
-                if int(((gen+2)/float(last_gen+2))*100) % 10 == 0:
-                    xticks.append(i)
-                    xtick_labels.append(gen)
-                curr_gen = gen
+                # PLOT AND RESET
+                plt.plot(t, err)
+
+                plt.ylabel("Mean Squared Error")
+                plt.title("Base Problem Error over Time")
+                plt.xlabel("Iteration")
+                xticks = [int(int(i)) * j / 10 for j in range(10)]
+                plt.xticks(xticks, xticks)
+                plt.savefig(dirr + "/base_problem/Error_Gen" + str(gen) + ".png")
+                plt.clf()
+
+                # reset for next plot
+                curr_gen, i, t, err = gen, 0, [], []
+
             i += 1
-
-    plt.plot(t, err)
-
-    plt.ylabel("Mean Squared Error")
-    plt.title("Base Problem Error over Time")
-    plt.xlabel("Generation")
-    plt.xticks(xticks, xtick_labels)
-    plt.savefig(dirr + "/base_problem/error_plot.png")
-    plt.clf()
-
-
-    # plot 1st gen errors
-    if len(all_lines) > 2:
-        t, err = [], []
-
-        i = 0
-        # awk, but note that first pressurize is gen "-1"
-
-        for line in all_lines[1:]:
-            line = line.replace('[', '').replace(']', '').replace("\n", '')
-            line = line.split(',')
-            an_err = line[2]
-
-            gen = int(line[0]) + 1  # offset
-            if gen == 1:
-                if an_err != None and an_err != "None" and an_err:
-                    err.append(float(an_err))
-                    t.append(i)
-                    i += 1
-            elif gen == 2: break
-
-        xticks = [int(int(i))*j/10 for j in range(10)]
-
-        plt.plot(t, err)
-
-        plt.ylabel("Mean Squared Error")
-        plt.title("Base Problem Error over Time")
-        plt.xlabel("Generation")
-        plt.xticks(xticks, xticks)
-        plt.savefig(dirr + "/base_problem/Gen1_error_plot.png")
-        plt.clf()
-
-    # plot last gen errors
-    if len(all_lines) > 2:
-        t, err = [], []
-
-        i = 0
-        # awk, but note that first pressurize is gen "-1"
-
-        for line in all_lines[1:]:
-            line = line.replace('[', '').replace(']', '').replace("\n", '')
-            line = line.split(',')
-            an_err = line[2]
-
-            gen = int(line[0]) + 1  # offset
-            if gen == last_gen:
-                if an_err != None and an_err != "None" and an_err:
-                #poss: if an_err is not None and an_err is not "None":
-                    err.append(float(an_err))
-                    t.append(i)
-                    i += 1
-
-        xticks = [int(int(i))*j/10 for j in range(10)]
-
-        plt.plot(t, err)
-
-        plt.ylabel("Mean Squared Error")
-        plt.title("Base Problem Error over Time")
-        plt.xlabel("Generation")
-        plt.xticks(xticks, xticks)
-        plt.savefig(dirr + "/base_problem/Gen" + str(last_gen) + "_error_plot.png")
-        plt.clf()
-
 
 
 

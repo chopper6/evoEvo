@@ -12,6 +12,19 @@ def step(net, configs):
 
     return MSE
 
+def feedfwd_step(net, configs, diameter):
+    # possibly make this the more general model?
+
+    input, output = problem_instance(net, configs)
+    apply_input(net, input)
+    for i in range(diameter):
+        step_fwd(net, configs)
+    MSE = stochastic_backprop (net, configs, output)
+    lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases
+
+    return MSE
+
+
 
 def activation(net, node, configs):
     # curr linear activation with static bias (which is ~ thresh)

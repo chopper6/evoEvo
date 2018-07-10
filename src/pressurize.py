@@ -22,7 +22,7 @@ def pressurize(configs, net, gen):
             # note that node states are not reset
             if not feedfwd: err = reservoir.step(net, configs)
             else:
-                diameter = nx.diameter(net)
+                diameter = nx.diameter(net.to_undirected())
                 err = reservoir.feedfwd_step(net, configs, diameter)
             if (err != None):
                 total_err += err

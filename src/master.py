@@ -93,10 +93,6 @@ def init_run(configs):
 
         #init fitness eval
         gen = 0 #for plotting purposes
-
-
-        print(nx.is_connected(population[0]))
-        mutate.ensure_single_cc(population[0], configs)
         if varied_init_population:
             for p in population:
                 pressurize.pressurize(configs, p, gen)

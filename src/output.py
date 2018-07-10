@@ -104,8 +104,9 @@ def popn_data(population, output_dir, gen):
             var_fitness = np.var(all_fitness)
 
             net = population[0] #most fit net
+            diameter = nx.diameter(net.to_undirected())
             nets_info = [gen, len(net.nodes()), net.graph['fitness'], sum(net.degree().values())/len(net.nodes()),len(net.edges())/len(net.nodes()),
-                         mean_fitness, var_fitness, net.graph['fitness']/float(len(net.edges())), net.graph['fitness']/float(len(net.nodes())), net.graph['error'], nx.diameter(net)]
+                         mean_fitness, var_fitness, net.graph['fitness']/float(len(net.edges())), net.graph['fitness']/float(len(net.nodes())), net.graph['error'], diameter]
 
             output.writerow(nets_info)
 

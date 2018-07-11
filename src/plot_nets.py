@@ -206,7 +206,7 @@ def base_problem_error(dirr, configs):
                 plt.xlabel("Iteration")
                 xticks = [int(int(i)) * j / 10 for j in range(10)]
                 plt.xticks(xticks, xticks)
-                plt.savefig(dirr + "/base_problem/Error_Gen" + str(gen) + ".png")
+                plt.savefig(dirr + "/base_problem/Error_Gen" + str(curr_gen) + ".png")
                 plt.clf()
 
                 # reset for next plot
@@ -218,6 +218,16 @@ def base_problem_error(dirr, configs):
 
             i += 1
 
+    # plot last recorded gen
+    plt.plot(t, err)
+
+    plt.ylabel("Mean Squared Error")
+    plt.title("Base Problem Error over Time")
+    plt.xlabel("Iteration")
+    xticks = [int(int(i)) * j / 10 for j in range(10)]
+    plt.xticks(xticks, xticks)
+    plt.savefig(dirr + "/base_problem/Error_Gen" + str(curr_gen) + ".png")
+    plt.clf()
 
 
 def degree_distrib(dirr):

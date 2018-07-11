@@ -22,12 +22,14 @@ def evolve_master(configs):
         t_start = time.time()
         pop_size, num_survive = curr_gen_params(size, num_survive, configs)
         output.master_info(population, gen, size, pop_size, num_survive, configs)
+
+
+        gen += 1 #since this is the 2nd round of pressurize
         write_mpi_info(output_dir, gen)
 
         if biased: biases = bias.gen_biases(configs) #all nets must have same bias to have comparable fitness
         else: biases = None
 
-        gen += 1 #since this is the 2nd round of pressurize
         distrib_workers(population, gen, worker_pop_size, num_survive, biases, configs)
 
         report_timing(t_start, gen, output_dir)

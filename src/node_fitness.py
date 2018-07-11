@@ -12,6 +12,9 @@ def calc_discrete_directed (net, node, fitness_metric):
     elif (fitness_metric == 'info'):
         return 1-shannon_entropy(num0,num1)
 
+    elif (fitness_metric == 'None' or fitness_metric == 'none'):
+        return 1
+
     else: assert(False) # unknown fitness metric
 
 
@@ -20,6 +23,9 @@ def calc_discrete_undirected (fitness_metric, up, down):
 
     if (fitness_metric == 'info'):
         return 1-shannon_entropy(up,down)
+
+    elif (fitness_metric == 'None' or fitness_metric == 'none'):
+        return 1
 
     else: assert (False)  # unknown fitness metric
 
@@ -60,6 +66,9 @@ def calc_continuous (states, fitness_metric, distrib_lng=1):
         else: entropish = 1/math.pow(math.e, 1/var)
         fitness = 1 - entropish
         assert(fitness >= 0 and fitness <= 1)
+
+    elif (fitness_metric == 'None' or fitness_metric == 'none'):
+        return 1
 
     else: assert(False) #unknown fitness metric
 

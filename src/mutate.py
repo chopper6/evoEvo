@@ -268,8 +268,8 @@ def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_
 
     if single_cc:
 
-        if node1 or node1==0: assert(node2 or node2==0)
-        elif not node1: assert not (node2)
+        #if node1 or node1==0: assert(node2 or node2==0)
+        if not node1: assert not (node2)
 
         net_undir = net.to_undirected()
         num_cc = nx.number_connected_components(net_undir)

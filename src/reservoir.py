@@ -17,10 +17,12 @@ def feedfwd_step(net, configs, diameter):
 
     input, output = problem_instance(net, configs)
     apply_input(net, input)
-    for i in range(diameter):
+    MSE = 0
+    for i in range(diameter): #all nodes should have had a chance to effect one another (except for directed aspect...)
         step_fwd(net, configs)
-    MSE = stochastic_backprop (net, configs, output)
-    lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases
+        MSE += stochastic_backprop (net, configs, output)
+    lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases -/> isn't backprop 1 learning?
+    MSE /= diameter
 
     return MSE
 
@@ -111,6 +113,18 @@ def problem_instance(net, configs):
         for i in range(len(net.graph['output_nodes'])):
             output.append(1)
 
+    # logic functions, should be used with sigmoid activation, since results in output in [0,1]
+    elif base_problem == 'AND':
+        assert(len(net.graph['input_nodes']) == 2)
+        assert(len(net.graph['output_nodes']) == 1)
+        if [input[0] == input[1]]:  return 1
+        else:                       return 0
+
+    elif base_problem == 'OR':
+        assert(len(net.graph['input_nodes']) == 2)
+        assert(len(net.graph['output_nodes']) == 1)
+        if [input[0] == 1 or input[1] == 1]:    return 1
+        else:                                   return 0
 
     elif base_problem  == 'XOR':
         assert(len(net.graph['input_nodes']) == 2)
@@ -135,6 +149,7 @@ def problem_instance(net, configs):
 
 
 def stochastic_backprop(net, configs, ideal_output):
+    # returns a float for error
 
     learning_rate = float(configs['learning_rate'])
     assert(configs['activation_function'] == 'sigmoid')

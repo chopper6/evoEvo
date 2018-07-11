@@ -199,7 +199,19 @@ def base_problem_error(dirr, configs):
             if gen != curr_gen:
                 # PLOT AND RESET
                 # plot before appending current line, since that is for diff gen
-                plt.plot(t, err)
+
+                # trimming number of data points
+                if len(err) > 20:
+                    x, y = [], []
+                    for j in range(len(err)):
+                        if int(j % len(err)/20) == 0:
+                            x.append(t[j])
+                            y.append(err[j])
+                else:
+                    x = t
+                    y = err
+
+                plt.plot(x, y)
 
                 plt.ylabel("Mean Squared Error")
                 plt.title("Base Problem Error over Time")
@@ -219,7 +231,19 @@ def base_problem_error(dirr, configs):
             i += 1
 
     # plot last recorded gen
-    plt.plot(t, err)
+
+    # trimming number of data points
+    if len(err) > 20:
+        x, y = [], []
+        for j in range(len(err)):
+            if int(j % len(err) / 20) == 0:
+                x.append(t[j])
+                y.append(err[j])
+    else:
+        x = t
+        y = err
+
+    plt.plot(x,y)
 
     plt.ylabel("Mean Squared Error")
     plt.title("Base Problem Error over Time")

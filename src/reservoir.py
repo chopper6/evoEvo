@@ -117,14 +117,20 @@ def problem_instance(net, configs):
     elif base_problem == 'AND':
         assert(len(net.graph['input_nodes']) == 2)
         assert(len(net.graph['output_nodes']) == 1)
-        if [input[0] == input[1]]:  return 1
-        else:                       return 0
+        input.append(rd.choice([0,1]))
+        input.append(rd.choice([0,1]))
+
+        if [input[0] == input[1]]:  output.append(1)
+        else:                       output.append(0)
 
     elif base_problem == 'OR':
         assert(len(net.graph['input_nodes']) == 2)
         assert(len(net.graph['output_nodes']) == 1)
-        if [input[0] == 1 or input[1] == 1]:    return 1
-        else:                                   return 0
+        input.append(rd.choice([0,1]))
+        input.append(rd.choice([0,1]))
+
+        if [input[0] == 1 or input[1] == 1]:    output.append(1)
+        else:                                   output.append(0)
 
     elif base_problem  == 'XOR':
         assert(len(net.graph['input_nodes']) == 2)

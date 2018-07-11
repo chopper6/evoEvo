@@ -43,7 +43,7 @@ def plot_undir(configs):
     output_dir = configs['output_directory']
     biased, bias_on = False, None #not implemented yet
 
-    dirs = ["/undirected_degree_distribution/", "/undirected_degree_distribution/loglog/", "/undirected_degree_distribution/loglog%/"] #"/undirected_degree_distribution/scatter/", "/undirected_degree_distribution/scatter%/"]
+    dirs = ["/undirected_degree_distribution/"]
 
     for dirr in dirs:
         if not os.path.exists(output_dir + dirr):
@@ -195,11 +195,10 @@ def base_problem_error(dirr, configs):
         line = line.split(',')
         an_err = line[2]
         if an_err != None and an_err != "None" and an_err:
-            err.append(float(an_err))
-            t.append(i)
             gen = int(line[0])
             if gen != curr_gen:
                 # PLOT AND RESET
+                # plot before appending current line, since that is for diff gen
                 plt.plot(t, err)
 
                 plt.ylabel("Mean Squared Error")
@@ -212,6 +211,10 @@ def base_problem_error(dirr, configs):
 
                 # reset for next plot
                 curr_gen, i, t, err = gen, 0, [], []
+
+
+            err.append(float(an_err))
+            t.append(i)
 
             i += 1
 
@@ -443,9 +446,7 @@ if __name__ == "__main__":
         biased = False  # sys.argv[2]
         bias_on = None  # sys.argv[3]
 
-        dirs = ["/undirected_degree_distribution/", "/undirected_degree_distribution/loglog/",
-                "/undirected_degree_distribution/loglog%/", "/undirected_degree_distribution/scatter/",
-                "/undirected_degree_distribution/scatter%/"]
+        dirs = ["/undirected_degree_distribution/"]
         for dirr in dirs:
             if not os.path.exists(net1_path + dirr):
                 os.makedirs(net1_path + dirr)

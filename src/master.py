@@ -27,13 +27,13 @@ def evolve_master(configs):
         if biased: biases = bias.gen_biases(configs) #all nets must have same bias to have comparable fitness
         else: biases = None
 
+        gen += 1 #since this is the 2nd round of pressurize
         distrib_workers(population, gen, worker_pop_size, num_survive, biases, configs)
 
         report_timing(t_start, gen, output_dir)
         population = watch(configs, gen, num_survive)
 
         size = len(population[0].nodes())
-        gen += 1
 
         keep_running = util.test_stop_condition(size, gen, configs)
 
@@ -92,13 +92,14 @@ def init_run(configs):
         population = init_nets.init_population(pop_size, configs)
 
         #init fitness eval
-        gen = 0 #for plotting purposes
+        gen = 0
         if varied_init_population:
             for p in population:
                 pressurize.pressurize(configs, p, gen)
         else: pressurize.pressurize(configs, population[0], gen)
 
-        gen, size = 1, start_size
+        # gen = 1
+        size = start_size
         keep_running = util.test_stop_condition(size, gen, configs)
 
     init_data =  population, gen, size, num_survive, keep_running

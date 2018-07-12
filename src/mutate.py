@@ -253,7 +253,9 @@ def rm_edges(net, num_rm, configs):
             post_size = len(net.edges())
             i+=1
 
-            if (i==10000000): util.cluster_print(configs['output_directory'], "WARNING mutate.rm_edges() is looping a lot.\n")
+            if (i==10000): 
+                util.cluster_print(configs['output_directory'], "WARNING mutate.rm_edges() is looping a lot.\n")
+                assert(False)
 
         ensure_single_cc(net, configs, node1=edge[0], node2=edge[1], sign_orig=sign_orig, bias_orig=bias_orig)
 

@@ -1,8 +1,8 @@
 import math, random as rd, networkx as nx
+import util
 
 
 def step(net, configs):
-    # TODO: explicitly debug this section
 
     input, output = problem_instance(net, configs)
     apply_input(net, input)
@@ -89,28 +89,25 @@ def problem_instance(net, configs):
     if base_problem  == 'control':
         for input_node in net.graph['input_nodes']:
             input.append(1)
-            assert(not net.in_edges(input_node))
+            if not util.boool(configs['in_edges_to_inputs']): assert(not net.in_edges(input_node))
         for i in range(len(net.graph['output_nodes'])):
             output.append(1)
 
     elif base_problem  == 'control00':
         for input_node in net.graph['input_nodes']:
             input.append(0)
-            assert(not net.in_edges(input_node))
         for i in range(len(net.graph['output_nodes'])):
             output.append(0)
 
     elif base_problem  == 'control10':
         for input_node in net.graph['input_nodes']:
             input.append(1)
-            assert(not net.in_edges(input_node))
         for i in range(len(net.graph['output_nodes'])):
             output.append(0)
 
     elif base_problem == 'control01':
         for input_node in net.graph['input_nodes']:
             input.append(0)
-            assert (not net.in_edges(input_node))
         for i in range(len(net.graph['output_nodes'])):
             output.append(1)
 
@@ -182,7 +179,8 @@ def stochastic_backprop(net, configs, ideal_output):
             for in_edge in net.in_edges(output_node):
                 if net.node[in_edge[0]]['state']:
                     weight_contribution = net.node[in_edge[0]]['state']
-                    assert(net.node[in_edge[0]] is not net.node[output_node]) #TODO: rm this when output out loops are allowed
+
+                    if not util.boool(configs['out_edges_from_outputs']): assert(net.node[in_edge[0]] is not net.node[output_node])
 
                     partial_err = delta * weight_contribution
                     #print("delta = " + str(delta) + ", weight_contrib = " + str(weight_contribution) + ", curr_weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))

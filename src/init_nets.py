@@ -37,7 +37,7 @@ def init_population(pop_size, configs):
 #HELPER FUNCTIONS
 def gen_rd_nets(pop_size, configs):
     start_size = int(configs['starting_size'])
-    assert (start_size >= 8) #really should consider number of edges, but trying to avoid an infinite rewire scenario
+    assert (start_size >= min_num_nodes(configs))
 
     edge_node_ratio = float(configs['edge_to_node_ratio'])
     num_edges = int(start_size*edge_node_ratio)
@@ -66,8 +66,8 @@ def gen_rd_nets(pop_size, configs):
             assert(num_input_nodes > 0 and num_output_nodes > 0)
             population[rep].graph['input_nodes'] = []
             population[rep].graph['output_nodes'] = []
-            mutate.add_nodes(population[rep], num_input_nodes, configs, layer='input')
             mutate.add_nodes(population[rep], num_output_nodes, configs, layer='output')
+            mutate.add_nodes(population[rep], num_input_nodes, configs, layer='input')
 
             # more to hidden layer
             mutate.add_nodes(population[rep], start_size - 8, configs)
@@ -100,6 +100,20 @@ def gen_rd_nets(pop_size, configs):
     return population
 
 
+
+def min_num_nodes(configs):
+
+    directed = util.boool(configs['directed'])
+    edge_node_ratio = float(configs['edge_to_node_ratio'])
+    self_loops = util.boool(configs['self_loops'])
+
+    assert(directed) #too lazy to make undirected version now
+
+    if self_loops:
+        return edge_node_ratio
+    else:
+        return edge_node_ratio + 1
+
 def double_check(population, configs):
     #TODO: eventually cut this for time sake
 
@@ -121,11 +135,15 @@ def double_check(population, configs):
             assert (len(p.edges()) == actual_num_edges)
             assert (len(p.nodes()) == actual_size)
 
-        for i in p.graph['input_nodes']:
-            assert(not p.in_edges(i))
 
-        for o in p.graph['output_nodes']:
-            assert(not p.out_edges(o)) #but will shortly rm this condition
+        if not util.boool(configs['in_edges_to_inputs']):
+            for i in p.graph['input_nodes']:
+                assert(not p.in_edges(i))
+
+
+        if not util.boool(configs['out_edges_from_outputs']):
+            for o in p.graph['output_nodes']:
+                assert(not p.out_edges(o)) #but will shortly rm this condition
 
 
 def init_directed_attributes(population, configs):

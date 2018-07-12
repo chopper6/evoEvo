@@ -186,7 +186,10 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
 
         if directed:
             input_output_check = True
-            if net.node[node2]['layer'] == 'input' or net.node[node1]['layer'] == 'output': input_output_check = False
+            if not util.boool(configs['in_edges_to_inputs']):
+                if net.node[node2]['layer'] == 'input': input_output_check = False
+            if not util.boool(configs['out_edges_from_outputs']):
+                if net.node[node1]['layer'] == 'output': input_output_check = False
 
             #print("mutate.191(): layer of node1 = " + str(net.node[node1]['layer']) + ", layer of node2 = " +  str(net.node[node2]['layer']) + ", so input_output_check = " + str(input_output_check))
 
@@ -207,7 +210,7 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
 
 
 def rm_edges(net, num_rm, configs):
-    # constraints: doesn't leave 0 deg edges or mult connected components
+    # constraints: doesn't leave 0 deg edges or mult connected components (if configs don't allow them)
 
     biased = util.boool(configs['biased'])
     bias_on = configs['bias_on']
@@ -218,12 +221,13 @@ def rm_edges(net, num_rm, configs):
         i=0
         while (pre_size == post_size):
             edge = rd.sample(net.edges(), 1)
-            edge = edge[0]
+            edge = edge[0] #just cause sample returns [edge]
 
-            # don't allow 0 deg edges
-            while ((net.in_degree(edge[0]) + net.out_degree(edge[0]) == 1) or (net.in_degree(edge[1]) + net.out_degree(edge[1]) == 1)):
-                edge = rd.sample(net.edges(), 1)
-                edge = edge[0]
+            if util.boool(configs['single_cc']):
+                # don't allow edges w/ 1 deg (which would then be severed from graph
+                while ((net.in_degree(edge[0]) + net.out_degree(edge[0]) == 1) or (net.in_degree(edge[1]) + net.out_degree(edge[1]) == 1)):
+                    edge = rd.sample(net.edges(), 1)
+                    edge = edge[0]
 
             sign_orig = net[edge[0]][edge[1]]['sign']
             if biased and bias_on == 'edges': bias_orig = net[edge[0]][edge[1]]['bias']

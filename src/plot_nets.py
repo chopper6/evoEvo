@@ -199,31 +199,9 @@ def base_problem_error(dirr, configs):
             if gen != curr_gen:
                 # PLOT AND RESET
                 # plot before appending current line, since that is for diff gen
-
-                # trimming number of data points
-                if len(err) > 20:
-                    x, y = [], []
-                    for j in range(len(err)):
-                        if int(j % (len(err)/20)) == 0:
-                            x.append(t[j])
-                            y.append(err[j])
-                else:
-                    x = t
-                    y = err
-
-                plt.plot(x, y)
-
-                plt.ylabel("Mean Squared Error")
-                plt.title("Base Problem Error over Time")
-                plt.xlabel("Iteration")
-                xticks = [int(int(i)) * j / 10 for j in range(10)]
-                plt.xticks(xticks, xticks)
-                plt.savefig(dirr + "/base_problem/Error_Gen" + str(curr_gen) + ".png")
-                plt.clf()
-
+                one_base_err_plot(err, t, curr_gen)
                 # reset for next plot
                 curr_gen, i, t, err = gen, 0, [], []
-
 
             err.append(float(an_err))
             t.append(i)
@@ -231,27 +209,33 @@ def base_problem_error(dirr, configs):
             i += 1
 
     # plot last recorded gen
+    one_base_err_plot(err, t, curr_gen)
+
+
+def one_base_err_plot(err, t, curr_gen):
 
     # trimming number of data points
-    if len(err) > 20:
+    if len(err) > 40:
         x, y = [], []
         for j in range(len(err)):
-            if int(j % len(err) / 20) == 0:
+            if (j % int(len(err) / 40)) == 0:
                 x.append(t[j])
                 y.append(err[j])
     else:
         x = t
         y = err
 
-    plt.plot(x,y)
+    plt.plot(x, y)
 
     plt.ylabel("Mean Squared Error")
-    plt.title("Base Problem Error over Time")
+    plt.title("Gen " + str(curr_gen) + " Base Problem Error")
     plt.xlabel("Iteration")
-    xticks = [int(int(i)) * j / 10 for j in range(10)]
-    plt.xticks(xticks, xticks)
+    xticks = [int(j * int(x[-1]) / 8) for j in range(8)]
+    xlabels = [x[xtick] for xtick in xticks]
+    plt.xticks(xticks, xlabels)
     plt.savefig(dirr + "/base_problem/Error_Gen" + str(curr_gen) + ".png")
     plt.clf()
+
 
 
 def degree_distrib(dirr):

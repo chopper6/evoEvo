@@ -43,7 +43,6 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
 
     # ADD NODE
     for i in range(num_add):
-        print("\nadding node #" + str(i))
         pre_size = post_size = len(net.nodes())
         while (pre_size == post_size):
             new_node = rd.randint(0, len(net.nodes()) * 10000)  # hope to hit number that doesn't already exist
@@ -152,7 +151,6 @@ def add_edges(net, num_add, configs, biases=None):
 
 def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=None):
 
-    print("adding node " + str(node1))
     directed = util.boool(configs['directed'])
     bias_on = configs['bias_on']
 

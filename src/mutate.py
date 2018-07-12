@@ -282,6 +282,7 @@ def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_
             components = list(nx.connected_components(net_undir))
             constraints_check = False
 
+            i = 0
             while not constraints_check:
                 if node1 is None:
                     c1 = components[0]
@@ -304,7 +305,17 @@ def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_
                     node1 = node3
 
                 constraints_check = check_constraints(net, node1, node2, configs)
-                if constraints_check == False: assert(nodes_given == False) #since they'll never change
+                if constraints_check == False:
+                    i += 1
+                    assert(nodes_given == False) #since they'll never change
+                    if (i >= 100000):
+                        print("ERROR in mutate.ensure_single_cc():\n layers of component 1 = ")
+                        for n in c1:
+                            print(net.node[n]['layer'])
+                        print("layers of components 2 = ")
+                        for n in c2:
+                            print(net.node[n]['layer'])
+
 
 
             add_this_edge(net, configs, node1=node1, node2=node2, sign=sign_orig, given_bias=bias_orig)

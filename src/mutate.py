@@ -172,11 +172,11 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
     i=0
     while (pre_size == post_size):  # ensure that net adds
 
-        if not node1_set: #previous had: and node1_set != 0, not sure why, same below for node2...
+        if not node1_set and node1_set != 0:
             node = rd.sample(net.nodes(), 1)
             node1 = node[0]
 
-        if not node2_set:
+        if not node2_set and node2_set != 0:
             if self_loops:
                 node2 = rd.sample(net.nodes(), 1)
                 node2 = node2[0]
@@ -288,8 +288,7 @@ def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_
 
     if single_cc:
 
-        #if node1 or node1==0: assert(node2 or node2==0)
-        if node1: assert node2
+        if node1 or node1==0: assert(node2 or node2==0)
         elif not node1: assert not (node2)
 
         net_undir = net.to_undirected()

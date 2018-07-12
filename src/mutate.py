@@ -194,8 +194,9 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
 
         constraints_check = check_constraints(net, node1, node2, configs)
 
-        if constraints_check: net.add_edge(node1, node2, sign=sign)
-        if directed: net[node1][node2]['weight'] = init_nets.assign_edge_weight(configs)
+        if constraints_check:
+            net.add_edge(node1, node2, sign=sign)
+            if directed: net[node1][node2]['weight'] = init_nets.assign_edge_weight(configs)
 
         post_size = len(net.edges())
         if constraints_check: assert(post_size != pre_size)

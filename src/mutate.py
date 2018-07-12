@@ -66,6 +66,11 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
         if biases and bias_on=='edges': add_this_edge(net, configs, node1=new_node, given_bias=biases[i])
         else: add_this_edge(net, configs, node1=new_node)
 
+    if util.boool(configs['single_cc']):
+        net_undir = net.to_undirected()
+        num_cc = nx.number_connected_components(net_undir)
+        assert(num_cc == 1)
+
     # MAINTAIN NODE_EDGE RATIO
     num_edge_add = int(num_add * float(configs['edge_to_node_ratio'])) - num_add
     if biases and bias_on == 'edges':
@@ -73,6 +78,10 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
         add_edges(net, num_edge_add, configs, biases=biases[num_add:])
     else:  add_edges(net, num_edge_add, configs)
 
+    if util.boool(configs['single_cc']):
+        net_undir = net.to_undirected()
+        num_cc = nx.number_connected_components(net_undir)
+        assert(num_cc == 1)
 
 def shrink(net, num_shrink, configs):
     #WARNING: outdated, ex directed
@@ -143,15 +152,16 @@ def add_edges(net, num_add, configs, biases=None):
     if util.boool(configs['single_cc']):
         net_undir = net.to_undirected()
         num_cc = nx.number_connected_components(net_undir)
-        if (num_cc != 1): ensure_single_cc(net, configs)
+        assert(num_cc == 1)
+        #before:
+        #if (num_cc != 1): ensure_single_cc(net, configs)
 
 
 def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=None):
 
     directed = util.boool(configs['directed'])
     self_loops = util.boool(configs['self_loops'])
-    if directed: random_direction = True
-    else: random_direction = False
+    single_cc = util.boool(configs['single_cc'])
     bias_on = configs['bias_on']
 
     node1_set, node2_set = node1, node2 #to save their states
@@ -178,11 +188,11 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
                     node2 = rd.sample(net.nodes(), 1)
                     node2 = node2[0]
 
-        if random_direction: #chance to swap nodes 1 & 2
-            if (rd.random()<.5):
-                node3=node2
-                node2=node1
-                node1=node3
+        #chance to swap nodes 1 & 2
+        if (rd.random()<.5):
+            node3=node2
+            node2=node1
+            node1=node3
 
         if directed:
             input_output_check = True
@@ -191,14 +201,20 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
             if not util.boool(configs['out_edges_from_outputs']):
                 if net.node[node1]['layer'] == 'output': input_output_check = False
 
+            connected_check = True
+            if single_cc and self_loops:
+                if node1 == node2: connected_check = False
             #print("mutate.191(): layer of node1 = " + str(net.node[node1]['layer']) + ", layer of node2 = " +  str(net.node[node2]['layer']) + ", so input_output_check = " + str(input_output_check))
 
-            if not net.has_edge(node1, node2) and input_output_check:
+            if not net.has_edge(node1, node2) and input_output_check and connected_check:
                 net.add_edge(node1, node2, sign=sign)
                 net[node1][node2]['weight'] = init_nets.assign_edge_weight(configs)
 
         else:
-            if not net.has_edge(node1, node2) and not net.has_edge(node2, node1):
+            connected_check = True
+            if single_cc and self_loops:
+                if node1 == node2: connected_check = False
+            if not net.has_edge(node1, node2) and not net.has_edge(node2, node1) and connected_check:
                 net.add_edge(node1, node2, sign=sign)
 
         post_size = len(net.edges())

@@ -66,6 +66,7 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
         # ADD EDGE TO NEW NODE TO KEEP CONNECTED
         if biases and bias_on=='edges': add_this_edge(net, configs, node1=new_node, given_bias=biases[i])
         else: add_this_edge(net, configs, node1=new_node)
+        assert(net.edges(new_node))
 
         if util.boool(configs['single_cc']): ensure_single_cc(net, configs)
 

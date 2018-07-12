@@ -199,7 +199,7 @@ def base_problem_error(dirr, configs):
             if gen != curr_gen:
                 # PLOT AND RESET
                 # plot before appending current line, since that is for diff gen
-                one_base_err_plot(err, t, curr_gen)
+                one_base_err_plot(dirr, err, t, curr_gen)
                 # reset for next plot
                 curr_gen, i, t, err = gen, 0, [], []
 
@@ -212,7 +212,7 @@ def base_problem_error(dirr, configs):
     one_base_err_plot(err, t, curr_gen)
 
 
-def one_base_err_plot(err, t, curr_gen):
+def one_base_err_plot(dirr, err, t, curr_gen):
 
     # trimming number of data points
     if len(err) > 40:

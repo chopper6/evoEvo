@@ -89,7 +89,8 @@ def problem_instance(net, configs):
     if base_problem  == 'control':
         for input_node in net.graph['input_nodes']:
             input.append(1)
-            if not util.boool(configs['in_edges_to_inputs']): assert(not net.in_edges(input_node))
+            #if not util.boool(configs['in_edges_to_inputs']):
+            assert(not net.in_edges(input_node))
         for i in range(len(net.graph['output_nodes'])):
             output.append(1)
 
@@ -165,8 +166,7 @@ def stochastic_backprop(net, configs, ideal_output):
     for output_node in sorted_output_nodes:
 
         if net.node[output_node]['state'] != None:
-            # input hasn't reached all outputs yet
-            #return None --> now correct what is available
+            # input hasn't reached all outputs yet, although outputs may now be emitting earlier (due to bias)
 
             output = net.node[output_node]['state']
             err = math.pow(ideal_output[i]-output,2)
@@ -187,7 +187,6 @@ def stochastic_backprop(net, configs, ideal_output):
                     net[in_edge[0]][in_edge[1]]['weight'] -= partial_err*learning_rate
                     #print("now weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
 
-            # calc for bias
             # could add diff learning rate for the bias (typically lower)
             #print("old bias = " + str(net.node[output_node]['neuron_bias']) + ", its err contrib is delta = " + str(delta))
             net.node[output_node]['neuron_bias'] -= delta*learning_rate
@@ -206,6 +205,8 @@ def stochastic_backprop(net, configs, ideal_output):
 def step_fwd(net, configs):
 
     for n in net.nodes():
-        net.node[n]['prev_state'] = net.node[n]['state']
+        if (net.node[n]['layer'] != 'input'):
+            net.node[n]['prev_state'] = net.node[n]['state']
     for n in net.nodes():
-        net.node[n]['state'] = activation(net, n, configs)
+        if (net.node[n]['layer'] != 'input'):
+            net.node[n]['state'] = activation(net, n, configs)

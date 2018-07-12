@@ -186,8 +186,8 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
 
         if directed:
             input_output_check = True
-            if not util.boool(configs['in_edges_to_inputs']):
-                if net.node[node2]['layer'] == 'input': input_output_check = False
+            #if not util.boool(configs['in_edges_to_inputs']):
+            if net.node[node2]['layer'] == 'input': input_output_check = False
             if not util.boool(configs['out_edges_from_outputs']):
                 if net.node[node1]['layer'] == 'output': input_output_check = False
 

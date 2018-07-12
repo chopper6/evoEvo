@@ -136,9 +136,9 @@ def double_check(population, configs):
             assert (len(p.nodes()) == actual_size)
 
 
-        if not util.boool(configs['in_edges_to_inputs']):
-            for i in p.graph['input_nodes']:
-                assert(not p.in_edges(i))
+        #if not util.boool(configs['in_edges_to_inputs']):
+        for i in p.graph['input_nodes']:
+            assert(not p.in_edges(i))
 
 
         if not util.boool(configs['out_edges_from_outputs']):

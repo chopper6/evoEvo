@@ -35,7 +35,8 @@ def calc_node_fitness(net, configs):
 
         if directed:
             for n in net.nodes():
-                net.node[n]['fitness'] += node_fitness.calc_discrete_directed(net, n, fitness_metric)
+                if net.node[n]['layer'] != 'input':
+                    net.node[n]['fitness'] += node_fitness.calc_discrete_directed(net, n, fitness_metric)
 
         else:
             for n in net.nodes():
@@ -47,14 +48,15 @@ def calc_node_fitness(net, configs):
 
         if directed:
             for n in net.nodes():
-                states = []
-                for in_edge in net.in_edges(n):
-                    if net.node[in_edge[0]]['state'] is not None:
-                        states.append(net.node[in_edge[0]]['state'])
+                if net.node[n]['layer'] != 'input':
+                    states = []
+                    for in_edge in net.in_edges(n):
+                        if net.node[in_edge[0]]['state'] is not None:
+                            states.append(net.node[in_edge[0]]['state'])
 
 
-                fitness = node_fitness.calc_continuous(states, fitness_metric)
-                net.node[n]['fitness'] += fitness
+                    fitness = node_fitness.calc_continuous(states, fitness_metric)
+                    net.node[n]['fitness'] += fitness
 
         else:
             for n in net.nodes():
@@ -103,6 +105,10 @@ def node_normz(net, denom, configs):
 def reset_nodes(net, configs):
     for n in net.nodes():
         net.node[n]['fitness'] = 0
+
+    if  util.boool(configs['feedforward']) and util.boool(configs['directed']):
+        for n in net.nodes():
+            net.node[n]['state'] = None
 
 
 

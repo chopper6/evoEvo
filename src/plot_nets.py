@@ -225,13 +225,18 @@ def one_base_err_plot(dirr, err, t, curr_gen):
         x = t
         y = err
 
+
+    if len(x) > 8:
+        xticks = [int(j * int(x[-1]) / 8) for j in range(8)]
+        xlabels = [x[xtick] for xtick in xticks]
+    else:
+        xticks, xlabels = x, x
+
     plt.plot(x, y)
 
     plt.ylabel("Mean Squared Error")
     plt.title("Gen " + str(curr_gen) + " Base Problem Error")
     plt.xlabel("Iteration")
-    xticks = [int(j * int(x[-1]) / 8) for j in range(8)]
-    xlabels = [x[xtick] for xtick in xticks]
     plt.xticks(xticks, xlabels)
     plt.savefig(dirr + "/base_problem/Error_Gen" + str(curr_gen) + ".png")
     plt.clf()

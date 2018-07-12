@@ -62,6 +62,11 @@ def gen_rd_nets(pop_size, configs):
             num_add = int(edge_node_ratio * 8)
             mutate.add_edges(population[rep], num_add, configs)
 
+            if util.boool(configs['single_cc']): mutate.ensure_single_cc(population[rep], configs)
+            # because init_nets for example can add to a previously node-only graph, which should then be connected
+
+
+
             # input and output layers
             assert(num_input_nodes > 0 and num_output_nodes > 0)
             population[rep].graph['input_nodes'] = []
@@ -82,6 +87,7 @@ def gen_rd_nets(pop_size, configs):
 
             num_add = int(edge_node_ratio * 8)
             mutate.add_edges(population[rep], num_add, configs)
+            if util.boool(configs['single_cc']): mutate.ensure_single_cc(population[rep], configs)
             mutate.add_nodes(population[rep], start_size - 8, configs)
 
         # correct for off-by-one-errors since rounding occurs twice

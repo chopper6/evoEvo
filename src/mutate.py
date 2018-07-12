@@ -148,12 +148,6 @@ def add_edges(net, num_add, configs, biases=None):
         if (biases): add_this_edge(net,configs, given_bias=biases[j])
         else: add_this_edge(net, configs)
 
-    if util.boool(configs['single_cc']):
-        net_undir = net.to_undirected()
-        num_cc = nx.number_connected_components(net_undir)
-        assert(num_cc == 1)
-        #before:
-        #if (num_cc != 1): ensure_single_cc(net, configs)
 
 
 def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=None):
@@ -173,11 +167,11 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
     i=0
     while (pre_size == post_size):  # ensure that net adds
 
-        if not node1_set and node1_set != 0:
+        if node1_set is None:
             node = rd.sample(net.nodes(), 1)
             node1 = node[0]
 
-        if not node2_set and node2_set != 0:
+        if node2_set is None:
             if self_loops:
                 node2 = rd.sample(net.nodes(), 1)
                 node2 = node2[0]
@@ -283,27 +277,30 @@ def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_
 
         if (num_cc != 1): #rm_edge() will recursively check #COULD CAUSE AN INFINITE LOOP
             components = list(nx.connected_components(net_undir))
+            constraints_check = False
 
-            if not node1 and node1 != 0:
-                c1 = components[0]
-                node1 = rd.sample(c1, 1)
-                node1 = node1[0]
+            while not constraints_check:
+                if node1 is None:
+                    c1 = components[0]
+                    node1 = rd.sample(c1, 1)
+                    node1 = node1[0]
 
-            if not node2 and node2 != 0:
-                c2 = components[1]
-                node2 = rd.sample(c2, 1)
-                node2 = node2[0]
+                if node2 is None:
+                    c2 = components[1]
+                    node2 = rd.sample(c2, 1)
+                    node2 = node2[0]
 
-            if not sign_orig:
-                sign_orig = rd.randint(0, 1)
-                if (sign_orig == 0): sign_orig = -1
+                if not sign_orig:
+                    sign_orig = rd.randint(0, 1)
+                    if (sign_orig == 0): sign_orig = -1
 
-            # chance to swap nodes 1 & 2
-            if (rd.random() < .5):
-                node3 = node2
-                node2 = node1
-                node1 = node3
+                # chance to swap nodes 1 & 2
+                if (rd.random() < .5):
+                    node3 = node2
+                    node2 = node1
+                    node1 = node3
 
+                constraints_check = check_constraints(net, node1, node2, configs)
 
             add_this_edge(net, configs, node1=node1, node2=node2, sign=sign_orig, given_bias=bias_orig)
             rm_edges(net, 1, configs) #calls ensure_single_cc() at end

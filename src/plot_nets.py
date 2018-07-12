@@ -209,7 +209,7 @@ def base_problem_error(dirr, configs):
             i += 1
 
     # plot last recorded gen
-    one_base_err_plot(err, t, curr_gen)
+    one_base_err_plot(dirr, err, t, curr_gen)
 
 
 def one_base_err_plot(dirr, err, t, curr_gen):

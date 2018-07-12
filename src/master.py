@@ -2,8 +2,6 @@ import os, pickle, time, shutil, sys
 from random import SystemRandom as sysRand
 from time import sleep
 import fitness, minion, output, plot_nets, init_nets, pressurize, util, init, bias
-import networkx as nx, mutate
-
 
 #MASTER EVOLUTION
 def evolve_master(configs):
@@ -13,7 +11,7 @@ def evolve_master(configs):
     biased = util.boool(configs['biased'])
     num_sims = int(configs['num_sims'])
 
-    init_data = init_run(configs)
+    init_data = init_run(configs) # ALSO PRESSURIZES 0TH GEN
     if not init_data: return #for example if run already done
 
     population, gen, size, num_survive, keep_running = init_data

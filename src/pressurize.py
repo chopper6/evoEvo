@@ -1,5 +1,4 @@
 import instances, node_fitness, fitness, util, reservoir, output
-import networkx as nx
 
 def pressurize(configs, net, gen):
     # configs:
@@ -21,9 +20,7 @@ def pressurize(configs, net, gen):
         for i in range(num_samples_relative):
             # note that node states are not reset
             if not feedfwd: err = reservoir.step(net, configs)
-            else:
-                diameter = nx.diameter(net.to_undirected())
-                err = reservoir.feedfwd_step(net, configs, diameter)
+            else: err = reservoir.feedfwd_step(net, configs)
             if (err != None):
                 total_err += err
                 num_outputs += 1

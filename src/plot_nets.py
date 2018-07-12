@@ -204,7 +204,7 @@ def base_problem_error(dirr, configs):
                 if len(err) > 20:
                     x, y = [], []
                     for j in range(len(err)):
-                        if int(j % len(err)/20) == 0:
+                        if int(j % (len(err)/20)) == 0:
                             x.append(t[j])
                             y.append(err[j])
                 else:

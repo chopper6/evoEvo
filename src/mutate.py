@@ -43,6 +43,7 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
 
     # ADD NODE
     for i in range(num_add):
+        print("\nadding node #" + str(i))
         pre_size = post_size = len(net.nodes())
         while (pre_size == post_size):
             new_node = rd.randint(0, len(net.nodes()) * 10000)  # hope to hit number that doesn't already exist
@@ -50,7 +51,7 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
                 net.add_node(new_node)
                 post_size = len(net.nodes())
                 assert(pre_size < post_size)
-
+            print("new node = " + str(new_node))
         if biases and bias_on == 'nodes': bias.assign_a_node_bias(net, new_node, configs['bias_distribution'], given_bias=biases[i])
 
         if directed:

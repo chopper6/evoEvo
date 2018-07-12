@@ -51,7 +51,6 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
                 net.add_node(new_node)
                 post_size = len(net.nodes())
                 assert(pre_size < post_size)
-            print("new node = " + str(new_node))
         if biases and bias_on == 'nodes': bias.assign_a_node_bias(net, new_node, configs['bias_distribution'], given_bias=biases[i])
 
         if directed:
@@ -170,21 +169,23 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
         if node1_set is None:
             node = rd.sample(net.nodes(), 1)
             node1 = node[0]
+        else: node1 = node1_set
 
         if node2_set is None:
             node2 = rd.sample(net.nodes(), 1)
             node2 = node2[0]
+        else: node2 = node2_set
 
         #chance to swap nodes 1 & 2
-        if (rd.random()<.5):
-            node3=node2
-            node2=node1
-            node1=node3
+        if node1_set is None or node2_set is None:
+            if (rd.random()<.5):
+                node3=node2
+                node2=node1
+                node1=node3
 
         constraints_check = check_constraints(net, node1, node2, configs)
 
         if constraints_check:
-            print("adding this edge: " + str(node1) + ", " + str(node2))
             net.add_edge(node1, node2, sign=sign)
             if directed: net[node1][node2]['weight'] = init_nets.assign_edge_weight(configs)
 
@@ -262,6 +263,8 @@ def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_
 
     single_cc = util.boool(configs['single_cc'])
 
+    node1_set, node2_set = node1, node2
+
     if single_cc:
 
         nodes_given = False
@@ -279,25 +282,29 @@ def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_
 
             i = 0
             while not constraints_check:
-                if node1 is None:
+                if node1_set is None:
                     c1 = components[0]
                     node1 = rd.sample(c1, 1)
                     node1 = node1[0]
+                else: node1 = node1_set
 
-                if node2 is None:
+                if node2_set is None:
                     c2 = components[1]
                     node2 = rd.sample(c2, 1)
                     node2 = node2[0]
+                else: node2 = node2_set
 
                 if not sign_orig:
                     sign_orig = rd.randint(0, 1)
                     if (sign_orig == 0): sign_orig = -1
 
                 # chance to swap nodes 1 & 2
-                if (rd.random() < .5):
-                    node3 = node2
-                    node2 = node1
-                    node1 = node3
+                # if they are pre-designated, don't assume switch is ok
+                if node1_set is None or node2_set is None:
+                    if (rd.random() < .5):
+                        node3 = node2
+                        node2 = node1
+                        node1 = node3
 
                 constraints_check = check_constraints(net, node1, node2, configs)
                 if constraints_check == False:
@@ -305,14 +312,6 @@ def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_
                     assert(nodes_given == False) #since they'll never change
                     if (i >= 100000):
                         print("ERROR in mutate.ensure_single_cc():\n layers of component 1 = ")
-                        for n in c1:
-                            print(net.node[n]['layer'])
-                            print(net.in_edges(n), net.out_edges(n))
-                        print("layers of components 2 = ")
-                        for n in c2:
-                            print(net.node[n]['layer'])
-                            print(net.in_edges(n), net.out_edges(n))
-
                         assert(False)
 
 

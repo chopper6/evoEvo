@@ -205,8 +205,7 @@ def stochastic_backprop(net, configs, ideal_output):
 def step_fwd(net, configs):
 
     for n in net.nodes():
-        if (net.node[n]['layer'] != 'input'):
-            net.node[n]['prev_state'] = net.node[n]['state']
+        net.node[n]['prev_state'] = net.node[n]['state']
     for n in net.nodes():
         if (net.node[n]['layer'] != 'input'):
             net.node[n]['state'] = activation(net, n, configs)

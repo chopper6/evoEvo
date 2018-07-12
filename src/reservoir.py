@@ -42,7 +42,7 @@ def activation(net, node, configs):
     num_active = 0
     for edge in net.in_edges(node):
         #use previous state, since state is reserved for the new iteration (see step_fwd())
-        if net.node[edge[0]]['prev_state'] != None:
+        if (net.node[edge[0]]['prev_state'] is not None):
             edge_val = net.node[edge[0]]['prev_state'] * net[edge[0]][edge[1]]['weight']
 
             sum += edge_val
@@ -165,7 +165,7 @@ def stochastic_backprop(net, configs, ideal_output):
     num_active_outputs = len(sorted_output_nodes)
     for output_node in sorted_output_nodes:
 
-        if net.node[output_node]['state'] != None:
+        if (net.node[output_node]['state'] is not None):
             # input hasn't reached all outputs yet, although outputs may now be emitting earlier (due to bias)
 
             output = net.node[output_node]['state']

@@ -218,7 +218,9 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
         post_size = len(net.edges())
 
         i+=1
-        if (i == 10000000): util.cluster_print(configs['output_directory'], "\n\n\nWARNING mutate.add_this_edge() is looping a lot.\nNode1 = " + str(node1_set) + ", Node2 = " + str(node2_set) +  "\n\n\n")
+        if (i == 100000):
+            util.cluster_print(configs['output_directory'], "\n\n\nWARNING mutate.add_this_edge() is looping a lot.\nNode1 = " + str(node1_set) + ", Node2 = " + str(node2_set) +  "\n\n\n")
+            assert(False)
 
     if (bias and bias_on == 'edges'): bias.assign_an_edge_bias(net, [node1,node2], configs['bias_distribution'], given_bias=given_bias)
 

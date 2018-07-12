@@ -153,8 +153,6 @@ def add_edges(net, num_add, configs, biases=None):
 def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=None):
 
     directed = util.boool(configs['directed'])
-    self_loops = util.boool(configs['self_loops'])
-    single_cc = util.boool(configs['single_cc'])
     bias_on = configs['bias_on']
 
     node1_set, node2_set = node1, node2 #to save their states
@@ -172,14 +170,8 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
             node1 = node[0]
 
         if node2_set is None:
-            if self_loops:
-                node2 = rd.sample(net.nodes(), 1)
-                node2 = node2[0]
-            else: #make sure that edge is not to self
-                node2 = node1
-                while (node2 == node1):
-                    node2 = rd.sample(net.nodes(), 1)
-                    node2 = node2[0]
+            node2 = rd.sample(net.nodes(), 1)
+            node2 = node2[0]
 
         #chance to swap nodes 1 & 2
         if (rd.random()<.5):
@@ -197,8 +189,8 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
         if constraints_check: assert(post_size != pre_size)
 
         i+=1
-        if (i == 100000):
-            util.cluster_print(configs['output_directory'], "\n\n\nWARNING mutate.add_this_edge() is looping a lot.\nNode1 = " + str(node1_set) + ", Node2 = " + str(node2_set) +  "\n\n\n")
+        if (i == 1000000):
+            util.cluster_print(configs['output_directory'], "\n\n\nERROR mutate.add_this_edge() is looping a lot.\nNode1 = " + str(node1_set) + ", Node2 = " + str(node2_set) +  "\n\n\n")
             assert(False)
 
     if (bias and bias_on == 'edges'): bias.assign_an_edge_bias(net, [node1,node2], configs['bias_distribution'], given_bias=given_bias)
@@ -312,9 +304,11 @@ def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_
                         print("ERROR in mutate.ensure_single_cc():\n layers of component 1 = ")
                         for n in c1:
                             print(net.node[n]['layer'])
+                            print(net.in_edges(n), net.out_edges(n))
                         print("layers of components 2 = ")
                         for n in c2:
                             print(net.node[n]['layer'])
+                            print(net.in_edges(n), net.out_edges(n))
 
                         assert(False)
 
@@ -334,7 +328,6 @@ def check_constraints(net, node1, node2, configs):
     # returns true if constraints held, false otherwise
     directed = util.boool(configs['directed'])
     self_loops = util.boool(configs['self_loops'])
-    single_cc = util.boool(configs['single_cc'])
 
     if directed:
         if net.node[node2]['layer'] == 'input': return False

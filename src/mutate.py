@@ -316,6 +316,8 @@ def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_
                         for n in c2:
                             print(net.node[n]['layer'])
 
+                        assert(False)
+
 
 
             add_this_edge(net, configs, node1=node1, node2=node2, sign=sign_orig, given_bias=bias_orig)

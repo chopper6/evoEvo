@@ -66,10 +66,8 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
         if biases and bias_on=='edges': add_this_edge(net, configs, node1=new_node, given_bias=biases[i])
         else: add_this_edge(net, configs, node1=new_node)
 
-    if util.boool(configs['single_cc']):
-        net_undir = net.to_undirected()
-        num_cc = nx.number_connected_components(net_undir)
-        assert(num_cc == 1)
+        if util.boool(configs['single_cc']): ensure_single_cc(net, configs)
+
 
     # MAINTAIN NODE_EDGE RATIO
     num_edge_add = int(num_add * float(configs['edge_to_node_ratio'])) - num_add
@@ -288,7 +286,8 @@ def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_
 
     if single_cc:
 
-        if node1 or node1==0: assert(node2 or node2==0)
+        #if node1 or node1==0: assert(node2 or node2==0)
+        if node1: assert node2
         elif not node1: assert not (node2)
 
         net_undir = net.to_undirected()

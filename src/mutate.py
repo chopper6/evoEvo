@@ -192,30 +192,13 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
             node2=node1
             node1=node3
 
-        if directed:
-            input_output_check = True
-            #if not util.boool(configs['in_edges_to_inputs']):
-            if net.node[node2]['layer'] == 'input': input_output_check = False
-            if not util.boool(configs['out_edges_from_outputs']):
-                if net.node[node1]['layer'] == 'output': input_output_check = False
+        constraints_check = check_constraints(net, node1, node2, configs)
 
-            connected_check = True
-            if single_cc and self_loops:
-                if node1 == node2: connected_check = False
-            #print("mutate.191(): layer of node1 = " + str(net.node[node1]['layer']) + ", layer of node2 = " +  str(net.node[node2]['layer']) + ", so input_output_check = " + str(input_output_check))
-
-            if not net.has_edge(node1, node2) and input_output_check and connected_check:
-                net.add_edge(node1, node2, sign=sign)
-                net[node1][node2]['weight'] = init_nets.assign_edge_weight(configs)
-
-        else:
-            connected_check = True
-            if single_cc and self_loops:
-                if node1 == node2: connected_check = False
-            if not net.has_edge(node1, node2) and not net.has_edge(node2, node1) and connected_check:
-                net.add_edge(node1, node2, sign=sign)
+        if constraints_check: net.add_edge(node1, node2, sign=sign)
+        if directed: net[node1][node2]['weight'] = init_nets.assign_edge_weight(configs)
 
         post_size = len(net.edges())
+        if constraints_check: assert(post_size != pre_size)
 
         i+=1
         if (i == 100000):
@@ -296,7 +279,7 @@ def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_
         net_undir = net.to_undirected()
         num_cc = nx.number_connected_components(net_undir)
 
-        if (num_cc != 1): #rm_edge() will recursively check #COULD CAUSE AN ERR
+        if (num_cc != 1): #rm_edge() will recursively check #COULD CAUSE AN INFINITE LOOP
             components = list(nx.connected_components(net_undir))
 
             if not node1 and node1 != 0:
@@ -313,6 +296,12 @@ def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_
                 sign_orig = rd.randint(0, 1)
                 if (sign_orig == 0): sign_orig = -1
 
+            # chance to swap nodes 1 & 2
+            if (rd.random() < .5):
+                node3 = node2
+                node2 = node1
+                node1 = node3
+
 
             add_this_edge(net, configs, node1=node1, node2=node2, sign=sign_orig, given_bias=bias_orig)
             rm_edges(net, 1, configs) #calls ensure_single_cc() at end
@@ -321,3 +310,26 @@ def ensure_single_cc(net, configs, node1=None, node2=None, sign_orig=None, bias_
         net_undir = net.to_undirected()
         num_cc = nx.number_connected_components(net_undir)
         assert (num_cc == 1)
+
+
+
+def check_constraints(net, node1, node2, configs):
+    # returns true if constraints held, false otherwise
+    directed = util.boool(configs['directed'])
+    self_loops = util.boool(configs['self_loops'])
+    single_cc = util.boool(configs['single_cc'])
+
+    if directed:
+        if net.node[node2]['layer'] == 'input': return False
+        if not util.boool(configs['out_edges_from_outputs']):
+            if net.node[node1]['layer'] == 'output': return False
+
+        if net.has_edge(node1, node2): return False
+
+    else:
+        if net.has_edge(node1, node2) or net.has_edge(node2, node1): return False
+
+    if not self_loops:
+        if node1==node2: return False
+
+    return True

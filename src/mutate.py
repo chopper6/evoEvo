@@ -70,7 +70,9 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
 
         # ADD EDGE TO NEW NODE TO KEEP CONNECTED
         if biases and bias_on=='edges': add_this_edge(net, configs, node1=new_node, given_bias=biases[i])
-        else: add_this_edge(net, configs, node1=new_node, node1_layer = node1_layer, node2_layer = node2_layer)
+        else:
+            if layer is None or layer == 'input': add_this_edge(net, configs, node1=new_node, node1_layer = node1_layer, node2_layer = node2_layer)
+            elif layer=='output': add_this_edge(net, configs, node2=new_node, node1_layer = node1_layer, node2_layer = node2_layer)
         assert(net.in_edges(new_node) or net.out_edges(new_node))
 
         if util.boool(configs['single_cc']): ensure_single_cc(net, configs)
@@ -205,7 +207,7 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
             util.cluster_print(configs['output_directory'], "\n\n\nERROR mutate.add_this_edge() is looping a lot.\nNode1 = " + str(node1_set) + ", Node2 = " + str(node2_set))
             if node1_set is not None: print("node1 layer = " + str(net.node[node1_set]['layer']))
             if node2_set is not None: print("node2 layer = " + str(net.node[node2_set]['layer']))
-            util.cluster_print("\n\n\n")
+            util.cluster_print(configs['output_directory'], "\n\n\n")
             assert(False)
 
     if (bias and bias_on == 'edges'): bias.assign_an_edge_bias(net, [node1,node2], configs['bias_distribution'], given_bias=given_bias)

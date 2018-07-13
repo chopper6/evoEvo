@@ -251,8 +251,8 @@ def rm_an_edge(net, configs, layer=None):
         net.remove_edge(edge[0], edge[1])
 
         if directed:
-            if net.nodes[edge[0]]['layer'] == 'input': node1_layer = 'input'
-            if net.nodes[edge[1]]['layer'] == 'output': node2_layer = 'output'
+            if net.node[edge[0]]['layer'] == 'input': node1_layer = 'input'
+            if net.node[edge[1]]['layer'] == 'output': node2_layer = 'output'
             #output as source node is irrelevant (not separately tracked)
 
         post_size = len(net.edges())

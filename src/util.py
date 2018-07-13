@@ -127,7 +127,7 @@ def test_stop_condition(size, gen, configs):
     if (stop_condition == 'size'):
         if (size < end_size): cont = True
         else: cont = False
-    elif (stop_condition == 'generation'):
+    elif (stop_condition == 'generation' or stop_condition == 'gen'):
         if (gen < max_gen): cont = True
         else: cont = False
     else:

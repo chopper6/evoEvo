@@ -225,18 +225,18 @@ def one_base_err_plot(dirr, err, t, curr_gen):
         x = t
         y = err
 
-    if len(x) > 10:
-        xticks = [int(j * len(x) / 10) for j in range(11)]
-        xlabels = [x[xtick] for xtick in xticks]
+    if len(x) > 11:
+        xticks = [int(j * x[-1] / 10) for j in range(11)]
+        #xlabels = [x[xtick] for xtick in xticks]
     else:
-        xticks, xlabels = x, x
+        xticks = x
 
     plt.plot(x, y)
 
     plt.ylabel("Mean Squared Error")
     plt.title("Gen " + str(curr_gen) + " Base Problem Error")
     plt.xlabel("Iteration")
-    plt.xticks(xticks, xlabels)
+    plt.xticks(xticks, xticks)
     plt.savefig(dirr + "/base_problem/Error_Gen" + str(curr_gen) + ".png")
     plt.clf()
 

@@ -22,8 +22,8 @@ def evolve_master(configs):
         output.master_info(population, gen, size, pop_size, num_survive, configs)
 
 
-        gen += 1 #since this is the 2nd round of pressurize
-        write_mpi_info(output_dir, gen)
+        gen += 1 #here since 1st round of pressurize during init_run()
+        write_mpi_info(output_dir, gen) #also writes progress file with relevant generation
 
         if biased: biases = bias.gen_biases(configs) #all nets must have same bias to have comparable fitness
         else: biases = None

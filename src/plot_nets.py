@@ -225,10 +225,8 @@ def one_base_err_plot(dirr, err, t, curr_gen):
         x = t
         y = err
 
-
     if len(x) > 10:
-        xticks = [int(j * int(x[-1]) / 10) for j in range(10)]
-        print("plots_nets, x = " + str(x) + "; xticks = " + str(xticks))
+        xticks = [int(j * len(x) / 10) for j in range(11)]
         xlabels = [x[xtick] for xtick in xticks]
     else:
         xticks, xlabels = x, x
@@ -394,8 +392,7 @@ def features_over_time(dirr, net_info, titles, mins, maxs, use_lims):
 
         x_ticks = []
         max_gen = xdata[-1]
-        for j in range(0, 11):
-            x_ticks.append(int((max_gen / 10) * j))
+        x_ticks = [int((max_gen / 10) * j) for j in range(11)]
         plt.plot(xdata, ydata)
 
         plt.ylabel(titles[i])

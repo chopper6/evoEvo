@@ -30,28 +30,19 @@ def calc_discrete_undirected (fitness_metric, up, down):
     else: assert (False)  # unknown fitness metric
 
 
-def calc_continuous (states, fitness_metric, distrib_lng=1):
-    if len(states)==0: 
+def calc_continuous (net, node, fitness_metric, distrib_lng=1):
+    if net.node[node]['layer'] == 'input':
+        return None
+
+
+    states, prev_states = retrieve_states(net, node)
+    mean, var, entropish = calc_mean_var_entropish(states, distrib_lng)
+    prev_mean, prev_var, prev_entropish = calc_mean_var_entropish(prev_states, distrib_lng)
+
+    if len(states)==0:
         fitness = 1
         return fitness
 
-    mean = sum(states)/len(states)
-    var, entropish = 0, 0
-    # may have to change distrib_lng if, for ex. states can be in [-1,1]
-
-    for state in states:
-        var += math.pow((mean-state),2)
-        pr = 1-abs(mean-state)/ float(distrib_lng)
-        assert(pr >= 0 and pr <= 1)
-        if pr != 0:
-            entropish -= math.log2(pr)
-
-    if (len(states) > 1): var /= len(states) - 1
-    if (len(states) > 0): entropish /= len(states)
-
-    if var == 0:
-        fitness = 1
-        return fitness
 
     fitness = None
 
@@ -60,6 +51,17 @@ def calc_continuous (states, fitness_metric, distrib_lng=1):
 
     elif (fitness_metric == 'variance'):
         fitness = var
+
+    elif (fitness_metric == 'info'):
+        info = 1-entropish
+        assert(info >= 0 and info <= 1)
+        return info
+
+    elif (fitness_metric == 'predictive_info'):
+        prev_info = 1-entropish
+        assert(prev_info >= 0 and prev_info <= 1)
+
+        pred_info = 1-prev_entropish
 
     elif (fitness_metric == 'entropish_old'):
         if (var < .01): entropish = 0
@@ -83,3 +85,38 @@ def shannon_entropy(up,down):
     else:  H_down = -1 * (down / (up + down)) * math.log2(down / float(up + down))
 
     return H_up + H_down
+
+
+def retrieve_states(net, node):
+    states, prev_states = [], []
+    for in_edge in net.in_edges(node):
+        if net.node[in_edge[0]]['state'] is not None:
+            states.append(net.node[in_edge[0]]['state'])
+
+        if net.node[in_edge[0]]['prev_state'] is not None:
+            prev_states.append(net.node[in_edge[0]]['prev_state'])
+
+    return states, prev_states
+
+
+def calc_mean_var_entropish(states, distrib_lng):
+
+    mean = sum(states)/len(states)
+    var, entropish = 0, 0
+    # may have to change distrib_lng if, for ex. states can be in [-1,1]
+
+    for state in states:
+        var += math.pow((mean-state),2)
+        pr = 1-abs(mean-state)/ float(distrib_lng)
+        assert(pr >= 0 and pr <= 1)
+        if pr != 0:
+            entropish -= math.log2(pr)
+
+    if (len(states) > 1): var /= len(states) - 1
+    if (len(states) > 0): entropish /= len(states)
+
+    return mean, var, entropish
+
+
+def calc_pred_infoish(prev_mean, states, distrib_lng):
+    assert(False)

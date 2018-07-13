@@ -48,14 +48,9 @@ def calc_node_fitness(net, configs):
 
         if directed:
             for n in net.nodes():
-                if net.node[n]['layer'] != 'input':
-                    states = []
-                    for in_edge in net.in_edges(n):
-                        if net.node[in_edge[0]]['state'] is not None:
-                            states.append(net.node[in_edge[0]]['state'])
 
-
-                    fitness = node_fitness.calc_continuous(states, fitness_metric)
+                fitness = node_fitness.calc_continuous(net,n, fitness_metric)
+                if fitness is not None: #for ex input nodes will yield none
                     net.node[n]['fitness'] += fitness
 
         else:
@@ -84,7 +79,7 @@ def node_product(net, scale_node_fitness):
             if scale_node_fitness: #hasn't really worked so far, in progress
                 e2n = len(net.edges(n))
                 Inode = net.node[n]['fitness']
-                fitness_score += -1*math.log(net.node[n]['fitness'])
+                fitness_score += -1*math.log(net.node[n]['fitness'], len(net.edges()))
             else:
                 # NOTE THAT THIS SEEMS TO INVERT THE MEANING, IE INFO --> ENTROPY : MAX --> MIN
                 fitness_score += -1*math.log(net.node[n]['fitness'])

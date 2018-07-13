@@ -21,7 +21,7 @@ def feedfwd_step(net, configs):
     for i in range(diameter): #all nodes should have had a chance to effect one another (except for directed aspect...)
         step_fwd(net, configs)
     MSE = stochastic_backprop (net, configs, output) #i.e. only care about last iteration
-    lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases -/> isn't backprop 1 learning?
+    lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases
 
     return MSE
 
@@ -71,6 +71,7 @@ def apply_input(net, input):
 
 
 def lvl_1_reservoir_learning(net, configs):
+    # alters weights in reservoir (as opposed to output layer)
 
     # TODO: add this
     return

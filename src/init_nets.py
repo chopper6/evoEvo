@@ -1,5 +1,4 @@
-import pickle, networkx as nx
-import random as rd
+import pickle, networkx as nx, random as rd, math
 import init, mutate, bias, util
 
 def init_population(pop_size, configs):
@@ -37,7 +36,8 @@ def init_population(pop_size, configs):
 #HELPER FUNCTIONS
 def gen_rd_nets(pop_size, configs):
     start_size = int(configs['starting_size'])
-    assert (start_size >= min_num_nodes(configs))
+    num_init_nodes = min_num_nodes(configs)
+    assert (start_size >= num_init_nodes)
 
     edge_node_ratio = float(configs['edge_to_node_ratio'])
     num_edges = int(start_size*edge_node_ratio)
@@ -45,6 +45,7 @@ def gen_rd_nets(pop_size, configs):
     num_input_nodes = int(configs['num_input_nodes'])
     num_output_nodes = int(configs['num_output_nodes'])
     varied_init_population = util.boool(configs['varied_init_population'])
+    single_cc = util.boool(configs['single_cc'])
 
     population = [nx.empty_graph(0) for i in range(pop_size)]  # those warnings are annoying
 
@@ -52,49 +53,56 @@ def gen_rd_nets(pop_size, configs):
     else:                       reps = 1
 
     for rep in range(reps):
+        net = population[rep]
 
         if directed:
-            population[rep] = nx.empty_graph(8, create_using=nx.DiGraph())
+            net = nx.empty_graph(num_init_nodes, create_using=nx.DiGraph())
 
             init_directed_attributes(population, configs)
 
             # init hidden layer
-            num_add = int(edge_node_ratio * 8)
-            mutate.add_edges(population[rep], num_add, configs)
+            num_add = int(edge_node_ratio * num_init_nodes)
+            mutate.add_edges(net, num_add, configs)
 
-            if util.boool(configs['single_cc']): mutate.ensure_single_cc(population[rep], configs)
+            if single_cc: mutate.ensure_single_cc(net, configs)
             # because init_nets for example can add to a previously node-only graph, which should then be connected
-
 
 
             # input and output layers
             assert(num_input_nodes > 0 and num_output_nodes > 0)
-            population[rep].graph['input_nodes'] = []
-            population[rep].graph['output_nodes'] = []
-            mutate.add_nodes(population[rep], num_output_nodes, configs, layer='output')
-            mutate.add_nodes(population[rep], num_input_nodes, configs, layer='input')
+            net.graph['input_nodes'], net.graph['output_nodes'] = [], []
+            mutate.add_nodes(net, num_output_nodes, configs, node2_layer='output')
+            mutate.add_nodes(net, num_input_nodes, configs, node1_layer='input')
 
             # more to hidden layer
-            mutate.add_nodes(population[rep], start_size - 8, configs)
+            mutate.add_nodes(net, start_size - num_init_nodes, configs)
 
             # attempt to patch bias introduced into input and output wiring
-            num_rewire = start_size * 10
-            mutate.rewire(population[rep], num_rewire, configs)
+            num_rewire = len(net.edges()) * 10
+            mutate.rewire(net, num_rewire, configs)
+
+            num_reservoir_edges = len(net.in_edges()) + len(net.out_edges()) \
+                                  - len(net.in_edges(net.graph['output_nodes'])) - len(net.out_edges(net.graph['input_nodes']))
 
 
         else:
-            population[rep] = nx.empty_graph(8, create_using=nx.DiGraph())
+            net = nx.empty_graph(8, create_using=nx.DiGraph())
 
             num_add = int(edge_node_ratio * 8)
-            mutate.add_edges(population[rep], num_add, configs)
-            if util.boool(configs['single_cc']): mutate.ensure_single_cc(population[rep], configs)
-            mutate.add_nodes(population[rep], start_size - 8, configs)
+            mutate.add_edges(net, num_add, configs)
+            if single_cc: mutate.ensure_single_cc(net, configs)
+            mutate.add_nodes(net, start_size - 8, configs)
+            num_reservoir_edges = len(net.edges())
 
         # correct for off-by-one-errors since rounding occurs twice
-        if (len(population[rep].edges()) == num_edges + 1): mutate.rm_edges(population[rep], 1, configs)
-        if (len(population[rep].edges()) == num_edges - 1): mutate.add_edges(population[rep], 1, configs)
+        if (num_reservoir_edges == num_edges + 1): mutate.rm_edges(net, 1, configs)
+        elif (num_reservoir_edges == num_edges - 1): mutate.add_edges(net, 1, configs)
+        elif (num_reservoir_edges != num_edges):
+            print("ERROR in init_nets.gen_rd_nets(): net has " + str(len(net.edges())) + " edges, but should have " + str(num_edges))
+            assert(False)
 
-        mutate.ensure_single_cc(population[rep], configs)
+        mutate.ensure_single_cc(net, configs)
+        if directed: mutate.check_layers(net, configs)
 
     if not varied_init_population:
         population = [population[0].copy() for i in range(pop_size)]
@@ -116,9 +124,15 @@ def min_num_nodes(configs):
     assert(directed) #too lazy to make undirected version now
 
     if self_loops:
-        return edge_node_ratio
+        min_num = edge_node_ratio
     else:
-        return edge_node_ratio + 1
+        min_num = edge_node_ratio + 1
+
+    min_num_for_inputs = math.ceil(float(configs['from_inputs_edge_ratio']))
+    min_num_for_outputs = math.ceil(float(configs['to_outputs_edge_ratio']))
+
+    return max(min_num, min_num_for_inputs, min_num_for_outputs)
+
 
 def double_check(population, configs):
     #TODO: eventually cut this for time sake
@@ -149,7 +163,7 @@ def double_check(population, configs):
 
         if not util.boool(configs['out_edges_from_outputs']):
             for o in p.graph['output_nodes']:
-                assert(not p.out_edges(o)) #but will shortly rm this condition
+                assert(not p.out_edges(o))
 
 
 def init_directed_attributes(population, configs):

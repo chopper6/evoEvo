@@ -412,9 +412,9 @@ def sample_edge(net, layer):
     if layer is None:
         edge = rd.sample(net.edges(), 1)
     elif layer == 'input':
-        edge = rd.sample(net.out_edges(net.graph['input_nodes']))
+        edge = rd.sample(net.out_edges(net.graph['input_nodes']),1)
     elif layer == 'output':
-        edge = rd.sample(net.in_edges(net.graph['output_nodes']))
+        edge = rd.sample(net.in_edges(net.graph['output_nodes']),1)
     else: assert(False)
 
     edge = edge[0]  # just cause sample returns [edge]

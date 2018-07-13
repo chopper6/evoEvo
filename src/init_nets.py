@@ -71,8 +71,8 @@ def gen_rd_nets(pop_size, configs):
             # input and output layers
             assert(num_input_nodes > 0 and num_output_nodes > 0)
             net.graph['input_nodes'], net.graph['output_nodes'] = [], []
-            mutate.add_nodes(net, num_output_nodes, configs, node2_layer='output')
-            mutate.add_nodes(net, num_input_nodes, configs, node1_layer='input')
+            mutate.add_nodes(net, num_output_nodes, configs, layer='output')
+            mutate.add_nodes(net, num_input_nodes, configs, layer='input')
 
             # more to hidden layer
             mutate.add_nodes(net, start_size - num_init_nodes, configs)

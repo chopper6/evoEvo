@@ -53,14 +53,12 @@ def gen_rd_nets(pop_size, configs):
     else:                       reps = 1
 
     for rep in range(reps):
-        net = population[rep]
 
         if directed:
-            net = nx.empty_graph(num_init_nodes, create_using=nx.DiGraph())
+            population[rep] = nx.empty_graph(num_init_nodes, create_using=nx.DiGraph())
+            net = population[rep]
 
             init_directed_attributes(population, configs)
-            for node in net.nodes():
-                assert(net.node[node]['layer'] != None)
 
             # init hidden layer
             num_add = int(edge_node_ratio * num_init_nodes)

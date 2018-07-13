@@ -59,6 +59,8 @@ def gen_rd_nets(pop_size, configs):
             net = nx.empty_graph(num_init_nodes, create_using=nx.DiGraph())
 
             init_directed_attributes(population, configs)
+            for node in net.nodes():
+                assert(net.node[node]['layer'] != None)
 
             # init hidden layer
             num_add = int(edge_node_ratio * num_init_nodes)
@@ -172,7 +174,7 @@ def init_directed_attributes(population, configs):
         p.graph['fitness'] = 0
         p.graph['error'] = 0
 
-        # THESSE SHOULD JUST BE FOR THE INITIAL NODES OF THE EMPTY GRAPH
+        # THESE SHOULD JUST BE FOR THE INITIAL NODES OF THE EMPTY GRAPH
         for n in p.nodes():
             p.node[n]['state'] = None
             p.node[n]['neuron_bias'] = assign_edge_weight(configs)

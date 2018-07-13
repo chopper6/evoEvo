@@ -67,6 +67,8 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
             net.node[new_node]['state'] = None
             net.node[new_node]['neuron_bias'] = init_nets.assign_edge_weight(configs)
 
+            assert (net.node[new_node]['layer'] != None)
+
         # ADD EDGE TO NEW NODE TO KEEP CONNECTED
         if biases and bias_on=='edges': add_this_edge(net, configs, node1=new_node, given_bias=biases[i])
         else: add_this_edge(net, configs, node1=new_node, node1_layer = node1_layer, node2_layer = node2_layer)

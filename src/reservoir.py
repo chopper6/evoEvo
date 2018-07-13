@@ -17,13 +17,11 @@ def feedfwd_step(net, configs):
 
     input, output = problem_instance(net, configs)
     apply_input(net, input)
-    MSE = 0
     diameter = nx.diameter(net.to_undirected())
     for i in range(diameter): #all nodes should have had a chance to effect one another (except for directed aspect...)
         step_fwd(net, configs)
-        MSE += stochastic_backprop (net, configs, output)
+    MSE = stochastic_backprop (net, configs, output) #i.e. only care about last iteration
     lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases -/> isn't backprop 1 learning?
-    MSE /= diameter
 
     return MSE
 

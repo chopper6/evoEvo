@@ -226,8 +226,9 @@ def one_base_err_plot(dirr, err, t, curr_gen):
         y = err
 
 
-    if len(x) > 8:
-        xticks = [int(j * int(x[-1]) / 8) for j in range(8)]
+    if len(x) > 10:
+        xticks = [int(j * int(x[-1]) / 10) for j in range(10)]
+        print("plots_nets, x = " + str(x) + "; xticks = " + str(xticks))
         xlabels = [x[xtick] for xtick in xticks]
     else:
         xticks, xlabels = x, x

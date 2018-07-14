@@ -37,6 +37,7 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
     biased = util.boool(configs['biased'])
     bias_on = configs['bias_on']
     directed = util.boool(configs['directed'])
+    single_cc = util.boool(configs['single_cc'])
 
     node1_layer, node2_layer = None, None
     if layer == 'input':     node1_layer = 'input'
@@ -69,26 +70,31 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
 
 
         # ADD EDGE TO NEW NODE TO KEEP CONNECTED
-        # TODO: this isn't nec is not configs['single_cc'], but then would need to add +1 edge
-        if biases and bias_on=='edges': add_this_edge(net, configs, node1=new_node, given_bias=biases[i])
-        else:
-            if layer is None or layer == 'input': add_this_edge(net, configs, node1=new_node, node1_layer = node1_layer, node2_layer = node2_layer)
-            elif layer=='output': add_this_edge(net, configs, node2=new_node, node1_layer = node1_layer, node2_layer = node2_layer)
-        assert(net.in_edges(new_node) or net.out_edges(new_node))
+        if single_cc:
+            if biases and bias_on=='edges': add_this_edge(net, configs, node1=new_node, given_bias=biases[i])
+            else:
+                if layer is None or layer == 'input': add_this_edge(net, configs, node1=new_node, node1_layer = node1_layer, node2_layer = node2_layer)
+                elif layer=='output': add_this_edge(net, configs, node2=new_node, node1_layer = node1_layer, node2_layer = node2_layer)
+            assert(net.in_edges(new_node) or net.out_edges(new_node))
 
-        if util.boool(configs['single_cc']): ensure_single_cc(net, configs)
+            ensure_single_cc(net, configs)
 
 
     # MAINTAIN NODE_EDGE RATIO
     if layer == 'input': num_edge_add = int(num_add * float(configs['from_inputs_edge_ratio'])) - num_add
     elif layer == 'output': num_edge_add = int(num_add * float(configs['to_outputs_edge_ratio'])) - num_add
     else: num_edge_add = int(num_add * float(configs['edge_to_node_ratio'])) - num_add
+
+    if not single_cc: num_edge_add += 1 #since haven't added one to start
+
     if biases and bias_on == 'edges':
         assert(len(biases) == num_edge_add + num_add)
         add_edges(net, num_edge_add, configs, biases=biases[num_add:])
-    else:  add_edges(net, num_edge_add, configs, node1_layer = node1_layer, node2_layer = node2_layer)
+    else:
+        add_edges(net, num_edge_add, configs, node1_layer = node1_layer, node2_layer = node2_layer)
+        correct_off_by_one_edges(net, configs, layer)
 
-    if util.boool(configs['single_cc']):
+    if single_cc:
         net_undir = net.to_undirected()
         num_cc = nx.number_connected_components(net_undir)
         assert(num_cc == 1)
@@ -448,3 +454,37 @@ def check_layers(net, configs):
     if num_edges != ideal_num_edges:
         print("ERROR in mutate.check_layers(): actual num RESERVOIR edges = " + str(num_edges) + ", but should be " + str(ideal_num_edges))
         assert (False)
+
+
+def correct_off_by_one_edges(net, configs, layer):
+
+    directed = util.boool(configs['directed'])
+    node1_layer, node2_layer = None, None
+
+    if layer == 'output':
+        num_edges = len(net.in_edges(net.graph['output_nodes']))
+        ideal_num_edges = int(configs['num_output_nodes']) * float(configs['to_outputs_edge_ratio'])
+        node2_layer = 'output'
+    elif layer == 'input':
+        num_edges = len(net.out_edges(net.graph['input_nodes']))
+        ideal_num_edges = int(configs['num_input_nodes']) * float(configs['from_inputs_edge_ratio'])
+        node1_layer = 'input'
+    else:
+        if directed:
+            num_edges = len(net.edges()) - len(net.in_edges(net.graph['output_nodes'])) - len(net.out_edges(net.graph['input_nodes']))
+            start_size = int(configs['starting_size'])
+            edge_node_ratio = float(configs['edge_to_node_ratio'])
+            ideal_num_edges = int(start_size*edge_node_ratio)
+        else:
+            num_edges = len(net.edges())
+            start_size = int(configs['starting_size'])
+            edge_node_ratio = float(configs['edge_to_node_ratio'])
+            ideal_num_edges = int(start_size * edge_node_ratio)
+
+    # correct for off-by-one-errors since rounding occurs twice
+    if (num_edges == ideal_num_edges + 1):
+        rm_an_edge(net, configs, layer = layer)
+    elif (num_edges == ideal_num_edges - 1):
+        add_this_edge(net, configs, node1_layer = node1_layer, node2_layer = node2_layer)
+    elif (num_edges != ideal_num_edges): assert(False) #shouldn't be more than off-by-one
+

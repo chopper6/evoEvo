@@ -40,7 +40,6 @@ def gen_rd_nets(pop_size, configs):
     assert (start_size >= num_init_nodes)
 
     edge_node_ratio = float(configs['edge_to_node_ratio'])
-    num_edges = int(start_size*edge_node_ratio)
     directed = util.boool(configs['directed'])
     num_input_nodes = int(configs['num_input_nodes'])
     num_output_nodes = int(configs['num_output_nodes'])
@@ -71,7 +70,6 @@ def gen_rd_nets(pop_size, configs):
             assert(num_input_nodes > 0 and num_output_nodes > 0)
             net.graph['input_nodes'], net.graph['output_nodes'] = [], []
             mutate.add_nodes(net, num_output_nodes, configs, layer='output')
-
             mutate.add_nodes(net, num_input_nodes, configs, layer='input')
 
             # more to hidden layer
@@ -82,8 +80,6 @@ def gen_rd_nets(pop_size, configs):
             num_rewire = len(net.edges()) * 10
             mutate.rewire(net, num_rewire, configs)
 
-            num_reservoir_edges = len(net.edges()) - len(net.in_edges(net.graph['output_nodes'])) - len(net.out_edges(net.graph['input_nodes']))
-
 
         else:
             net = nx.empty_graph(8, create_using=nx.DiGraph())
@@ -92,15 +88,7 @@ def gen_rd_nets(pop_size, configs):
             mutate.add_edges(net, num_add, configs)
             if single_cc: mutate.ensure_single_cc(net, configs)
             mutate.add_nodes(net, start_size - 8, configs)
-            num_reservoir_edges = len(net.edges())
 
-        # correct for off-by-one-errors since rounding occurs twice
-        if (num_reservoir_edges == num_edges + 1): mutate.rm_edges(net, 1, configs)
-        elif (num_reservoir_edges == num_edges - 1): mutate.add_edges(net, 1, configs)
-        elif (num_reservoir_edges != num_edges):
-            print("ERROR in init_nets.gen_rd_nets(): net has " + str(num_reservoir_edges) + " edges, but should have " + str(num_edges))
-            print_inout_edges(net, configs)
-            assert(False)
 
         mutate.ensure_single_cc(net, configs)
         if directed: mutate.check_layers(net, configs)
@@ -226,8 +214,7 @@ def print_inout_edges(net, configs):
 
     num_input_nodes = int(configs['num_input_nodes'])
     num_output_nodes = int(configs['num_output_nodes'])
-    num_reservoir_edges = len(net.edges()) \
-                          - len(net.in_edges(net.graph['output_nodes'])) - len(net.out_edges(net.graph['input_nodes']))
+    num_reservoir_edges = len(net.edges()) - len(net.in_edges(net.graph['output_nodes'])) - len(net.out_edges(net.graph['input_nodes']))
     start_size = int(configs['starting_size'])
     edge_node_ratio = float(configs['edge_to_node_ratio'])
     num_edges = int(start_size*edge_node_ratio)

@@ -84,7 +84,7 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
     if layer == 'input': num_edge_add = round(num_add * float(configs['from_inputs_edge_ratio'])) - num_add
     elif layer == 'output': 
         num_edge_add = round(num_add * float(configs['to_outputs_edge_ratio'])) - num_add
-        print("mutate(): curr #output edges = " + str(len(net.in_edges(net.graph['output_nodes']))) + ", adding " + str(num_edge_add) + "\n num out nodes added = " + str(num_add) + ", ratio = " + str(configs['to_outputs_edge_ratio']))
+        #print("mutate(): curr #output edges = " + str(len(net.in_edges(net.graph['output_nodes']))) + ", adding " + str(num_edge_add) + "\n num out nodes added = " + str(num_add) + ", ratio = " + str(configs['to_outputs_edge_ratio']))
     else: num_edge_add = round(num_add * float(configs['edge_to_node_ratio'])) - num_add
 
     if not single_cc: num_edge_add += 1 #since haven't added one to start

@@ -82,7 +82,9 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
 
     # MAINTAIN NODE_EDGE RATIO
     if layer == 'input': num_edge_add = int(num_add * float(configs['from_inputs_edge_ratio'])) - num_add
-    elif layer == 'output': num_edge_add = int(num_add * float(configs['to_outputs_edge_ratio'])) - num_add
+    elif layer == 'output': 
+        num_edge_add = int(num_add * float(configs['to_outputs_edge_ratio'])) - num_add
+        print("mutate(): curr #output edges = " + str(len(net.in_edges(net.graph['output_nodes']))) + ", adding " + str(num_edge_add) + "\n num out nodes added = " + str(num_add) + ", ratio = " + str(configs['to_outputs_edge_ratio']))
     else: num_edge_add = int(num_add * float(configs['edge_to_node_ratio'])) - num_add
 
     if not single_cc: num_edge_add += 1 #since haven't added one to start
@@ -486,5 +488,7 @@ def correct_off_by_one_edges(net, configs, layer):
         rm_an_edge(net, configs, layer = layer)
     elif (num_edges == ideal_num_edges - 1):
         add_this_edge(net, configs, node1_layer = node1_layer, node2_layer = node2_layer)
-    elif (num_edges != ideal_num_edges): assert(False) #shouldn't be more than off-by-one
+    elif (num_edges != ideal_num_edges): 
+        print("ERROR in mutate.correct_off_by_one_edges(): num edges = " + str(num_edges) + ", but ideal = " + str(ideal_num_edges))
+        assert(False) #shouldn't be more than off-by-one
 

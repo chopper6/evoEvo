@@ -63,37 +63,26 @@ def gen_rd_nets(pop_size, configs):
             # init hidden layer
             num_add = int(edge_node_ratio * num_init_nodes)
             mutate.add_edges(net, num_add, configs)
-            print("\n1 after first slew of hidden: num edges = " + str(len(net.edges())))
 
             if single_cc: mutate.ensure_single_cc(net, configs)
-
-            print("\n1.5 after ensure_single_cc: num edges = " + str(len(net.edges())))
             # because init_nets for example can add to a previously node-only graph, which should then be connected
 
             # input and output layers
             assert(num_input_nodes > 0 and num_output_nodes > 0)
             net.graph['input_nodes'], net.graph['output_nodes'] = [], []
             mutate.add_nodes(net, num_output_nodes, configs, layer='output')
-            print("\n2 after output:")
-            print_inout_edges(net, configs)
 
             mutate.add_nodes(net, num_input_nodes, configs, layer='input')
-            print("\n3: after input")
-            print_inout_edges(net, configs)
-
 
             # more to hidden layer
             mutate.add_nodes(net, start_size - num_init_nodes, configs)
-            print("\n4: after all hidden nodes, before rewire")
-            print_inout_edges(net, configs)
 
 
             # attempt to patch bias introduced into input and output wiring
             num_rewire = len(net.edges()) * 10
             mutate.rewire(net, num_rewire, configs)
 
-            num_reservoir_edges = len(net.in_edges()) + len(net.out_edges()) \
-                                  - len(net.in_edges(net.graph['output_nodes'])) - len(net.out_edges(net.graph['input_nodes']))
+            num_reservoir_edges = len(net.edges()) - len(net.in_edges(net.graph['output_nodes'])) - len(net.out_edges(net.graph['input_nodes']))
 
 
         else:
@@ -233,6 +222,7 @@ def assign_bias_weight(configs):
 
 
 def print_inout_edges(net, configs):
+    # just used for debugging
 
     num_input_nodes = int(configs['num_input_nodes'])
     num_output_nodes = int(configs['num_output_nodes'])
@@ -247,4 +237,3 @@ def print_inout_edges(net, configs):
     print("# input edges = " + str(len(net.out_edges(net.graph['input_nodes']))) + " vs " + str(
         int(num_input_nodes * float(configs['from_inputs_edge_ratio']))))
     print("# reservoir edges = " + str(num_reservoir_edges) + " vs " + str(num_edges))
-    print("# TOTAL edges = " + str(len(net.edges())))

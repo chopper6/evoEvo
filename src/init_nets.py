@@ -233,8 +233,14 @@ def print_inout_edges(net, configs):
 
     num_input_nodes = int(configs['num_input_nodes'])
     num_output_nodes = int(configs['num_output_nodes'])
+    num_reservoir_edges = len(net.in_edges()) + len(net.out_edges()) \
+                          - len(net.in_edges(net.graph['output_nodes'])) - len(net.out_edges(net.graph['input_nodes']))
+    start_size = int(configs['starting_size'])
+    edge_node_ratio = float(configs['edge_to_node_ratio'])
+    num_edges = int(start_size*edge_node_ratio)
 
     print("# output edges = " + str(len(net.in_edges(net.graph['output_nodes']))) + " vs " + str(
         int(num_output_nodes * float(configs['to_outputs_edge_ratio']))))
     print("# input edges = " + str(len(net.out_edges(net.graph['input_nodes']))) + " vs " + str(
         int(num_input_nodes * float(configs['from_inputs_edge_ratio']))))
+    print("# reservoir edges = " + str(num_reservoir_edges) + " vs " + str(num_edges))

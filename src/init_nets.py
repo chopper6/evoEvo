@@ -46,18 +46,20 @@ def gen_rd_nets(pop_size, configs):
     varied_init_population = util.boool(configs['varied_init_population'])
     single_cc = util.boool(configs['single_cc'])
 
-    population = [nx.empty_graph(0) for i in range(pop_size)]  # those warnings are annoying
 
-    if varied_init_population:  reps = pop_size
-    else:                       reps = 1
+
+    if varied_init_population:
+        population = [nx.empty_graph(num_init_nodes, create_using=nx.DiGraph()) for i in range(pop_size)]
+        reps = pop_size
+    else:
+        population = [None for i in range(pop_size)]
+        population[0] = nx.empty_graph(num_init_nodes, create_using=nx.DiGraph())
+        reps = 1
 
     for rep in range(reps):
 
         if directed:
-            population[rep] = nx.empty_graph(num_init_nodes, create_using=nx.DiGraph())
             net = population[rep]
-
-            init_directed_attributes(population, configs)
 
             # init hidden layer
             num_add = round(edge_node_ratio * num_init_nodes)
@@ -99,6 +101,8 @@ def gen_rd_nets(pop_size, configs):
 
     else:
         double_check(population, configs)
+
+    if directed: init_directed_attributes(population, configs)
 
     return population
 

@@ -66,16 +66,26 @@ def gen_rd_nets(pop_size, configs):
 
             if single_cc: mutate.ensure_single_cc(net, configs)
             # because init_nets for example can add to a previously node-only graph, which should then be connected
-
+            print("\n1:")
+            print_inout_edges(net, configs)
 
             # input and output layers
             assert(num_input_nodes > 0 and num_output_nodes > 0)
             net.graph['input_nodes'], net.graph['output_nodes'] = [], []
             mutate.add_nodes(net, num_output_nodes, configs, layer='output')
+            print("\n2 after output:")
+            print_inout_edges(net, configs)
+
             mutate.add_nodes(net, num_input_nodes, configs, layer='input')
+            print("\n3: after input")
+            print_inout_edges(net, configs)
+
 
             # more to hidden layer
             mutate.add_nodes(net, start_size - num_init_nodes, configs)
+            print("\n4: after all hidden nodes, before rewire")
+            print_inout_edges(net, configs)
+
 
             # attempt to patch bias introduced into input and output wiring
             num_rewire = len(net.edges()) * 10
@@ -99,8 +109,7 @@ def gen_rd_nets(pop_size, configs):
         elif (num_reservoir_edges == num_edges - 1): mutate.add_edges(net, 1, configs)
         elif (num_reservoir_edges != num_edges):
             print("ERROR in init_nets.gen_rd_nets(): net has " + str(num_reservoir_edges) + " edges, but should have " + str(num_edges))
-            print("# output edges = " + str(len(net.in_edges(net.graph['output_nodes']))) + " vs " + str(int(num_output_nodes*float(configs['to_outputs_edge_ratio']))))
-            print("# input edges = " + str(len(net.out_edges(net.graph['input_nodes']))) + " vs " + str(int(num_input_nodes*float(configs['from_inputs_edge_ratio']))))
+            print_inout_edges(net, configs)
             assert(False)
 
         mutate.ensure_single_cc(net, configs)
@@ -220,3 +229,14 @@ def assign_bias_weight(configs):
     elif distrib == 'uniform': return rd.uniform(-1,1)
 
     else: assert(False)
+
+
+def print_inout_edges(net, configs):
+
+    num_input_nodes = int(configs['num_input_nodes'])
+    num_output_nodes = int(configs['num_output_nodes'])
+
+    print("# output edges = " + str(len(net.in_edges(net.graph['output_nodes']))) + " vs " + str(
+        int(num_output_nodes * float(configs['to_outputs_edge_ratio']))))
+    print("# input edges = " + str(len(net.out_edges(net.graph['input_nodes']))) + " vs " + str(
+        int(num_input_nodes * float(configs['from_inputs_edge_ratio']))))

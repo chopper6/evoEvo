@@ -377,7 +377,7 @@ def check_constraints(net, node1, node2, configs):
         if not util.boool(configs['out_edges_from_outputs']):
             if net.node[node1]['layer'] == 'output': return False
 
-        if net.node[node1]['layer'] == 'input' and net.node[2]['layer'] == 'output': return False
+        if net.node[node1]['layer'] == 'input' and net.node[node2]['layer'] == 'output': return False
         #this one is not objectionable to the model, it's just a giant flagpole up the ass
         #would have to anticipate rewire scenarios where edge[input][output] is rm'd
         #then rebalancing is req'd (to maintain requested num of input and output edges)...ect, ect

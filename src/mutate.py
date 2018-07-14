@@ -94,7 +94,8 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
         add_edges(net, num_edge_add, configs, biases=biases[num_add:])
     else:
         add_edges(net, num_edge_add, configs, node1_layer = node1_layer, node2_layer = node2_layer)
-        correct_off_by_one_edges(net, configs, layer)
+
+    correct_off_by_one_edges(net, configs, layer)
 
     if single_cc:
         net_undir = net.to_undirected()
@@ -451,7 +452,7 @@ def check_layers(net, configs):
     # check hidden e2n
     num_edges = len(net.edges()) - num_edges_to_outputs - num_edges_from_inputs
     reservoir_size = len(net.nodes()) - len(net.graph['output_nodes']) - len(net.graph['input_nodes'])
-    ideal_num_edges = int(float(configs['edge_to_node_ratio']) * reservoir_size)
+    ideal_num_edges = round(float(configs['edge_to_node_ratio']) * reservoir_size)
 
     if num_edges != ideal_num_edges:
         print("ERROR in mutate.check_layers(): actual num RESERVOIR edges = " + str(num_edges) + ", but should be " + str(ideal_num_edges))

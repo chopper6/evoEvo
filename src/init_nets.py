@@ -69,11 +69,11 @@ def gen_rd_nets(pop_size, configs):
             # input and output layers
             assert(num_input_nodes > 0 and num_output_nodes > 0)
             net.graph['input_nodes'], net.graph['output_nodes'] = [], []
-            mutate.add_nodes(net, num_output_nodes, configs, layer='output')
-            mutate.add_nodes(net, num_input_nodes, configs, layer='input')
+            mutate.add_nodes(net, num_output_nodes, configs, layer='output', init=True)
+            mutate.add_nodes(net, num_input_nodes, configs, layer='input', init=True)
 
             # more to hidden layer
-            mutate.add_nodes(net, start_size - num_init_nodes, configs)
+            mutate.add_nodes(net, start_size - num_init_nodes, configs, init=True)
 
 
             # attempt to patch bias introduced into input and output wiring
@@ -87,7 +87,7 @@ def gen_rd_nets(pop_size, configs):
             num_add = round(edge_node_ratio * 8)
             mutate.add_edges(net, num_add, configs)
             if single_cc: mutate.ensure_single_cc(net, configs)
-            mutate.add_nodes(net, start_size - 8, configs)
+            mutate.add_nodes(net, start_size - 8, configs, init=True)
 
 
         mutate.ensure_single_cc(net, configs)

@@ -32,7 +32,7 @@ def mutate(configs, net, biases = None):
 
 
 ################################ MUTATIONS ################################
-def add_nodes(net, num_add, configs, biases=None, layer = None):
+def add_nodes(net, num_add, configs, biases=None, layer = None, init=False):
 
     biased = util.boool(configs['biased'])
     bias_on = configs['bias_on']
@@ -95,7 +95,7 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
     else:
         add_edges(net, num_edge_add, configs, node1_layer = node1_layer, node2_layer = node2_layer)
 
-    correct_off_by_one_edges(net, configs, layer)
+    correct_off_by_one_edges(net, configs, layer, init)
 
     if single_cc:
         net_undir = net.to_undirected()
@@ -288,7 +288,7 @@ def rm_edges(net, num_rm, configs):
     assert(not directed) #would have to deal with layer shit
 
     for j in range(num_rm):
-        orig_bias, node1_layer, node2_layer = rm_an_edge(net,configs)
+        orig_bias = rm_an_edge(net,configs)
         orig_biases.append(orig_bias)
 
     return orig_biases
@@ -459,7 +459,7 @@ def check_layers(net, configs):
         assert (False)
 
 
-def correct_off_by_one_edges(net, configs, layer):
+def correct_off_by_one_edges(net, configs, layer, init=False):
 
     directed = util.boool(configs['directed'])
     node1_layer, node2_layer = None, None
@@ -484,10 +484,13 @@ def correct_off_by_one_edges(net, configs, layer):
             ideal_num_edges = round(len(net.nodes()) * edge_node_ratio)
 
     # correct for off-by-one-errors since rounding occurs twice
-    if (num_edges == ideal_num_edges + 1):
+    if (num_edges > ideal_num_edges):
         rm_an_edge(net, configs, layer = layer)
     elif (num_edges == ideal_num_edges - 1):
         add_this_edge(net, configs, node1_layer = node1_layer, node2_layer = node2_layer)
+    elif (init is True and num_edges < ideal_num_edges):
+        num_add = ideal_num_edges - num_edges
+        add_edges(net, num_add, configs, node1_layer = node1_layer, node2_layer = node2_layer)
     elif (num_edges != ideal_num_edges): 
         print("ERROR in mutate.correct_off_by_one_edges(): num edges = " + str(num_edges) + ", but ideal = " + str(ideal_num_edges))
         assert(False) #shouldn't be more than off-by-one

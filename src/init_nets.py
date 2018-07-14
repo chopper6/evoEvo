@@ -63,8 +63,11 @@ def gen_rd_nets(pop_size, configs):
             # init hidden layer
             num_add = int(edge_node_ratio * num_init_nodes)
             mutate.add_edges(net, num_add, configs)
+            print("\n1 after first slew of hidden: num edges = " + str(len(net.edges())))
 
             if single_cc: mutate.ensure_single_cc(net, configs)
+
+            print("\n1.5 after ensure_single_cc: num edges = " + str(len(net.edges())))
             # because init_nets for example can add to a previously node-only graph, which should then be connected
 
             # input and output layers

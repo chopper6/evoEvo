@@ -433,7 +433,7 @@ def check_layers(net, configs):
 
     # check output e2n
     num_edges_to_outputs = len(net.in_edges(net.graph['output_nodes']))
-    ideal_num_edges = int(len(net.graph['input_nodes']) * float(configs['to_outputs_edge_ratio']))
+    ideal_num_edges = int(len(net.graph['output_nodes']) * float(configs['to_outputs_edge_ratio']))
 
     if num_edges_to_outputs != ideal_num_edges:
         print("ERROR in mutate.check_layers(): actual num OUTPUT edges = " + str(num_edges_to_outputs) + ", but should be " + str(ideal_num_edges))

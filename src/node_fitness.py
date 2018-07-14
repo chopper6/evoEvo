@@ -101,6 +101,7 @@ def retrieve_states(net, node):
 
 def calc_mean_var_entropish(states, distrib_lng):
 
+    if (len(states) == 0): return 0,0,0
     mean = sum(states)/len(states)
     var, entropish = 0, 0
     # may have to change distrib_lng if, for ex. states can be in [-1,1]

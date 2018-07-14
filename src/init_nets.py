@@ -152,9 +152,9 @@ def double_check(population, configs):
 
         else:
             actual_size = start_size + num_input_nodes + num_output_nodes
-            actual_num_edges = num_edges + int((num_input_nodes + num_output_nodes) * edge_node_ratio)
-            assert (len(p.edges()) == actual_num_edges)
-            assert (len(p.nodes()) == actual_size)
+            #actual_num_edges = num_edges + int((num_input_nodes + num_output_nodes) * edge_node_ratio)
+            #assert (len(p.edges()) == actual_num_edges)
+            #assert (len(p.nodes()) == actual_size)
 
 
         #if not util.boool(configs['in_edges_to_inputs']):

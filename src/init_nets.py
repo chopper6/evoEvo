@@ -50,10 +50,12 @@ def gen_rd_nets(pop_size, configs):
 
     if varied_init_population:
         population = [nx.empty_graph(num_init_nodes, create_using=nx.DiGraph()) for i in range(pop_size)]
+        if directed: init_directed_attributes(population, configs)
         reps = pop_size
     else:
         population = [None for i in range(pop_size)]
         population[0] = nx.empty_graph(num_init_nodes, create_using=nx.DiGraph())
+        if directed: init_directed_attributes([population[0]], configs)
         reps = 1
 
     for rep in range(reps):
@@ -101,8 +103,6 @@ def gen_rd_nets(pop_size, configs):
 
     else:
         double_check(population, configs)
-
-    if directed: init_directed_attributes(population, configs)
 
     return population
 

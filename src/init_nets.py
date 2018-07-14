@@ -98,7 +98,9 @@ def gen_rd_nets(pop_size, configs):
         if (num_reservoir_edges == num_edges + 1): mutate.rm_edges(net, 1, configs)
         elif (num_reservoir_edges == num_edges - 1): mutate.add_edges(net, 1, configs)
         elif (num_reservoir_edges != num_edges):
-            print("ERROR in init_nets.gen_rd_nets(): net has " + str(len(net.edges())) + " edges, but should have " + str(num_edges))
+            print("ERROR in init_nets.gen_rd_nets(): net has " + str(num_reservoir_edges) + " edges, but should have " + str(num_edges))
+            print("# output edges = " + str(len(net.in_edges(net.graph['output_nodes']))) + " vs " + str(int(num_output_nodes*float(configs['to_outputs_edge_ratio']))))
+            print("# input edges = " + str(len(net.out_edges(net.graph['input_nodes']))) + " vs " + str(int(num_input_nodes*float(configs['from_inputs_edge_ratio']))))
             assert(False)
 
         mutate.ensure_single_cc(net, configs)

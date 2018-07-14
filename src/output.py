@@ -23,7 +23,7 @@ def master_info(population, gen, size, pop_size, num_survive, configs):
     if (num_data_output > 0):
         if (gen % int(end / num_data_output) == 0):
             popn_data(population, output_dir, gen)
-            util.cluster_print(output_dir, "Master at gen " + str(gen) + ", with net size = " + str(size) + " nodes and " + str(len(population[0].edges())) + " edges, " + str(num_survive) + "<=" + str(len(population)) + " survive out of " + str(pop_size))
+            util.cluster_print(output_dir, "Master at gen " + str(gen) + ", with net size = " + str(len(population[0].nodes())) + " nodes and " + str(len(population[0].edges())) + " edges, " + str(num_survive) + "<=" + str(len(population)) + " survive out of " + str(pop_size))
 
     if (num_net_output > 0):
         if (gen % int(end / num_net_output) == 0):

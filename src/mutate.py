@@ -474,14 +474,13 @@ def correct_off_by_one_edges(net, configs, layer):
     else:
         if directed:
             num_edges = len(net.edges()) - len(net.in_edges(net.graph['output_nodes'])) - len(net.out_edges(net.graph['input_nodes']))
-            start_size = round(configs['starting_size'])
             edge_node_ratio = float(configs['edge_to_node_ratio'])
-            ideal_num_edges = round(start_size*edge_node_ratio)
+            num_reservoir_nodes = len(net.nodes()) - len(net.graph['output_nodes']) - len(net.graph['input_nodes'])
+            ideal_num_edges = round(num_reservoir_nodes*edge_node_ratio)
         else:
             num_edges = len(net.edges())
-            start_size = int(configs['starting_size'])
             edge_node_ratio = float(configs['edge_to_node_ratio'])
-            ideal_num_edges = round(start_size * edge_node_ratio)
+            ideal_num_edges = round(len(net.nodes()) * edge_node_ratio)
 
     # correct for off-by-one-errors since rounding occurs twice
     if (num_edges == ideal_num_edges + 1):

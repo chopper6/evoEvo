@@ -66,8 +66,6 @@ def gen_rd_nets(pop_size, configs):
 
             if single_cc: mutate.ensure_single_cc(net, configs)
             # because init_nets for example can add to a previously node-only graph, which should then be connected
-            print("\n1:")
-            print_inout_edges(net, configs)
 
             # input and output layers
             assert(num_input_nodes > 0 and num_output_nodes > 0)

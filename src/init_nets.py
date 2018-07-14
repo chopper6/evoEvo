@@ -60,7 +60,7 @@ def gen_rd_nets(pop_size, configs):
             init_directed_attributes(population, configs)
 
             # init hidden layer
-            num_add = int(edge_node_ratio * num_init_nodes)
+            num_add = round(edge_node_ratio * num_init_nodes)
             mutate.add_edges(net, num_add, configs)
 
             if single_cc: mutate.ensure_single_cc(net, configs)
@@ -84,7 +84,7 @@ def gen_rd_nets(pop_size, configs):
         else:
             net = nx.empty_graph(8, create_using=nx.DiGraph())
 
-            num_add = int(edge_node_ratio * 8)
+            num_add = round(edge_node_ratio * 8)
             mutate.add_edges(net, num_add, configs)
             if single_cc: mutate.ensure_single_cc(net, configs)
             mutate.add_nodes(net, start_size - 8, configs)
@@ -128,7 +128,7 @@ def double_check(population, configs):
 
     start_size = int(configs['starting_size'])
     edge_node_ratio = float(configs['edge_to_node_ratio'])
-    num_edges = int(start_size*edge_node_ratio)
+    num_edges = round(start_size*edge_node_ratio)
     directed = util.boool(configs['directed'])
     num_input_nodes = int(configs['num_input_nodes'])
     num_output_nodes = int(configs['num_output_nodes'])
@@ -217,10 +217,10 @@ def print_inout_edges(net, configs):
     num_reservoir_edges = len(net.edges()) - len(net.in_edges(net.graph['output_nodes'])) - len(net.out_edges(net.graph['input_nodes']))
     start_size = int(configs['starting_size'])
     edge_node_ratio = float(configs['edge_to_node_ratio'])
-    num_edges = int(start_size*edge_node_ratio)
+    num_edges = round(start_size*edge_node_ratio)
 
     print("# output edges = " + str(len(net.in_edges(net.graph['output_nodes']))) + " vs " + str(
-        int(num_output_nodes * float(configs['to_outputs_edge_ratio']))))
+        round(num_output_nodes * float(configs['to_outputs_edge_ratio']))))
     print("# input edges = " + str(len(net.out_edges(net.graph['input_nodes']))) + " vs " + str(
-        int(num_input_nodes * float(configs['from_inputs_edge_ratio']))))
+        round(num_input_nodes * float(configs['from_inputs_edge_ratio']))))
     print("# reservoir edges = " + str(num_reservoir_edges) + " vs " + str(num_edges))

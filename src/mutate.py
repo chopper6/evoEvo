@@ -81,11 +81,11 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
 
 
     # MAINTAIN NODE_EDGE RATIO
-    if layer == 'input': num_edge_add = int(num_add * float(configs['from_inputs_edge_ratio'])) - num_add
+    if layer == 'input': num_edge_add = round(num_add * float(configs['from_inputs_edge_ratio'])) - num_add
     elif layer == 'output': 
-        num_edge_add = int(num_add * float(configs['to_outputs_edge_ratio'])) - num_add
+        num_edge_add = round(num_add * float(configs['to_outputs_edge_ratio'])) - num_add
         print("mutate(): curr #output edges = " + str(len(net.in_edges(net.graph['output_nodes']))) + ", adding " + str(num_edge_add) + "\n num out nodes added = " + str(num_add) + ", ratio = " + str(configs['to_outputs_edge_ratio']))
-    else: num_edge_add = int(num_add * float(configs['edge_to_node_ratio'])) - num_add
+    else: num_edge_add = round(num_add * float(configs['edge_to_node_ratio'])) - num_add
 
     if not single_cc: num_edge_add += 1 #since haven't added one to start
 
@@ -433,7 +433,7 @@ def check_layers(net, configs):
 
     # check input e2n
     num_edges_from_inputs = len(net.out_edges(net.graph['input_nodes']))
-    ideal_num_edges = int(len(net.graph['input_nodes']) * float(configs['from_inputs_edge_ratio']))
+    ideal_num_edges = round(len(net.graph['input_nodes']) * float(configs['from_inputs_edge_ratio']))
 
     if num_edges_from_inputs != ideal_num_edges:
         print("ERROR in mutate.check_layers(): actual num INPUT edges = " + str(num_edges_from_inputs) + ", but should be " + str(ideal_num_edges))
@@ -441,7 +441,7 @@ def check_layers(net, configs):
 
     # check output e2n
     num_edges_to_outputs = len(net.in_edges(net.graph['output_nodes']))
-    ideal_num_edges = int(len(net.graph['output_nodes']) * float(configs['to_outputs_edge_ratio']))
+    ideal_num_edges = round(len(net.graph['output_nodes']) * float(configs['to_outputs_edge_ratio']))
 
     if num_edges_to_outputs != ideal_num_edges:
         print("ERROR in mutate.check_layers(): actual num OUTPUT edges = " + str(num_edges_to_outputs) + ", but should be " + str(ideal_num_edges))
@@ -465,23 +465,23 @@ def correct_off_by_one_edges(net, configs, layer):
 
     if layer == 'output':
         num_edges = len(net.in_edges(net.graph['output_nodes']))
-        ideal_num_edges = int(configs['num_output_nodes']) * float(configs['to_outputs_edge_ratio'])
+        ideal_num_edges = round(int(configs['num_output_nodes']) * float(configs['to_outputs_edge_ratio']))
         node2_layer = 'output'
     elif layer == 'input':
         num_edges = len(net.out_edges(net.graph['input_nodes']))
-        ideal_num_edges = int(configs['num_input_nodes']) * float(configs['from_inputs_edge_ratio'])
+        ideal_num_edges = round(int(configs['num_input_nodes']) * float(configs['from_inputs_edge_ratio']))
         node1_layer = 'input'
     else:
         if directed:
             num_edges = len(net.edges()) - len(net.in_edges(net.graph['output_nodes'])) - len(net.out_edges(net.graph['input_nodes']))
-            start_size = int(configs['starting_size'])
+            start_size = round(configs['starting_size'])
             edge_node_ratio = float(configs['edge_to_node_ratio'])
-            ideal_num_edges = int(start_size*edge_node_ratio)
+            ideal_num_edges = round(start_size*edge_node_ratio)
         else:
             num_edges = len(net.edges())
             start_size = int(configs['starting_size'])
             edge_node_ratio = float(configs['edge_to_node_ratio'])
-            ideal_num_edges = int(start_size * edge_node_ratio)
+            ideal_num_edges = round(start_size * edge_node_ratio)
 
     # correct for off-by-one-errors since rounding occurs twice
     if (num_edges == ideal_num_edges + 1):

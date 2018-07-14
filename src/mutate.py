@@ -69,6 +69,7 @@ def add_nodes(net, num_add, configs, biases=None, layer = None):
 
 
         # ADD EDGE TO NEW NODE TO KEEP CONNECTED
+        # TODO: this isn't nec is not configs['single_cc'], but then would need to add +1 edge
         if biases and bias_on=='edges': add_this_edge(net, configs, node1=new_node, given_bias=biases[i])
         else:
             if layer is None or layer == 'input': add_this_edge(net, configs, node1=new_node, node1_layer = node1_layer, node2_layer = node2_layer)
@@ -238,8 +239,7 @@ def rm_an_edge(net, configs, layer=None):
         if util.boool(configs['single_cc']):
             # don't allow edges w/ 1 deg (which would then be severed from graph
             while ((net.in_degree(edge[0]) + net.out_degree(edge[0]) == 1) or (net.in_degree(edge[1]) + net.out_degree(edge[1]) == 1)):
-                edge = rd.sample(net.edges(), 1)
-                edge = edge[0]
+                edge = sample_edge(net, layer)
 
         sign_orig = net[edge[0]][edge[1]]['sign']
         if biased and bias_on == 'edges':

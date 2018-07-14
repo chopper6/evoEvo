@@ -223,11 +223,11 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
     if (bias and bias_on == 'edges'): bias.assign_an_edge_bias(net, [node1,node2], configs['bias_distribution'], given_bias=given_bias)
 
     if net.node[node1]['layer']=='input' and node1_layer != 'input':
+        add_this_edge(net,configs) # need to compensate for rm'd edge, add first to help with ensure_single_cc
         rm_an_edge(net,configs, layer='input') # need to rebalance input layer
-        add_this_edge(net,configs) # need to compensate for rm'd edge
     if net.node[node2]['layer']=='output' and node2_layer != 'output':
-        rm_an_edge(net,configs,layer='output')
         add_this_edge(net,configs)
+        rm_an_edge(net,configs,layer='output')
 
 
 def rm_an_edge(net, configs, layer=None):
@@ -257,12 +257,12 @@ def rm_an_edge(net, configs, layer=None):
             bias_orig = None
         orig_biases.append(bias_orig)
 
-        net.remove_edge(edge[0], edge[1])
-
         if directed:
             if net.node[edge[0]]['layer'] == 'input': node1_layer = 'input'
             if net.node[edge[1]]['layer'] == 'output': node2_layer = 'output'
             #output as source node is irrelevant (not separately tracked)
+
+        net.remove_edge(edge[0], edge[1])
 
         post_size = len(net.edges())
         i += 1

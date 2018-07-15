@@ -181,7 +181,8 @@ def stochastic_backprop(net, configs, ideal_output):
             elif (activation_fn == 'tanh'):
                 activation = 0
                 for prev_node in net.in_edges(net.node[output_node]):
-                    activation += net.node[prev_node]['state']
+                    activation += net.node[prev_node]['state']*net[prev_node][output_node]['weight']
+                activation += net.node[output_node]['neuron_bias']
                 activation_deriv = math.pow(1/np.cosh(activation),2)
             else: assert(None)
 

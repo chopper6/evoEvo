@@ -203,12 +203,21 @@ def assign_edge_weight(configs):
 
 def assign_bias_weight(configs):
     #called by mutate
+    basis = 'activation'
 
-    distrib = configs['init_weight_distrib']
+    if basis == 'activation':
+        activn_fn = configs['activation_function']
+        if activn_fn == 'sigmoid':
+            return rd.uniform(0,1)
+        elif activn_fn == 'tanh':
+            return rd.uniform(-1,1)
 
-    if distrib == 'uniformPositive': return rd.uniform(0,1)
-
-    elif distrib == 'uniform': return rd.uniform(-1,1)
+    elif basis == 'distribution':
+        distrib = configs['init_weight_distrib']
+        if distrib == 'uniformPositive':
+            return rd.uniform(0, 1)
+        elif distrib == 'uniform':
+            return rd.uniform(-1, 1)
 
     else: assert(False)
 

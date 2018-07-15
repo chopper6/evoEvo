@@ -177,13 +177,10 @@ def stochastic_backprop(net, configs, ideal_output):
             MSE += err
             if verbose: print('\nbackprop(): output of node = ' + str(output) + ", with err " + str(err))
 
-            if (activation_fn == 'sigmoid'): activation_deriv = (1-output) #the partial derivative of MSE by the input given to the output neuron
-            elif (activation_fn == 'tanh'):
-                activation = 0
-                for prev_node in net.in_edges(net.node[output_node]):
-                    activation += net.node[prev_node]['state']*net[prev_node][output_node]['weight']
-                activation += net.node[output_node]['neuron_bias']
-                activation_deriv = math.pow(1/np.cosh(activation),2)
+            if (activation_fn == 'sigmoid'):
+                #TODO: apparently this should be output(1-output), not sure why below works so well then...
+                activation_deriv = (1-output) #the partial derivative of MSE by the input given to the output neuron
+            elif (activation_fn == 'tanh'): activation_deriv = 1-math.pow(output,2)
             else: assert(None)
 
             err_deriv = (output-ideal_output[i])

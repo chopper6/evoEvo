@@ -177,10 +177,9 @@ def stochastic_backprop(net, configs, ideal_output):
             MSE += err
             if verbose: print('\nbackprop(): output of node = ' + str(output) + ", with err " + str(err))
 
-            if (activation_fn == 'sigmoid'):
-                #TODO: apparently this should be output(1-output), not sure why below works so well then...
-                activation_deriv = (1-output) #the partial derivative of MSE by the input given to the output neuron
+            if (activation_fn == 'sigmoid'): activation_deriv = output*(1-output)
             elif (activation_fn == 'tanh'): activation_deriv = 1-math.pow(output,2)
+            elif (activation_fn == 'linear'): activation_deriv = 1
             else: assert(None)
 
             err_deriv = (output-ideal_output[i])
@@ -188,7 +187,7 @@ def stochastic_backprop(net, configs, ideal_output):
 
             for in_edge in net.in_edges(output_node):
                 if net.node[in_edge[0]]['state']:
-                    weight_contribution = net.node[in_edge[0]]['state']
+                    weight_contribution = net.node[in_edge[0]]['state'] #'weight contribution' is a misnomer...
 
                     if not util.boool(configs['out_edges_from_outputs']): assert(net.node[in_edge[0]] is not net.node[output_node])
 

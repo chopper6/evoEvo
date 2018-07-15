@@ -154,6 +154,7 @@ def problem_instance(net, configs):
 
 def stochastic_backprop(net, configs, ideal_output):
     # returns a float for error
+    verbose = False
 
     learning_rate = float(configs['learning_rate'])
     assert(configs['activation_function'] == 'sigmoid')
@@ -171,10 +172,11 @@ def stochastic_backprop(net, configs, ideal_output):
             err = math.pow(ideal_output[i]-output,2)
             #print("\nOutput Node = " + str(output) + ", resulting in err = " + str(err))
             MSE += err
-            print('\nbackprop(): output of node = ' + str(output) + ", with err " + str(err))
+            if verbose: print('\nbackprop(): output of node = ' + str(output) + ", with err " + str(err))
 
             # assumes sigmoid
-            delta = (output-ideal_output[i])*output*(1-output) #the partial derivative of MSE by the input given to the output neuron
+            if output==0 or output==1: delta = (output-ideal_output[i])
+            else: delta = (output-ideal_output[i])*output*(1-output) #the partial derivative of MSE by the input given to the output neuron
             for in_edge in net.in_edges(output_node):
                 if net.node[in_edge[0]]['state']:
                     weight_contribution = net.node[in_edge[0]]['state']
@@ -182,14 +184,14 @@ def stochastic_backprop(net, configs, ideal_output):
                     if not util.boool(configs['out_edges_from_outputs']): assert(net.node[in_edge[0]] is not net.node[output_node])
 
                     partial_err = delta * weight_contribution
-                    print("delta = " + str(delta) + ", weight_contrib = " + str(weight_contribution) + ", curr_weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
+                    if verbose: print("delta = " + str(delta) + ", weight_contrib = " + str(weight_contribution) + ", curr_weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
                     net[in_edge[0]][in_edge[1]]['weight'] -= partial_err*learning_rate
-                    print("now weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
+                    if verbose: print("now weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
 
             # could add diff learning rate for the bias (typically lower)
-            print("old bias = " + str(net.node[output_node]['neuron_bias']) + ", its err contrib is delta = " + str(delta))
+            if verbose: print("old bias = " + str(net.node[output_node]['neuron_bias']) + ", its err contrib is delta = " + str(delta))
             net.node[output_node]['neuron_bias'] -= delta*learning_rate
-            print("new bias = " + str(net.node[output_node]['neuron_bias']))
+            if verbose: print("new bias = " + str(net.node[output_node]['neuron_bias']))
 
         else: num_active_outputs -= 1
 
@@ -197,7 +199,7 @@ def stochastic_backprop(net, configs, ideal_output):
 
     if (num_active_outputs >0):
         MSE /= 2*num_active_outputs
-        print("\nReturning MSE of " + str(MSE) + " with " + str(num_active_outputs) + " active outputs.\n")
+        if verbose: print("\nReturning MSE of " + str(MSE) + " with " + str(num_active_outputs) + " active outputs.\n")
     return MSE
 
 

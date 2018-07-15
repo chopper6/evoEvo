@@ -197,6 +197,7 @@ def assign_edge_weight(configs):
     if distrib == 'uniformPositive': return rd.uniform(0,1)
 
     elif distrib == 'uniform': return rd.uniform(-1,1)
+    elif distrib == 'small_uniform': return rd.uniform(-.1,.1)
 
     else: assert(False)
 

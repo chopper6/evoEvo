@@ -47,9 +47,14 @@ def calc_node_fitness(net, configs):
     elif interval == 'continuous':
 
         if directed:
+            actvn = configs['activation_function']
+            if actvn == 'sigmoid':  distrib_lng = 1
+            elif actvn == 'tanh': distrib_lng = 2
+            else: assert(False)
+
             for n in net.nodes():
 
-                fitness = node_fitness.calc_continuous(net,n, fitness_metric)
+                fitness = node_fitness.calc_continuous(net,n, fitness_metric, distrib_lng=distrib_lng)
                 if fitness is not None: #for ex input nodes will yield none
                     net.node[n]['fitness'] += fitness
 

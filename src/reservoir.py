@@ -186,7 +186,7 @@ def stochastic_backprop(net, configs, ideal_output):
             else: assert(None)
 
             err_deriv = (output-ideal_output[i])
-            delta = err_deriv*output*activation_deriv
+            delta = err_deriv*activation_deriv
 
             for in_edge in net.in_edges(output_node):
                 if net.node[in_edge[0]]['state']:

@@ -1,4 +1,4 @@
-import math, random as rd, networkx as nx
+import math, random as rd, networkx as nx, numpy as np
 import util
 
 
@@ -58,6 +58,9 @@ def activation(net, node, configs):
 
     elif activation_fn == 'sigmoid':
         return 1/(1+math.exp(-(sum)))
+
+    elif activation_fn == 'tanh':
+        return np.tanh(sum)
 
     else: assert(False)
 
@@ -156,8 +159,8 @@ def stochastic_backprop(net, configs, ideal_output):
     # returns a float for error
     verbose = False
 
+    activation_fn = configs['activation_function']
     learning_rate = float(configs['learning_rate'])
-    assert(configs['activation_function'] == 'sigmoid')
     MSE  = 0
 
     sorted_output_nodes = sorted(net.graph['output_nodes']) #fn doesn't matter as long as its consistent
@@ -174,9 +177,17 @@ def stochastic_backprop(net, configs, ideal_output):
             MSE += err
             if verbose: print('\nbackprop(): output of node = ' + str(output) + ", with err " + str(err))
 
-            # assumes sigmoid
-            if output==0 or output==1: delta = (output-ideal_output[i])
-            else: delta = (output-ideal_output[i])*output*(1-output) #the partial derivative of MSE by the input given to the output neuron
+            if (activation_fn == 'sigmoid'): activation_deriv = (1-output) #the partial derivative of MSE by the input given to the output neuron
+            elif (activation_fn == 'tanh'):
+                activation = 0
+                for prev_node in net.in_edges(net.node[output_node]):
+                    activation += net.node[prev_node]['state']
+                activation_deriv = math.pow(1/np.cosh(activation),2)
+            else: assert(None)
+
+            err_deriv = (output-ideal_output[i])
+            delta = err_deriv*output*activation_deriv
+
             for in_edge in net.in_edges(output_node):
                 if net.node[in_edge[0]]['state']:
                     weight_contribution = net.node[in_edge[0]]['state']

@@ -1,16 +1,42 @@
 import math
 
 def calc_discrete_directed (net, node, fitness_metric):
-    num0, num1 = 0, 0
+    num0, num1, prev_num0, prev_num1 = 0, 0, 0, 0
 
     for e in net.in_edges(node):
         if net.node[e[0]]['state'] == 0: num0 += 1
         elif net.node[e[0]]['state'] == 1: num1 += 1
 
+
+        if net.node[e[0]]['prev_state'] == 0: prev_num0 += 1
+        elif net.node[e[0]]['prev_state'] == 1: prev_num1 += 1
+
+    output = net.node[node]['state']
+    prev_output = net.node[node]['state']
+
     if (num0 + num1 ==0): return 0
 
-    elif (fitness_metric == 'info'):
-        return 1-shannon_entropy(num0,num1)
+    elif (fitness_metric == 'undirected_info'):
+        return 1-entropy(num0,num1)
+
+    elif (fitness_metric == 'directed_info'):
+        info = entropy(num0,num1) - cond_entropy(num0, num1, output)
+        assert(info <= 1 and info >= 0)
+        return info
+
+    elif (fitness_metric == 'predictive_info'):
+        predictive_info = entropy(num0,num1) - cond_entropy(num0, num1, prev_output)
+        assert(predictive_info <= 1 and predictive_info >= 0)
+        return predictive_info
+
+    elif (fitness_metric == 'flux_info'):
+        # flux = (info - predictive_info); should be min'd
+        #based on Still et al. Thermodynamics of Prediction
+        prev_info = entropy(prev_num0,prev_num1) - cond_entropy(prev_num0, prev_num1, prev_output)
+        predictive_info = entropy(num0,num1) - cond_entropy(num0, num1, prev_output)
+        flux = prev_info - predictive_info
+        assert(flux <= 1 and flux >= 0)
+        return flux
 
     elif (fitness_metric == 'None' or fitness_metric == 'none'):
         return 1
@@ -19,10 +45,11 @@ def calc_discrete_directed (net, node, fitness_metric):
 
 
 def calc_discrete_undirected (fitness_metric, up, down):
+    # might be broken by now
     if (up + down ==0): return 0
 
     if (fitness_metric == 'info'):
-        return 1-shannon_entropy(up,down)
+        return 1-entropy(up,down)
 
     elif (fitness_metric == 'None' or fitness_metric == 'none'):
         return 1
@@ -30,94 +57,132 @@ def calc_discrete_undirected (fitness_metric, up, down):
     else: assert (False)  # unknown fitness metric
 
 
+
 def calc_continuous (net, node, fitness_metric, distrib_lng=1):
-    if net.node[node]['layer'] == 'input':
-        return None
+    if net.node[node]['layer'] == 'input': return None
 
+    inputs, prev_inputs, output, prev_output = retrieve_states(net, node)
 
-    states, prev_states = retrieve_states(net, node)
-    mean, var, entropish = calc_mean_var_entropish(states, distrib_lng)
-    prev_mean, prev_var, prev_entropish = calc_mean_var_entropish(prev_states, distrib_lng)
+    if len(inputs)==0: return None
 
-    if len(states)==0:
-        fitness = 1
-        return fitness
-
-
-    fitness = None
+    mean, var, entropish, cond_entropish = None, None, None, None #those annoying ass warnings...
+    if (fitness_metric != 'predictive_info' and fitness_metric != 'flux_info'): mean, var, entropish, cond_entropish  = calc_continuous_features(inputs, output, distrib_lng)
 
     if (fitness_metric == 'entropish'):
         return entropish
 
     elif (fitness_metric == 'variance'):
         fitness = var
+        return fitness
 
-    elif (fitness_metric == 'info'):
+    elif (fitness_metric == 'undirected_info'):
         info = 1-entropish
         assert(info >= 0 and info <= 1)
         return info
 
-    elif (fitness_metric == 'predictive_info'):
-        prev_info = 1-entropish
-        assert(prev_info >= 0 and prev_info <= 1)
+    elif (fitness_metric == 'directed_info'):
+        info = entropish - cond_entropish
+        assert(info >= 0 and info <= 1)
+        return info
 
-        pred_info = 1-prev_entropish
+    elif (fitness_metric == 'predictive_info'):
+
+        mean, var, entropish, predictive_cond_entropish = calc_continuous_features(inputs, prev_output, distrib_lng)
+
+        predictive_info = entropish - predictive_cond_entropish
+        assert(predictive_info >= 0 and predictive_info <= 1)
+        return predictive_info
+
+    elif (fitness_metric == 'flux_info'):
+
+        prev_mean, prev_var, prev_entropish, prev_cond_entropish = calc_continuous_features(prev_inputs, prev_output, distrib_lng)
+        mean, var, entropish, predictive_cond_entropish = calc_continuous_features(inputs, prev_output, distrib_lng)
+
+        predictive_info = entropish - predictive_cond_entropish
+        prev_info = prev_entropish - prev_cond_entropish
+        flux = prev_info - predictive_info
+        assert(flux >= 0 and flux <= 1)
+        return flux
+
+
 
     elif (fitness_metric == 'entropish_old'):
         if (var < .01): entropish = 0
         else: entropish = 1/math.pow(math.e, 1/var)
         fitness = 1 - entropish
         assert(fitness >= 0 and fitness <= 1)
+        return fitness
 
     elif (fitness_metric == 'None' or fitness_metric == 'none'):
         return 1
 
-    else: assert(False) #unknown fitness metric
-
-    return fitness
+    assert(False) #unknown fitness metric/shouldn't get here
 
 
-def shannon_entropy(up,down):
-    if (up == 0): H_up = 0
-    else: H_up = -1 * (up / (up + down)) * math.log2(up / float(up + down))
 
-    if (down == 0):  H_down = 0
-    else:  H_down = -1 * (down / (up + down)) * math.log2(down / float(up + down))
+def entropy(num0,num1):
+    total = num0 + num1
 
-    return H_up + H_down
+    if (num0 == 0): H0 = 0
+    else: H0 = -1 * (num0 / float(total)) * math.log2(num0 / float(total))
+
+    if (num1 == 0): H1 = 0
+    else: H1 = -1 * (num1 / float(total)) * math.log2(num1 / float(total))
+
+    return H0 + H1
+
+
+
+def cond_entropy(num0,num1,given):
+    total = num0 + num1
+
+    if (given==1): #the unexpected part are the opposite states
+        if (num0 == 0): H0 = 0
+        else: H0 = -1 * (num0 / float(total)) * math.log2(num0 / float(total))
+        return H0
+
+    if (given==0):
+        if (num1 == 0): H1 = 0
+        else: H1 = -1 * (num1 / float(total)) * math.log2(num1 / float(total))
+        return H1
+
+    else:
+        print("ERROR in node_fitness.conditional_entropy(): given state = " + str(given))
+        assert(False)
+
 
 
 def retrieve_states(net, node):
-    states, prev_states = [], []
+    inputs, prev_inputs = [], []
     for in_edge in net.in_edges(node):
         if net.node[in_edge[0]]['state'] is not None:
-            states.append(net.node[in_edge[0]]['state'])
+            inputs.append(net.node[in_edge[0]]['state'])
 
         if net.node[in_edge[0]]['prev_state'] is not None:
-            prev_states.append(net.node[in_edge[0]]['prev_state'])
+            prev_inputs.append(net.node[in_edge[0]]['prev_state'])
 
-    return states, prev_states
+    output = net.node[node]['state']
+    prev_output = net.node[node]['prev_state']
+
+    return  inputs, prev_inputs, output, prev_output
 
 
-def calc_mean_var_entropish(states, distrib_lng):
+def calc_continuous_features(inputs, output, distrib_lng):
+    if len(inputs)==0 or inputs is None: assert(False) #this case should already be handled higher up
 
-    if (len(states) == 0): return 0,0,0
-    mean = sum(states)/len(states)
-    var, entropish = 0, 0
-    # may have to change distrib_lng if, for ex. states can be in [-1,1]
+    var, entropish, cond_entropish = 0, 0, 0
+    mean = sum(inputs)/float(len(inputs))
 
-    for state in states:
-        var += math.pow((mean-state),2)
-        pr = 1-abs(mean-state)/ float(distrib_lng)
+    for input in inputs:
+        var += math.pow((mean-input),2)
+        pr = 1-abs(mean-input)/ float(distrib_lng)
         assert(pr >= 0 and pr <= 1)
         if pr != 0:
             entropish -= math.log2(pr)
+            cond_entropish -= entropish*abs(input-output)
 
-    if (len(states) > 1): var /= len(states) - 1
-    if (len(states) > 0): entropish /= len(states)
+    if (len(inputs) > 1): var /= len(inputs) - 1
+    entropish /= len(inputs)
+    cond_entropish /= len(inputs)
 
-    return mean, var, entropish
-
-
-def calc_pred_infoish(prev_mean, states, distrib_lng):
-    assert(False)
+    return mean, var, entropish, cond_entropish

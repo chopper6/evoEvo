@@ -39,6 +39,7 @@ def calc_node_fitness(net, configs):
                     net.node[n]['fitness'] += node_fitness.calc_discrete_directed(net, n, fitness_metric)
 
         else:
+            assert(False) #i may have screwed this up, not sure what # up and down refer to anymore...
             for n in net.nodes():
                 up, down = net.node[n]['up'], net.node[n]['down']
                 net.node[n]['fitness'] += node_fitness.calc_discrete_undirected(fitness_metric, up, down)
@@ -47,15 +48,12 @@ def calc_node_fitness(net, configs):
     elif interval == 'continuous':
 
         if directed:
-            actvn = configs['activation_function']
-            if actvn == 'sigmoid':  distrib_lng = 1
-            elif actvn == 'tanh': distrib_lng = 2
-            else: assert(False)
+            distrib_lng = calc_distrib_lng(configs['activation_function'])
 
             for n in net.nodes():
 
                 fitness = node_fitness.calc_continuous(net,n, fitness_metric, distrib_lng=distrib_lng)
-                if fitness is not None: #for ex input nodes will yield none
+                if fitness is not None: #for ex input nodes or nodes with no inputs will yield none
                     net.node[n]['fitness'] += fitness
 
         else:
@@ -69,8 +67,7 @@ def calc_node_fitness(net, configs):
                         states.append(net[out_edge[0]][out_edge[1]]['state'])
 
                 fitness = node_fitness.calc_continuous(states, fitness_metric)
-                net.node[n]['fitness'] += fitness
-                # later add net.node[n]['var'] += var
+                if fitness is not None: net.node[n]['fitness'] += fitness
 
 
 def node_product(net, scale_node_fitness):
@@ -112,3 +109,13 @@ def reset_nodes(net, configs):
 
 
 
+
+def calc_distrib_lng(actvn_fn):
+    if actvn_fn == 'sigmoid':
+        distrib_lng = 1
+    elif actvn_fn == 'tanh':
+        distrib_lng = 2
+    else:
+        assert (False)
+
+    return distrib_lng

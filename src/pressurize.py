@@ -31,7 +31,7 @@ def pressurize(configs, net, gen):
         else:               net.graph['error'] = total_err / num_outputs
 
         fitness.node_normz(net, num_samples_relative, configs) #TODO: may be later nodes with more 'None' instances
-        fitness_score = fitness.node_product(net, scale_node_fitness)
+        fitness_score = fitness.node_product(net, scale_node_fitness, configs)
 
     else:
 
@@ -42,7 +42,7 @@ def pressurize(configs, net, gen):
             fitness.calc_node_fitness(net, configs)
 
         fitness.node_normz(net, num_samples_relative, configs)
-        fitness_score = fitness.node_product(net, scale_node_fitness)
+        fitness_score = fitness.node_product(net, scale_node_fitness, configs)
 
 
     net.graph['fitness'] = fitness_score

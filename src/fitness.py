@@ -70,7 +70,7 @@ def calc_node_fitness(net, configs):
                 if fitness is not None: net.node[n]['fitness'] += fitness
 
 
-def node_product(net, scale_node_fitness):
+def node_product(net, scale_node_fitness, configs):
     fitness_score = 0
     num_0 = 0
     num_under, num_over = 0,0
@@ -89,7 +89,8 @@ def node_product(net, scale_node_fitness):
     if (num_over != 0 or num_under != 0):
         print("# I < 0 = " + str(num_under) + "\t # I > 1 = " + str(num_over) + "\n")
 
-    if (num_0 > len(net.nodes())/100 and num_0 > 10): print("WARNING: fitness.node_product(): " + str(num_0) + " nodes had 0 fitness out of " + str(len(net.nodes())))
+    if util.boool(configs['debug']):
+        if (num_0 > len(net.nodes())/100 and num_0 > 10): print("WARNING: fitness.node_product(): " + str(num_0) + " nodes had 0 fitness out of " + str(len(net.nodes())))
     return fitness_score
 
 

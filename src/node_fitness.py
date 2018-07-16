@@ -179,7 +179,7 @@ def calc_continuous_features(inputs, output, distrib_lng):
         assert(pr >= 0 and pr <= 1)
         if pr != 0:
             entropish -= math.log2(pr)
-            cond_entropish -= entropish*abs(input-output)
+            cond_entropish -= math.log2(pr)*abs(input-output)
 
     if (len(inputs) > 1): var /= len(inputs) - 1
     entropish /= len(inputs)

@@ -24,7 +24,7 @@ def feedfwd_step(net, configs):
     MSE = stochastic_backprop (net, configs, output) #i.e. only care about last iteration
     lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases
 
-    return MSE, output
+    return MSE
 
 
 

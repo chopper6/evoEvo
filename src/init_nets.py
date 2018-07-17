@@ -173,6 +173,7 @@ def init_directed_attributes(population, configs):
         # THESE SHOULD JUST BE FOR THE INITIAL NODES OF THE EMPTY GRAPH
         for n in p.nodes():
             p.node[n]['state'] = None
+            p.node[n]['prev_iteration_state'] = None
             p.node[n]['neuron_bias'] = assign_edge_weight(configs)
             p.node[n]['layer'] = 'hidden'
 

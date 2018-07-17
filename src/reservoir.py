@@ -20,7 +20,6 @@ def feedfwd_step(net, configs):
     diameter = nx.diameter(net.to_undirected())
     for i in range(diameter): #all nodes should have had a chance to effect one another (except for directed aspect...)
         step_fwd(net, configs)
-    save_states(net, configs)
     MSE = stochastic_backprop (net, configs, output) #i.e. only care about last iteration
     lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases
 
@@ -219,14 +218,14 @@ def stochastic_backprop(net, configs, ideal_output):
 
 
 def step_fwd(net, configs):
-
     for n in net.nodes():
         net.node[n]['prev_state'] = net.node[n]['state']
+
     for n in net.nodes():
         if (net.node[n]['layer'] != 'input'):
             net.node[n]['state'] = activation(net, n, configs)
 
-def save_states(net, configs):
+def save_prev_iteration_states(net, configs):
     assert(configs['feedforward'])
 
     for n in net.nodes():

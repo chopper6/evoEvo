@@ -80,8 +80,9 @@ def calc_discrete_undirected (fitness_metric, up, down):
 
 def calc_continuous (net, node, fitness_metric, configs, distrib_lng=1, ideal_output = False):
     if net.node[node]['layer'] == 'input': return None
+    feedfwd = util.boool(configs['feedforward'])
 
-    inputs, prev_inputs, output, prev_output = retrieve_states(net, node, ideal_output)
+    inputs, prev_inputs, output, prev_output = retrieve_states(net, node, ideal_output, feedfwd)
 
     if len(inputs)==0: return None
 

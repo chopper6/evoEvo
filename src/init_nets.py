@@ -165,6 +165,11 @@ def init_directed_attributes(population, configs):
         p.graph['fitness'] = 0
         p.graph['error'] = 0
 
+        p.graph['input'] = None
+        p.graph['output'] = None
+        p.graph['prev_input'] = None
+        p.graph['prev_output'] = None
+
         # THESE SHOULD JUST BE FOR THE INITIAL NODES OF THE EMPTY GRAPH
         for n in p.nodes():
             p.node[n]['state'] = None

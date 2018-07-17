@@ -41,7 +41,7 @@ def calc_node_fitness(net, configs):
 
             if net.graph['output'] is not None and net.graph['prev_output']:
                 assert(len(net.graph['output']) == len(net.graph['prev_output']) == len(net.graph['output_nodes']))
-                for i in range(net.graph['output']):
+                for i in range(len(net.graph['output'])):
                     net.graph['output_fitness'] +=  node_fitness.calc_discrete_directed(net, i, fitness_metric, configs, ideal_output = True)
                 net.graph['output_fitness'] /= len(net.graph['output'])
 
@@ -66,7 +66,7 @@ def calc_node_fitness(net, configs):
 
             if net.graph['output'] is not None and net.graph['prev_output']:
                 assert (len(net.graph['output']) == len(net.graph['prev_output']) == len(net.graph['output_nodes']))
-                for i in range(net.graph['output']):
+                for i in range(len(net.graph['output'])):
                     net.graph['output_fitness'] += node_fitness.calc_continuous(net, i, fitness_metric, configs, ideal_output=True)
                 net.graph['output_fitness'] /= len(net.graph['output'])
 

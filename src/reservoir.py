@@ -227,7 +227,7 @@ def step_fwd(net, configs):
             net.node[n]['state'] = activation(net, n, configs)
 
 def save_states(net, configs):
-    assert(configs['feedfwd'])
+    assert(configs['feedforward'])
 
     for n in net.nodes():
         net.node[n]['prev_iteration_state'] = net.node[n]['state']

@@ -2,7 +2,7 @@ import math, util
 
 def calc_discrete_directed (net, node, fitness_metric, configs, ideal_output = False):
     num0, num1, prev_num0, prev_num1 = 0, 0, 0, 0
-    feedfwd = util.boool(configs['feedfwd'])
+    feedfwd = util.boool(configs['feedforward'])
 
     if ideal_output:
         assert(feedfwd) #TODO: otherwise prev_iteration_state --> prev_state

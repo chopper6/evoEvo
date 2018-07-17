@@ -65,7 +65,7 @@ def add_nodes(net, num_add, configs, biases=None, layer = None, init=False):
                 net.node[new_node]['layer'] = layer
                 if layer=='input': net.graph['input_nodes'].append(new_node)
                 elif layer=='output': net.graph['output_nodes'].append(new_node)
-            net.node[new_node]['state'] = None
+            net.node[new_node]['state'], net.node[new_node]['prev_iteration_state'] = None, None
             net.node[new_node]['neuron_bias'] = init_nets.assign_edge_weight(configs)
 
 

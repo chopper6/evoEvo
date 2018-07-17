@@ -1,18 +1,38 @@
-import math
+import math, util
 
-def calc_discrete_directed (net, node, fitness_metric):
+def calc_discrete_directed (net, node, fitness_metric, configs, ideal_output = False):
     num0, num1, prev_num0, prev_num1 = 0, 0, 0, 0
+    feedfwd = util.boool(configs['feedfwd'])
 
-    for e in net.in_edges(node):
-        if net.node[e[0]]['state'] == 0: num0 += 1
-        elif net.node[e[0]]['state'] == 1: num1 += 1
+    if ideal_output:
+        assert(feedfwd) #TODO: otherwise prev_iteration_state --> prev_state
+        output_node = net.graph['output_nodes'][node] #node is just used as an index
+
+        if net.node[output_node]['state'] == 0: num0 += 1
+        elif net.node[output_node]['state'] == 1: num1 += 1
+
+        if net.node[output_node]['prev_iteration_state'] == 0: prev_num0 += 1
+        elif net.node[output_node]['prev_iteration_state'] == 1: prev_num1 +=1
+
+        output = net.graph['output'][node] #again, this is messy, but node is just the index
+        prev_output = net.graph['prev_output'][node]
 
 
-        if net.node[e[0]]['prev_state'] == 0: prev_num0 += 1
-        elif net.node[e[0]]['prev_state'] == 1: prev_num1 += 1
+    else:
+        for e in net.in_edges(node):
+            if net.node[e[0]]['state'] == 0:  num0 += 1
+            elif net.node[e[0]]['state'] == 1:   num1 += 1
 
-    output = net.node[node]['state']
-    prev_output = net.node[node]['state']
+            if feedfwd:
+                if net.node[e[0]]['prev_iteration_state'] == 0: prev_num0 += 1
+                elif net.node[e[0]]['prev_iteration_state'] == 1:  prev_num1 += 1
+            else:
+                if net.node[e[0]]['prev_state'] == 0: prev_num0 += 1
+                elif net.node[e[0]]['prev_state'] == 1:  prev_num1 += 1
+
+
+        output = net.node[node]['state']
+        prev_output = net.node[node]['state']
 
     if (num0 + num1 ==0): return 0
 
@@ -31,7 +51,7 @@ def calc_discrete_directed (net, node, fitness_metric):
 
     elif (fitness_metric == 'flux_info'):
         # flux = (info - predictive_info); should be min'd
-        #based on Still et al. Thermodynamics of Prediction
+        # based on Still et al. Thermodynamics of Prediction
         prev_info = entropy(prev_num0,prev_num1) - cond_entropy(prev_num0, prev_num1, prev_output)
         predictive_info = entropy(num0,num1) - cond_entropy(num0, num1, prev_output)
         flux = prev_info - predictive_info
@@ -58,10 +78,10 @@ def calc_discrete_undirected (fitness_metric, up, down):
 
 
 
-def calc_continuous (net, node, fitness_metric, distrib_lng=1):
+def calc_continuous (net, node, fitness_metric, configs, distrib_lng=1, ideal_output = False):
     if net.node[node]['layer'] == 'input': return None
 
-    inputs, prev_inputs, output, prev_output = retrieve_states(net, node)
+    inputs, prev_inputs, output, prev_output = retrieve_states(net, node, ideal_output)
 
     if len(inputs)==0: return None
 
@@ -94,6 +114,8 @@ def calc_continuous (net, node, fitness_metric, distrib_lng=1):
         return predictive_info
 
     elif (fitness_metric == 'flux_info'):
+        #TODO: not sure why but predictive_info always = prev_info
+        # poss a problem related to the base problem?
 
         prev_mean, prev_var, prev_entropish, prev_cond_entropish = calc_continuous_features(prev_inputs, prev_output, distrib_lng)
         mean, var, entropish, predictive_cond_entropish = calc_continuous_features(inputs, prev_output, distrib_lng)
@@ -103,7 +125,6 @@ def calc_continuous (net, node, fitness_metric, distrib_lng=1):
         flux = prev_info - predictive_info
         assert(flux >= 0 and flux <= 1)
         return flux
-
 
 
     elif (fitness_metric == 'entropish_old'):
@@ -152,17 +173,31 @@ def cond_entropy(num0,num1,given):
 
 
 
-def retrieve_states(net, node):
+def retrieve_states(net, node, ideal_output, feedfwd):
     inputs, prev_inputs = [], []
-    for in_edge in net.in_edges(node):
-        if net.node[in_edge[0]]['state'] is not None:
-            inputs.append(net.node[in_edge[0]]['state'])
+    if feedfwd: prev = 'prev_iteration_state'
+    else: prev = 'prev_state'
 
-        if net.node[in_edge[0]]['prev_state'] is not None:
-            prev_inputs.append(net.node[in_edge[0]]['prev_state'])
+    if ideal_output: #used for fitness based on ideal_output of base problem
+        # then node is just an index (ugly i know)
+        output_node = net.graph['output_nodes'][node]
+        inputs.append(net.node[output_node]['state'])
+        prev_inputs.append(net.node[output_node][prev])
 
-    output = net.node[node]['state']
-    prev_output = net.node[node]['prev_state']
+        output = net.graph['output'][node]  # again, this is messy, but node is just the index
+        prev_output = net.graph['prev_output'][node]
+
+    else:
+        inputs, prev_inputs = [], []
+        for in_edge in net.in_edges(node):
+            if net.node[in_edge[0]]['state'] is not None:
+                inputs.append(net.node[in_edge[0]]['state'])
+
+            if net.node[in_edge[0]][prev] is not None:
+                prev_inputs.append(net.node[in_edge[0]][prev])
+
+        output = net.node[node]['state']
+        prev_output = net.node[node][prev]
 
     return  inputs, prev_inputs, output, prev_output
 

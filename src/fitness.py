@@ -32,11 +32,18 @@ def calc_node_fitness(net, configs):
     interval = configs['interval']
 
     if interval == 'discrete':
+        # WARNING: this likely needs a good bit of debugging
 
         if directed:
             for n in net.nodes():
                 if net.node[n]['layer'] != 'input':
-                    net.node[n]['fitness'] += node_fitness.calc_discrete_directed(net, n, fitness_metric)
+                    net.node[n]['fitness'] += node_fitness.calc_discrete_directed(net, n, fitness_metric, configs)
+
+            if net.graph['output'] is not None and net.graph['prev_output']:
+                assert(len(net.graph['output']) == len(net.graph['prev_output']) == len(net.graph['output_nodes']))
+                for i in range(net.graph['output']):
+                    net.graph['output_fitness'] +=  node_fitness.calc_discrete_directed(net, i, fitness_metric, configs, ideal_output = True)
+                net.graph['output_fitness'] /= len(net.graph['output'])
 
         else:
             assert(False) #i may have screwed this up, not sure what # up and down refer to anymore...
@@ -52,9 +59,17 @@ def calc_node_fitness(net, configs):
 
             for n in net.nodes():
 
-                fitness = node_fitness.calc_continuous(net,n, fitness_metric, distrib_lng=distrib_lng)
+                fitness = node_fitness.calc_continuous(net, n, fitness_metric, configs, distrib_lng=distrib_lng)
                 if fitness is not None: #for ex input nodes or nodes with no inputs will yield none
                     net.node[n]['fitness'] += fitness
+
+
+            if net.graph['output'] is not None and net.graph['prev_output']:
+                assert (len(net.graph['output']) == len(net.graph['prev_output']) == len(net.graph['output_nodes']))
+                for i in range(net.graph['output']):
+                    net.graph['output_fitness'] += node_fitness.calc_continuous(net, i, fitness_metric, configs, ideal_output=True)
+                net.graph['output_fitness'] /= len(net.graph['output'])
+
 
         else:
             for n in net.nodes():
@@ -99,6 +114,7 @@ def node_normz(net, denom, configs):
         for n in net.nodes():
             net.node[n]['fitness'] /= float(denom)
 
+    net.graph['output_fitness'] /= float(denom)
 
 def reset_nodes(net, configs):
     for n in net.nodes():
@@ -107,6 +123,8 @@ def reset_nodes(net, configs):
     if  util.boool(configs['feedforward']) and util.boool(configs['directed']):
         for n in net.nodes():
             net.node[n]['state'] = None
+
+    net.graph['output_fitness'] = 0
 
 
 

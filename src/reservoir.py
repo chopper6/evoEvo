@@ -20,10 +20,11 @@ def feedfwd_step(net, configs):
     diameter = nx.diameter(net.to_undirected())
     for i in range(diameter): #all nodes should have had a chance to effect one another (except for directed aspect...)
         step_fwd(net, configs)
+    save_states(net, configs)
     MSE = stochastic_backprop (net, configs, output) #i.e. only care about last iteration
     lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases
 
-    return MSE
+    return MSE, output
 
 
 
@@ -84,6 +85,7 @@ def lvl_1_reservoir_learning(net, configs):
 
 
 def problem_instance(net, configs):
+    # returns input and output, as well as saving them (and their previous iteration) to the net
 
     base_problem = configs['base_problem']
     input, output = [],[]
@@ -152,6 +154,11 @@ def problem_instance(net, configs):
 
     else: assert(False)
 
+    if net.graph['input'] is not None: net.graph['prev_input'] = net.graph['input']
+    if net.graph['output'] is not None: net.graph['prev_output'] = net.graph['output']
+    net.graph['input'] = input
+    net.graph['output'] = output
+
     return input, output
 
 
@@ -218,3 +225,9 @@ def step_fwd(net, configs):
     for n in net.nodes():
         if (net.node[n]['layer'] != 'input'):
             net.node[n]['state'] = activation(net, n, configs)
+
+def save_states(net, configs):
+    assert(configs['feedfwd'])
+
+    for n in net.nodes():
+        net.node[n]['prev_iteration_state'] = net.node[n]['state']

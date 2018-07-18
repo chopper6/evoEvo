@@ -30,6 +30,7 @@ def calc_node_fitness(net, configs):
     directed = util.boool(configs['directed'])
     fitness_metric = str(configs['fitness_metric'])
     interval = configs['interval']
+    feedfwd = util.boool(configs['feedforward'])
 
     if interval == 'discrete':
         # WARNING: this likely needs a good bit of debugging
@@ -64,7 +65,7 @@ def calc_node_fitness(net, configs):
                     net.node[n]['fitness'] += fitness
 
 
-            if net.graph['output'] is not None and net.graph['prev_output']:
+            if net.graph['output'] is not None and net.graph['prev_output'] is not None:
                 assert (len(net.graph['output']) == len(net.graph['prev_output']) == len(net.graph['output_nodes']))
                 for i in range(len(net.graph['output'])):
                     net.graph['output_fitness'] += node_fitness.calc_continuous(net, i, fitness_metric, configs, ideal_output=True)

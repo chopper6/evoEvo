@@ -108,6 +108,7 @@ def calc_continuous (net, node, fitness_metric, configs, distrib_lng=1, ideal_ou
 
     elif (fitness_metric == 'predictive_info'):
 
+        if prev_output is None: return None
         mean, var, entropish, predictive_cond_entropish = calc_continuous_features(inputs, prev_output, distrib_lng)
 
         predictive_info = entropish - predictive_cond_entropish
@@ -117,6 +118,8 @@ def calc_continuous (net, node, fitness_metric, configs, distrib_lng=1, ideal_ou
     elif (fitness_metric == 'flux_info'):
         #TODO: not sure why but predictive_info always = prev_info
         # poss a problem related to the base problem?
+
+        if prev_output is None: return None
 
         prev_mean, prev_var, prev_entropish, prev_cond_entropish = calc_continuous_features(prev_inputs, prev_output, distrib_lng)
         mean, var, entropish, predictive_cond_entropish = calc_continuous_features(inputs, prev_output, distrib_lng)

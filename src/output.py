@@ -58,7 +58,7 @@ def write_base_err(configs, gen, iter, err):
     if (stop_condition == 'size'):
         end = int(configs['ending_size'])
         #this sort of assumes simulation starts near size 0
-    elif (stop_condition == 'generation'):
+    elif (stop_condition == 'generation' or stop_condition == 'gen'):
         end = int(configs['max_generations'])
     else: assert(False)
 

@@ -79,7 +79,7 @@ def add_nodes(net, num_add, configs, biases=None, layer = None, init=False):
 
     # MAINTAIN NODE_EDGE RATIO
     num_edge_add = None #those damn warnings
-    if input_output_e2n and layer != 'hidden':
+    if input_output_e2n and layer != 'hidden' and layer is not None:
         if layer == 'input': num_edge_add = round(num_add * float(configs['from_inputs_edge_ratio'])) - num_add
         elif layer == 'output':
             num_edge_add = round(num_add * float(configs['to_outputs_edge_ratio'])) - num_add

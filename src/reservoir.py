@@ -79,7 +79,7 @@ def apply_input(net, input):
 def initialize_input(net, configs):
     # supposed to be only at gen 0 if fully online learning
     # may later add diff initializations
-    assert(not util.boool(configs['feedfwd']))
+    assert(not util.boool(configs['feedforward']))
     num_inputs = len(net.graph['input_nodes'])
     activn_fn = configs['activation_function']
 

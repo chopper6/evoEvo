@@ -15,7 +15,7 @@ def master_info(population, gen, size, pop_size, num_survive, configs):
         start = int(configs['starting_size'])
         assert(end-start >= num_data_output and end-start >= num_net_output)
         #this sort of assumes simulation starts near size 0
-    elif (stop_condition == 'generation'):
+    elif (stop_condition == 'generation' or stop_condition == 'gen'):
         end = int(configs['max_generations'])
         assert(end >= num_data_output and end >= num_net_output)
     else: assert(False)

@@ -131,13 +131,13 @@ def double_check(net, configs):
 
     start_size = int(configs['starting_size'])
     edge_node_ratio = float(configs['edge_to_node_ratio'])
-    num_edges = round(start_size*edge_node_ratio)
     directed = util.boool(configs['directed'])
     input_output_e2n =  util.boool(configs['input_output_e2n'])
-    num_input_nodes = int(configs['num_input_nodes'])
-    num_output_nodes = int(configs['num_output_nodes'])
+    num_inputs = int(configs['num_input_nodes'])
+    num_outputs = int(configs['num_output_nodes'])
 
-
+    if directed: num_edges = round((start_size+num_inputs+num_outputs)*edge_node_ratio)
+    else: num_edges = round(start_size*edge_node_ratio)
     assert (len(net.edges()) == num_edges)
     assert (len(net.nodes()) == start_size)
 

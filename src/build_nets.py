@@ -136,12 +136,13 @@ def double_check(net, configs):
     num_inputs = int(configs['num_input_nodes'])
     num_outputs = int(configs['num_output_nodes'])
 
-    if directed: num_edges = round((start_size+num_inputs+num_outputs)*edge_node_ratio)
-    else: num_edges = round(start_size*edge_node_ratio)
-    assert (len(net.edges()) == num_edges)
-    assert (len(net.nodes()) == start_size)
-
     if directed:
+
+        ideal_num_nodes = start_size + num_inputs + num_outputs
+        num_edges = round(ideal_num_nodes * edge_node_ratio)
+        assert (len(net.edges()) == num_edges)
+        assert (len(net.nodes()) == ideal_num_nodes)
+
         # if not util.boool(configs['in_edges_to_inputs']):
         for i in net.graph['input_nodes']:
             assert (not net.in_edges(i))
@@ -154,6 +155,10 @@ def double_check(net, configs):
 
             mutate.check_layers(net, configs)
 
+    else:
+        num_edges = round(start_size * edge_node_ratio)
+        assert (len(net.edges()) == num_edges)
+        assert (len(net.nodes()) == start_size)
 
 def init_directed_attributes(net, configs):
 

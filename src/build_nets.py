@@ -38,74 +38,71 @@ def gen_rd_nets(pop_size, configs):
     start_size = int(configs['starting_size'])
     num_init_nodes = min_num_nodes(configs)
     assert (start_size >= num_init_nodes)
+    varied_init_population = util.boool(configs['varied_init_population'])
+
+
+    if varied_init_population:
+        population = [gen_a_rd_net(configs) for i in range(pop_size)]
+    else:
+        seed_net = gen_a_rd_net(configs)
+        population = [seed_net.copy() for i in range(pop_size)]
+
+    return population
+
+
+def gen_a_rd_net(configs):
+
+    start_size = int(configs['starting_size'])
+    num_init_nodes = min_num_nodes(configs)
+    assert (start_size >= num_init_nodes)
 
     edge_node_ratio = float(configs['edge_to_node_ratio'])
     directed = util.boool(configs['directed'])
     num_input_nodes = int(configs['num_input_nodes'])
     num_output_nodes = int(configs['num_output_nodes'])
-    varied_init_population = util.boool(configs['varied_init_population'])
     single_cc = util.boool(configs['single_cc'])
+    debug = util.boool(configs['debug'])
 
 
+    if directed:
 
-    if varied_init_population:
-        population = [nx.empty_graph(num_init_nodes, create_using=nx.DiGraph()) for i in range(pop_size)]
-        if directed: init_directed_attributes(population, configs)
-        reps = pop_size
-    else:
-        population = [None for i in range(pop_size)]
-        population[0] = nx.empty_graph(num_init_nodes, create_using=nx.DiGraph())
-        if directed: init_directed_attributes([population[0]], configs)
-        reps = 1
+        net = nx.empty_graph(num_init_nodes, create_using=nx.DiGraph())
+        init_directed_attributes(net, configs)
 
-    for rep in range(reps):
+        # init hidden layer
+        num_add = round(edge_node_ratio * num_init_nodes)
+        mutate.add_edges(net, num_add, configs)
 
-        if directed:
-            net = population[rep]
+        if single_cc: mutate.ensure_single_cc(net, configs)
+        # because init_nets for example can add to a previously node-only graph, which should then be connected
 
-            # init hidden layer
-            num_add = round(edge_node_ratio * num_init_nodes)
-            mutate.add_edges(net, num_add, configs)
+        # input and output layers
+        assert(num_input_nodes > 0 and num_output_nodes > 0)
+        net.graph['input_nodes'], net.graph['output_nodes'] = [], []
+        mutate.add_nodes(net, num_output_nodes, configs, layer='output', init=True)
+        mutate.add_nodes(net, num_input_nodes, configs, layer='input', init=True)
 
-            if single_cc: mutate.ensure_single_cc(net, configs)
-            # because init_nets for example can add to a previously node-only graph, which should then be connected
+        # more to hidden layer
+        mutate.add_nodes(net, start_size - num_init_nodes, configs, init=True)
 
-            # input and output layers
-            assert(num_input_nodes > 0 and num_output_nodes > 0)
-            net.graph['input_nodes'], net.graph['output_nodes'] = [], []
-            mutate.add_nodes(net, num_output_nodes, configs, layer='output', init=True)
-            mutate.add_nodes(net, num_input_nodes, configs, layer='input', init=True)
+        # attempt to patch bias introduced into input and output wiring
+        num_rewire = len(net.edges()) * 10
+        mutate.rewire(net, num_rewire, configs)
 
-            # more to hidden layer
-            mutate.add_nodes(net, start_size - num_init_nodes, configs, init=True)
-
-
-            # attempt to patch bias introduced into input and output wiring
-            num_rewire = len(net.edges()) * 10
-            mutate.rewire(net, num_rewire, configs)
-
-
-        else:
-            net = nx.empty_graph(8, create_using=nx.DiGraph())
-
-            num_add = round(edge_node_ratio * 8)
-            mutate.add_edges(net, num_add, configs)
-            if single_cc: mutate.ensure_single_cc(net, configs)
-            mutate.add_nodes(net, start_size - 8, configs, init=True)
-
-
-        mutate.ensure_single_cc(net, configs)
-        if directed: mutate.check_layers(net, configs)
-
-    if not varied_init_population:
-        population = [population[0].copy() for i in range(pop_size)]
-        double_check([population[0]], configs)
 
     else:
-        double_check(population, configs)
+        net = nx.empty_graph(8, create_using=nx.DiGraph())
 
-    return population
+        num_add = round(edge_node_ratio * 8)
+        mutate.add_edges(net, num_add, configs)
+        if single_cc: mutate.ensure_single_cc(net, configs)
+        mutate.add_nodes(net, start_size - 8, configs, init=True)
 
+
+    mutate.ensure_single_cc(net, configs)
+    if debug: double_check(net, configs)
+
+    return net
 
 
 def min_num_nodes(configs):
@@ -113,6 +110,7 @@ def min_num_nodes(configs):
     directed = util.boool(configs['directed'])
     edge_node_ratio = float(configs['edge_to_node_ratio'])
     self_loops = util.boool(configs['self_loops'])
+    input_output_e2n =  util.boool(configs['input_output_e2n'])
 
     assert(directed) #too lazy to make undirected version now
 
@@ -121,61 +119,58 @@ def min_num_nodes(configs):
     else:
         min_num = edge_node_ratio + 1
 
-    min_num_for_inputs = math.ceil(float(configs['from_inputs_edge_ratio']))
-    min_num_for_outputs = math.ceil(float(configs['to_outputs_edge_ratio']))
+    if input_output_e2n:
+        min_num_for_inputs = math.ceil(float(configs['from_inputs_edge_ratio']))
+        min_num_for_outputs = math.ceil(float(configs['to_outputs_edge_ratio']))
 
-    return max(min_num, min_num_for_inputs, min_num_for_outputs)
+        return max(min_num, min_num_for_inputs, min_num_for_outputs)
 
+    else: return min_num
 
-def double_check(population, configs):
-    #TODO: eventually cut this for time sake
+def double_check(net, configs):
 
     start_size = int(configs['starting_size'])
     edge_node_ratio = float(configs['edge_to_node_ratio'])
     num_edges = round(start_size*edge_node_ratio)
     directed = util.boool(configs['directed'])
+    input_output_e2n =  util.boool(configs['input_output_e2n'])
     num_input_nodes = int(configs['num_input_nodes'])
     num_output_nodes = int(configs['num_output_nodes'])
 
-    for p in population:
-        if not directed:
-            assert (len(p.edges()) == num_edges)
-            assert (len(p.nodes()) == start_size)
 
-        else:
-            actual_size = start_size + num_input_nodes + num_output_nodes
-            #actual_num_edges = num_edges + int((num_input_nodes + num_output_nodes) * edge_node_ratio)
-            #assert (len(p.edges()) == actual_num_edges)
-            #assert (len(p.nodes()) == actual_size)
+    assert (len(net.edges()) == num_edges)
+    assert (len(net.nodes()) == start_size)
 
-
-        #if not util.boool(configs['in_edges_to_inputs']):
-        for i in p.graph['input_nodes']:
-            assert(not p.in_edges(i))
-
+    if directed:
+        # if not util.boool(configs['in_edges_to_inputs']):
+        for i in net.graph['input_nodes']:
+            assert (not net.in_edges(i))
 
         if not util.boool(configs['out_edges_from_outputs']):
-            for o in p.graph['output_nodes']:
-                assert(not p.out_edges(o))
+            for o in net.graph['output_nodes']:
+                assert (not net.out_edges(o))
+
+        if input_output_e2n:
+
+            mutate.check_layers(net, configs)
 
 
-def init_directed_attributes(population, configs):
-    for p in population:
+def init_directed_attributes(net, configs):
 
-        p.graph['fitness'] = 0
-        p.graph['error'] = 0
+    net.graph['fitness'] = 0
+    net.graph['error'] = 0
 
-        p.graph['input'] = None
-        p.graph['output'] = None
-        p.graph['prev_input'] = None
-        p.graph['prev_output'] = None
+    net.graph['input'] = None
+    net.graph['output'] = None
+    net.graph['prev_input'] = None
+    net.graph['prev_output'] = None
 
-        # THESE SHOULD JUST BE FOR THE INITIAL NODES OF THE EMPTY GRAPH
-        for n in p.nodes():
-            p.node[n]['state'] = None
-            p.node[n]['prev_iteration_state'] = None
-            p.node[n]['neuron_bias'] = assign_edge_weight(configs)
-            p.node[n]['layer'] = 'hidden'
+    # THESE SHOULD JUST BE FOR THE INITIAL NODES OF THE EMPTY GRAPH
+    for n in net.nodes():
+        net.node[n]['state'] = None
+        net.node[n]['prev_iteration_state'] = None
+        net.node[n]['neuron_bias'] = assign_edge_weight(configs)
+        net.node[n]['layer'] = 'hidden'
 
 
 def custom_to_directed(population):

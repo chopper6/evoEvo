@@ -38,10 +38,12 @@ def add_nodes(net, num_add, configs, biases=None, layer = None, init=False):
     bias_on = configs['bias_on']
     directed = util.boool(configs['directed'])
     single_cc = util.boool(configs['single_cc'])
+    input_output_e2n = util.boool(configs['input_output_e2n'])
 
     node1_layer, node2_layer = None, None
-    if layer == 'input':     node1_layer = 'input'
-    elif layer == 'output':  node2_layer = 'output'
+    if input_output_e2n:
+        if layer == 'input':     node1_layer = 'input'
+        elif layer == 'output':  node2_layer = 'output'
 
     if directed: assert(not biased) #not ready for that shit yet
 
@@ -60,18 +62,13 @@ def add_nodes(net, num_add, configs, biases=None, layer = None, init=False):
         if biases and bias_on == 'nodes': bias.assign_a_node_bias(net, new_node, configs['bias_distribution'], given_bias=biases[i])
 
         if directed:
-            if not layer: net.node[new_node]['layer'] = 'hidden'
-            else:
-                net.node[new_node]['layer'] = layer
-                if layer=='input': net.graph['input_nodes'].append(new_node)
-                elif layer=='output': net.graph['output_nodes'].append(new_node)
-            net.node[new_node]['state'], net.node[new_node]['prev_iteration_state'] = None, None
-            net.node[new_node]['neuron_bias'] = init_nets.assign_edge_weight(configs)
+            apply_directed_attributes(new_node, net, layer, configs)
 
 
         # ADD EDGE TO NEW NODE TO KEEP CONNECTED
         if single_cc:
-            if biases and bias_on=='edges': add_this_edge(net, configs, node1=new_node, given_bias=biases[i])
+            if not input_output_e2n and not biases: add_this_edge(net, configs, node1=new_node)
+            elif biases and bias_on=='edges': add_this_edge(net, configs, node1=new_node, given_bias=biases[i])
             else:
                 if layer is None or layer == 'input': add_this_edge(net, configs, node1=new_node, node1_layer = node1_layer, node2_layer = node2_layer)
                 elif layer=='output': add_this_edge(net, configs, node2=new_node, node1_layer = node1_layer, node2_layer = node2_layer)
@@ -81,10 +78,13 @@ def add_nodes(net, num_add, configs, biases=None, layer = None, init=False):
 
 
     # MAINTAIN NODE_EDGE RATIO
-    if layer == 'input': num_edge_add = round(num_add * float(configs['from_inputs_edge_ratio'])) - num_add
-    elif layer == 'output': 
-        num_edge_add = round(num_add * float(configs['to_outputs_edge_ratio'])) - num_add
-        #print("mutate(): curr #output edges = " + str(len(net.in_edges(net.graph['output_nodes']))) + ", adding " + str(num_edge_add) + "\n num out nodes added = " + str(num_add) + ", ratio = " + str(configs['to_outputs_edge_ratio']))
+    num_edge_add = None #those damn warnings
+    if input_output_e2n and layer != 'hidden':
+        if layer == 'input': num_edge_add = round(num_add * float(configs['from_inputs_edge_ratio'])) - num_add
+        elif layer == 'output':
+            num_edge_add = round(num_add * float(configs['to_outputs_edge_ratio'])) - num_add
+            #print("mutate(): curr #output edges = " + str(len(net.in_edges(net.graph['output_nodes']))) + ", adding " + str(num_edge_add) + "\n num out nodes added = " + str(num_add) + ", ratio = " + str(configs['to_outputs_edge_ratio']))
+        else: assert(False)
     else: num_edge_add = round(num_add * float(configs['edge_to_node_ratio'])) - num_add
 
     if not single_cc: num_edge_add += 1 #since haven't added one to start
@@ -93,6 +93,7 @@ def add_nodes(net, num_add, configs, biases=None, layer = None, init=False):
         assert(len(biases) == num_edge_add + num_add)
         add_edges(net, num_edge_add, configs, biases=biases[num_add:])
     else:
+        #note that node_layers will be None if not input_output_e2n
         add_edges(net, num_edge_add, configs, node1_layer = node1_layer, node2_layer = node2_layer)
 
     correct_off_by_one_edges(net, configs, layer, init)
@@ -431,6 +432,7 @@ def sample_edge(net, layer):
 
 
 def check_layers(net, configs):
+    if not util.boool(configs['input_output_e2n']): return
 
     # check input e2n
     num_edges_from_inputs = len(net.out_edges(net.graph['input_nodes']))
@@ -463,35 +465,48 @@ def correct_off_by_one_edges(net, configs, layer, init=False):
 
     directed = util.boool(configs['directed'])
     node1_layer, node2_layer = None, None
+    input_output_e2n = util.boool(configs['input_output_e2n'])
+    if not directed: assert(not input_output_e2n)
 
-    if layer == 'output':
-        num_edges = len(net.in_edges(net.graph['output_nodes']))
-        ideal_num_edges = round(int(configs['num_output_nodes']) * float(configs['to_outputs_edge_ratio']))
-        node2_layer = 'output'
-    elif layer == 'input':
-        num_edges = len(net.out_edges(net.graph['input_nodes']))
-        ideal_num_edges = round(int(configs['num_input_nodes']) * float(configs['from_inputs_edge_ratio']))
-        node1_layer = 'input'
-    else:
-        if directed:
-            num_edges = len(net.edges()) - len(net.in_edges(net.graph['output_nodes'])) - len(net.out_edges(net.graph['input_nodes']))
-            edge_node_ratio = float(configs['edge_to_node_ratio'])
-            num_reservoir_nodes = len(net.nodes()) - len(net.graph['output_nodes']) - len(net.graph['input_nodes'])
-            ideal_num_edges = round(num_reservoir_nodes*edge_node_ratio)
+    if input_output_e2n:
+        if layer == 'output':
+            num_edges = len(net.in_edges(net.graph['output_nodes']))
+            ideal_num_edges = round(int(configs['num_output_nodes']) * float(configs['to_outputs_edge_ratio']))
+            node2_layer = 'output'
+        elif layer == 'input':
+            num_edges = len(net.out_edges(net.graph['input_nodes']))
+            ideal_num_edges = round(int(configs['num_input_nodes']) * float(configs['from_inputs_edge_ratio']))
+            node1_layer = 'input'
         else:
-            num_edges = len(net.edges())
-            edge_node_ratio = float(configs['edge_to_node_ratio'])
-            ideal_num_edges = round(len(net.nodes()) * edge_node_ratio)
+            if directed:
+                num_edges = len(net.edges()) - len(net.in_edges(net.graph['output_nodes'])) - len(net.out_edges(net.graph['input_nodes']))
+                edge_node_ratio = float(configs['edge_to_node_ratio'])
+                num_reservoir_nodes = len(net.nodes()) - len(net.graph['output_nodes']) - len(net.graph['input_nodes'])
+                ideal_num_edges = round(num_reservoir_nodes*edge_node_ratio)
+    else:
+        num_edges = len(net.edges())
+        edge_node_ratio = float(configs['edge_to_node_ratio'])
+        ideal_num_edges = round(len(net.nodes()) * edge_node_ratio)
 
     # correct for off-by-one-errors since rounding occurs twice
     if (num_edges > ideal_num_edges):
         rm_an_edge(net, configs, layer = layer)
     elif (num_edges == ideal_num_edges - 1):
         add_this_edge(net, configs, node1_layer = node1_layer, node2_layer = node2_layer)
-    elif (init is True and num_edges < ideal_num_edges):
+    elif (init is True and input_output_e2n and num_edges < ideal_num_edges):
         num_add = ideal_num_edges - num_edges
         add_edges(net, num_add, configs, node1_layer = node1_layer, node2_layer = node2_layer)
     elif (num_edges != ideal_num_edges): 
         print("ERROR in mutate.correct_off_by_one_edges(): num edges = " + str(num_edges) + ", but ideal = " + str(ideal_num_edges))
-        assert(False) #shouldn't be more than off-by-one
+        assert(False) #shouldn't be more than off-by-one unles initiallizing with input_output_e2n active
 
+
+
+def apply_directed_attributes(node, net, layer, configs):
+    if not layer: net.node[node]['layer'] = 'hidden'
+    else:
+        net.node[node]['layer'] = layer
+        if layer=='input': net.graph['input_nodes'].append(node)
+        elif layer=='output': net.graph['output_nodes'].append(node)
+    net.node[node]['state'], net.node[node]['prev_iteration_state'] = None, None
+    net.node[node]['neuron_bias'] = init_nets.assign_edge_weight(configs)

@@ -1,10 +1,11 @@
-import math, random as rd, networkx as nx, numpy as np
-import util
+import math, networkx as nx, numpy as np, random as rd
+import util, base_problem
 
 
-def step(net, configs):
+def step(net, configs,  problem_instance = None):
 
-    input, output = problem_instance(net, configs)
+    if problem_instance is None: input, output = base_problem.generate_instance(net, configs)
+    else: input, output = problem_instance
     apply_input(net, input)
     step_fwd(net, configs)
     MSE = stochastic_backprop (net, configs, output)
@@ -12,10 +13,11 @@ def step(net, configs):
 
     return MSE
 
+
 def feedfwd_step(net, configs):
     # possibly make this the more general model?
 
-    input, output = problem_instance(net, configs)
+    input, output = base_problem.generate_instance(net, configs)
     apply_input(net, input)
     diameter = nx.diameter(net.to_undirected())
     for i in range(diameter): #all nodes should have had a chance to effect one another (except for directed aspect...)
@@ -73,6 +75,35 @@ def apply_input(net, input):
         net.node[sorted_input_nodes[i]]['state'] = input[i]
 
 
+
+def initialize_input(net, configs):
+    # supposed to be only at gen 0 if fully online learning
+    # may later add diff initializations
+    assert(not util.boool(configs['feedfwd']))
+    num_inputs = len(net.graph['input_nodes'])
+    activn_fn = configs['activation_function']
+
+    assert(num_inputs > 0)
+    inputs = []
+
+    if activn_fn == 'sigmoid':
+        for i in range(num_inputs):
+            inputs.append(rd.uniform(0,1))
+
+
+    elif activn_fn == 'tanh':
+        for i in range(num_inputs):
+            inputs.append(rd.uniform(-1,1))
+
+    else: assert(False)
+
+    apply_input(net, inputs)
+
+
+
+
+
+
 def lvl_1_reservoir_learning(net, configs):
     # alters weights in reservoir (as opposed to output layer)
 
@@ -83,82 +114,6 @@ def lvl_1_reservoir_learning(net, configs):
     # can be greedy, naive_EA, or none
 
 
-def problem_instance(net, configs):
-    # returns input and output, as well as saving them (and their previous iteration) to the net
-
-    base_problem = configs['base_problem']
-    input, output = [],[]
-
-    if base_problem  == 'control':
-        for input_node in net.graph['input_nodes']:
-            input.append(1)
-            #if not util.boool(configs['in_edges_to_inputs']):
-            assert(not net.in_edges(input_node))
-        for i in range(len(net.graph['output_nodes'])):
-            output.append(1)
-
-    elif base_problem  == 'control00':
-        for input_node in net.graph['input_nodes']:
-            input.append(0)
-        for i in range(len(net.graph['output_nodes'])):
-            output.append(0)
-
-    elif base_problem  == 'control10':
-        for input_node in net.graph['input_nodes']:
-            input.append(1)
-        for i in range(len(net.graph['output_nodes'])):
-            output.append(0)
-
-    elif base_problem == 'control01':
-        for input_node in net.graph['input_nodes']:
-            input.append(0)
-        for i in range(len(net.graph['output_nodes'])):
-            output.append(1)
-
-    # logic functions, should be used with sigmoid activation, since results in output in [0,1]
-    elif base_problem == 'AND':
-        assert(len(net.graph['input_nodes']) == 2)
-        assert(len(net.graph['output_nodes']) == 1)
-        input.append(rd.choice([0,1]))
-        input.append(rd.choice([0,1]))
-
-        if [input[0] == input[1]]:  output.append(1)
-        else:                       output.append(0)
-
-    elif base_problem == 'OR':
-        assert(len(net.graph['input_nodes']) == 2)
-        assert(len(net.graph['output_nodes']) == 1)
-        input.append(rd.choice([0,1]))
-        input.append(rd.choice([0,1]))
-
-        if [input[0] == 1 or input[1] == 1]:    output.append(1)
-        else:                                   output.append(0)
-
-    elif base_problem  == 'XOR':
-        assert(len(net.graph['input_nodes']) == 2)
-        assert(len(net.graph['output_nodes']) == 1)
-
-        input.append(rd.choice([0,1]))
-        input.append(rd.choice([0,1]))
-
-        if (input[0] == 1 and input[1] == 0):     output.append(1)
-        elif (input[0] == 0 and input[1] == 1):   output.append(1)
-        else:                                     output.append(0)
-
-    elif base_problem  == 'meanAF':
-        for i in range(len(net.graph['input_nodes'])):
-            input.append(rd.choice([0,1]))
-        for i in range(len(net.graph['output_nodes'])):
-            input.append(rd.choice([0,1]))
-
-    else: assert(False)
-
-    if net.graph['input'] is not None: net.graph['prev_input'] = net.graph['input']
-    if net.graph['output'] is not None: net.graph['prev_output'] = net.graph['output']
-    net.graph['input'] = input
-    net.graph['output'] = output
-
-    return input, output
 
 
 def stochastic_backprop(net, configs, ideal_output):

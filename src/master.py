@@ -1,7 +1,7 @@
 import os, pickle, time, shutil, sys
 from random import SystemRandom as sysRand
 from time import sleep
-import fitness, minion, output, plot_nets, init_nets, pressurize, util, init, bias
+import fitness, minion, output, plot_nets, build_nets, pressurize, util, init, bias, base_problem, reservoir
 
 #MASTER EVOLUTION
 def evolve_master(configs):
@@ -10,30 +10,35 @@ def evolve_master(configs):
     worker_pop_size = int(configs['num_worker_nets'])
     biased = util.boool(configs['biased'])
     num_sims = int(configs['num_sims'])
+    net_base_problem = util.boool(configs['net_base_problem'])
 
-    init_data = init_run(configs) # ALSO PRESSURIZES 0TH GEN
+    init_data = init_run(configs)
     if not init_data: return #for example if run already done
 
-    population, gen, size, num_survive, keep_running = init_data
+    population, teacher_net, gen, size, num_survive, keep_running = init_data
 
     while keep_running:
         t_start = time.time()
         pop_size, num_survive = curr_gen_params(size, num_survive, configs)
-        output.master_info(population, gen, size, pop_size, num_survive, configs)
 
-
-        gen += 1 #here since 1st round of pressurize during init_run()
         write_mpi_info(output_dir, gen) #also writes progress file with relevant generation
+        if net_base_problem: write_teacher_net(teacher_net, configs)
 
         if biased: biases = bias.gen_biases(configs) #all nets must have same bias to have comparable fitness
         else: biases = None
 
-        distrib_workers(population, gen, worker_pop_size, num_survive, biases, configs)
+        if net_base_problem: problem_instances = base_problem.step_teacher_net(teacher_net, configs)
+        else: problem_instances = None
+
+        distrib_workers(population, gen, worker_pop_size, num_survive, biases, problem_instances, configs)
 
         report_timing(t_start, gen, output_dir)
         population = watch(configs, gen, num_survive)
 
         size = len(population[0].nodes())
+        output.master_info(population, gen, size, pop_size, num_survive, configs)
+
+        gen += 1
 
         keep_running = util.test_stop_condition(size, gen, configs)
 
@@ -57,7 +62,8 @@ def init_run(configs):
     output_dir = configs['output_directory']
     start_size = int(configs['starting_size'])
     fitness_direction = str(configs['fitness_direction'])
-    varied_init_population = util.boool(configs['varied_init_population'])
+    net_base_problem = util.boool(configs['net_base_problem']) #a teacher net is used for the base problem
+    if net_base_problem: assert(not util.boool(configs['feedforward']))
 
     population, gen, size, keep_running = None, None, None, None #avoiding annoying warnings
 
@@ -78,32 +84,34 @@ def init_run(configs):
         elif (int(gen) > 2): #IS CONTINUATION RUN
             gen = int(gen)-2 #latest may not have finished
             population = parse_worker_popn(num_workers, gen, output_dir, num_survive, fitness_direction)
+            if net_base_problem: teacher_net = parse_teacher_net(configs)
+
             size = len(population[0].nodes())
             gen += 1
 
             keep_running = util.test_stop_condition(size, gen, configs)
             cont = True
 
+        #else not cont runs
+
     if not cont: #FRESH START
         init_dirs(num_workers, output_dir)
         output.init_csv(output_dir, configs)
         # draw_nets.init(output_dir)
 
-        population = init_nets.init_population(pop_size, configs)
+        population = build_nets.init_population(pop_size, configs)
+        if net_base_problem:
+            teacher_net = build_nets.gen_a_rd_net(configs)
+            # TODO: if online learning, need to initiliaze teacher_net (and not reapply input at each gen)
+            #reservoir.initialize_input(teacher_net, configs)
+        else:
+            teacher_net = None
 
-        #init fitness eval
         gen = 0
-        if varied_init_population:
-            for p in population:
-                pressurize.pressurize(configs, p, gen)
-        else: pressurize.pressurize(configs, population[0], gen)
+        keep_running = util.test_stop_condition(start_size, gen, configs)
 
-        # gen = 1
-        size = start_size
-        keep_running = util.test_stop_condition(size, gen, configs)
-
-    init_data =  population, gen, size, num_survive, keep_running
-    return init_data
+    #init_data =  population, teacher_net, gen, size, num_survive, keep_running
+    return [population, teacher_net, gen, size, num_survive, keep_running]
 
 
 def init_dirs(num_workers, output_dir):
@@ -135,35 +143,26 @@ def write_mpi_info(output_dir, gen):
         shutil.rmtree(output_dir + "/to_workers/" + str(prev_gen))
 
 
-def distrib_workers(population, gen, worker_pop_size, num_survive, biases, configs):
+def distrib_workers(population, gen, worker_pop_size, num_survive, biases, problem_instances, configs):
     num_workers = int(configs['number_of_workers'])
     output_dir = configs['output_directory']
     debug = util.boool(configs['debug'])
 
-    if (debug == True):  # sequential debug
-        for w in range(1, num_workers + 1):
-            dump_file = output_dir + "to_workers/" + str(gen) + "/" + str(w)
-            seed = population[0].copy()
-            randSeeds = os.urandom(sysRand().randint(0, 1000000))
-            worker_args = [w, seed, worker_pop_size, min(worker_pop_size, num_survive), randSeeds, biases, configs]
-            with open(dump_file, 'wb') as file:
-                pickle.dump(worker_args, file)
-            # pool.map_async(minion.evolve_minion, (dump_file,))
-            minion.evolve_minion(dump_file, gen, w, output_dir)
+    for w in range(1, num_workers + 1):
+        dump_file = output_dir + "/to_workers/" + str(gen) + "/" + str(w)
+        seed = population[w % num_survive].copy()
+        randSeeds = os.urandom(sysRand().randint(0, 1000000))
+        assert (seed != population[w % num_survive])
+        worker_args = [w, seed, worker_pop_size, min(worker_pop_size, num_survive), randSeeds, biases, problem_instances, configs]
+        with open(dump_file, 'wb') as file:
+            pickle.dump(worker_args, file)
+        if (debug == True):  # sequential debug
+            minion.evolve_minion(dump_file, gen, w, output_dir) # calls minion from same thread
             sleep(.0001)
-
-    else:
-        for w in range(1, num_workers + 1):
-            dump_file = output_dir + "/to_workers/" + str(gen) + "/" + str(w)
-            seed = population[w % num_survive].copy()
-            randSeeds = os.urandom(sysRand().randint(0, 1000000))
-            assert (seed != population[w % num_survive])
-            worker_args = [w, seed, worker_pop_size, min(worker_pop_size, num_survive), randSeeds, biases, configs]
-            with open(dump_file, 'wb') as file:
-                pickle.dump(worker_args, file)
+        # else minions are already running as sep threads
 
     del population
-    if (debug == True): util.cluster_print(output_dir, "debug is ON")
+    if (debug == True and gen % 10 == 0): util.cluster_print(output_dir, "debug is ON")
 
 
 def parse_worker_popn (num_workers, gen, output_dir, num_survive, fitness_direction):
@@ -181,6 +180,22 @@ def parse_worker_popn (num_workers, gen, output_dir, num_survive, fitness_direct
 
     sorted_popn = fitness.eval_fitness(popn, fitness_direction)
     return sorted_popn[:num_survive]
+
+def parse_teacher_net(configs):
+    output_dir = configs['output_directory']
+
+    teacher_file = output_dir + "teacher_net"
+    with open(teacher_file, 'rb') as file:
+        teacher_net = pickle.load(file)
+
+    return teacher_net
+
+def write_teacher_net(teacher_net, configs):
+    output_dir = configs['output_directory']
+    teacher_file = output_dir + "teacher_net"
+
+    with open(teacher_file, 'rb') as file:
+        pickle.dump(teacher_net, file)
 
 
 def watch(configs, gen, num_survive):

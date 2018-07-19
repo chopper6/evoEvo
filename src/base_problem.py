@@ -31,13 +31,13 @@ def generate_net_instances(teacher_net, configs):
     return instances
 
 
-def step_teacher_net(teacher_net, configs):
+def step_teacher_net(teacher_net, gen, configs):
 
     assert(not util.boool(configs['biased'])) #else need to pass to mutate
 
     #returns problem instances
     reservoir.initialize_input(teacher_net, configs) #for fully online learning this may not be nec
-    mutate.mutate(configs, teacher_net)
+    if gen !=0: mutate.mutate(configs, teacher_net) #as in minion
     instances = generate_net_instances(teacher_net, configs)
 
     return instances

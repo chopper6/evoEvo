@@ -27,7 +27,7 @@ def evolve_master(configs):
         if biased: biases = bias.gen_biases(configs) #all nets must have same bias to have comparable fitness
         else: biases = None
 
-        if net_base_problem: problem_instances = base_problem.step_teacher_net(teacher_net, configs)
+        if net_base_problem: problem_instances = base_problem.step_teacher_net(teacher_net, gen, configs)
         else: problem_instances = None
 
         distrib_workers(population, gen, worker_pop_size, num_survive, biases, problem_instances, configs)

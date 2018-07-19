@@ -122,6 +122,7 @@ def stochastic_backprop(net, configs, ideal_output):
 
     activation_fn = configs['activation_function']
     learning_rate = float(configs['learning_rate'])
+    bias_learning_rate = float(configs['bias_learning_rate'])
     MSE  = 0
 
     sorted_output_nodes = sorted(net.graph['output_nodes']) #fn doesn't matter as long as its consistent
@@ -159,7 +160,7 @@ def stochastic_backprop(net, configs, ideal_output):
 
             # could add diff learning rate for the bias (typically lower)
             if verbose: print("old bias = " + str(net.node[output_node]['neuron_bias']) + ", its err contrib is delta = " + str(delta))
-            net.node[output_node]['neuron_bias'] -= delta*learning_rate
+            net.node[output_node]['neuron_bias'] -= delta*bias_learning_rate
             if verbose: print("new bias = " + str(net.node[output_node]['neuron_bias']))
 
         else: num_active_outputs -= 1

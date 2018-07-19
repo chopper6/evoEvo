@@ -1,5 +1,5 @@
 import random as rd, networkx as nx
-import bias, util, init_nets
+import bias, util, build_nets
 
 def mutate(configs, net, biases = None):
     # mutation operations: rm edge, add edge, rewire an edge, change edge sign, reverse edge direction
@@ -208,7 +208,7 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
 
         if constraints_check:
             net.add_edge(node1, node2, sign=sign)
-            if directed: net[node1][node2]['weight'] = init_nets.assign_edge_weight(configs)
+            if directed: net[node1][node2]['weight'] = build_nets.assign_edge_weight(configs)
 
         post_size = len(net.edges())
         if constraints_check: assert(post_size != pre_size)
@@ -509,4 +509,4 @@ def apply_directed_attributes(node, net, layer, configs):
         if layer=='input': net.graph['input_nodes'].append(node)
         elif layer=='output': net.graph['output_nodes'].append(node)
     net.node[node]['state'], net.node[node]['prev_iteration_state'] = None, None
-    net.node[node]['neuron_bias'] = init_nets.assign_edge_weight(configs)
+    net.node[node]['neuron_bias'] = build_nets.assign_edge_weight(configs)

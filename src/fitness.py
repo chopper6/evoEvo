@@ -5,8 +5,10 @@ import node_fitness, util
 def eval_fitness(population, fitness_direction):
     #determines fitness of each individual and orders the population by fitness
 
-    if (fitness_direction == 'max'): population = sorted(population,key=fitness_key, reverse=True)
-    elif (fitness_direction == 'min'):  population = sorted(population,key=fitness_key)
+
+    # MAKING FITNESS A -PRODUCT OF NODES ACTUALLY INVERTS THE MAX/MIN VALUE OF NET RELATIVE TO ITS NODES
+    if (fitness_direction == 'min'): population = sorted(population,key=fitness_key, reverse=True)
+    elif (fitness_direction == 'max'):  population = sorted(population,key=fitness_key)
     else: print("ERROR in fitness.eval_fitness(): unknown fitness_direction " + str(fitness_direction) + ", population not sorted.")
 
     #temp for debug purposes
@@ -30,7 +32,6 @@ def calc_node_fitness(net, configs):
     directed = util.boool(configs['directed'])
     fitness_metric = str(configs['fitness_metric'])
     interval = configs['interval']
-    feedfwd = util.boool(configs['feedforward'])
 
     if interval == 'discrete':
         # WARNING: this likely needs a good bit of debugging
@@ -65,7 +66,9 @@ def calc_node_fitness(net, configs):
                     net.node[n]['fitness'] += fitness
 
 
+            #TODO: need sep one for each output
             if net.graph['output'] is not None and net.graph['prev_output'] is not None:
+
                 assert (len(net.graph['output']) == len(net.graph['prev_output']) == len(net.graph['output_nodes']))
                 for i in range(len(net.graph['output'])):
                     net.graph['output_fitness'] += node_fitness.calc_continuous(net, i, fitness_metric, configs, ideal_output=True)
@@ -87,6 +90,8 @@ def calc_node_fitness(net, configs):
 
 
 def node_product(net, scale_node_fitness, configs):
+    directed = util.boool(configs['directed'])
+
     fitness_score = 0
     num_0 = 0
     num_under, num_over = 0,0
@@ -101,6 +106,11 @@ def node_product(net, scale_node_fitness, configs):
             else:
                 # NOTE THAT THIS SEEMS TO INVERT THE MEANING, IE INFO --> ENTROPY : MAX --> MIN
                 fitness_score += -1*math.log(net.node[n]['fitness'])
+
+    # include output
+    if directed and net.graph['output_fitness'] is not None:
+        net.graph['output_fitness'] += node_fitness.calc_continuous(net, i, fitness_metric, configs, ideal_output=True)
+        net.graph['output_fitness'] /= len(net.graph['output'])
 
     if (num_over != 0 or num_under != 0):
         print("# I < 0 = " + str(num_under) + "\t # I > 1 = " + str(num_over) + "\n")

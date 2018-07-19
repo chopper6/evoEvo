@@ -118,11 +118,12 @@ def lvl_1_reservoir_learning(net, configs):
 
 def stochastic_backprop(net, configs, ideal_output):
     # returns a float for error
-    verbose = False
+    verbose = util.boool(configs['verbose_backprop'])
 
     activation_fn = configs['activation_function']
     learning_rate = float(configs['learning_rate'])
     bias_learning_rate = float(configs['bias_learning_rate'])
+    regularization = util.boool(configs['regularization'])
     MSE  = 0
 
     sorted_output_nodes = sorted(net.graph['output_nodes']) #fn doesn't matter as long as its consistent
@@ -147,6 +148,7 @@ def stochastic_backprop(net, configs, ideal_output):
             err_deriv = (output-ideal_output[i])
             delta = err_deriv*activation_deriv
 
+            if verbose: print("\nerr = " + str(err_deriv) + ", output = " + str(output) + " vs ideal = " + str(ideal_output[i]))
             for in_edge in net.in_edges(output_node):
                 if net.node[in_edge[0]]['state']:
                     weight_contribution = net.node[in_edge[0]]['state'] #'weight contribution' is a misnomer...
@@ -155,7 +157,9 @@ def stochastic_backprop(net, configs, ideal_output):
 
                     partial_err = delta * weight_contribution
                     if verbose: print("delta = " + str(delta) + ", weight_contrib = " + str(weight_contribution) + ", curr_weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
-                    net[in_edge[0]][in_edge[1]]['weight'] -= partial_err*learning_rate
+                    w_change = partial_err*learning_rate
+                    if regularization and abs(net[in_edge[0]][in_edge[1]]['weight']) > .01: w_change /= abs(net[in_edge[0]][in_edge[1]]['weight'])
+                    net[in_edge[0]][in_edge[1]]['weight'] -= w_change
                     if verbose: print("now weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
 
             # could add diff learning rate for the bias (typically lower)
@@ -169,7 +173,7 @@ def stochastic_backprop(net, configs, ideal_output):
 
     if (num_active_outputs >0):
         MSE /= 2*num_active_outputs
-        if verbose: print("\nReturning MSE of " + str(MSE) + " with " + str(num_active_outputs) + " active outputs.\n")
+        if verbose: print("\nReturning MSE of " + str(MSE) + " with " + str(num_active_outputs) + " active outputs.\n\n")
     return MSE
 
 

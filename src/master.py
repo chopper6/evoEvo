@@ -194,7 +194,7 @@ def write_teacher_net(teacher_net, configs):
     output_dir = configs['output_directory']
     teacher_file = output_dir + "teacher_net"
 
-    with open(teacher_file, 'rb') as file:
+    with open(teacher_file, 'w') as file:
         pickle.dump(teacher_net, file)
 
 

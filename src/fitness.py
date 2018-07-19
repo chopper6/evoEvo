@@ -91,6 +91,7 @@ def calc_node_fitness(net, configs):
 
 def node_product(net, scale_node_fitness, configs):
     directed = util.boool(configs['directed'])
+    debug = util.boool(configs['debug'])
 
     fitness_score = 0
     num_0 = 0
@@ -108,9 +109,14 @@ def node_product(net, scale_node_fitness, configs):
                 fitness_score += -1*math.log(net.node[n]['fitness'])
 
     # include output
-    if directed and net.graph['output_fitness'] is not None:
-        net.graph['output_fitness'] += node_fitness.calc_continuous(net, i, fitness_metric, configs, ideal_output=True)
-        net.graph['output_fitness'] /= len(net.graph['output'])
+    # TODO: this shit
+    if not debug:
+        assert(False)
+        '''
+        if directed and net.graph['output_fitness'] is not None:
+            net.graph['output_fitness'] += node_fitness.calc_continuous(net, i, fitness_metric, configs, ideal_output=True)
+            net.graph['output_fitness'] /= len(net.graph['output'])
+        '''
 
     if (num_over != 0 or num_under != 0):
         print("# I < 0 = " + str(num_under) + "\t # I > 1 = " + str(num_over) + "\n")

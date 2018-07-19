@@ -186,9 +186,7 @@ def parse_teacher_net(configs):
 
     teacher_file = output_dir + "teacher_net"
     with open(teacher_file, 'rb') as file:
-        data = pickle.load(file)
-        teacher_net = data[0]
-        assert(len(data) == 1)
+        teacher_net = pickle.load(file)
 
     return teacher_net
 
@@ -196,8 +194,8 @@ def write_teacher_net(teacher_net, configs):
     output_dir = configs['output_directory']
     teacher_file = output_dir + "teacher_net"
 
-    with open(teacher_file, 'w') as file:
-        pickle.dump([teacher_net], file)
+    with open(teacher_file, 'wb') as file:
+        pickle.dump(teacher_net, file)
 
 
 def watch(configs, gen, num_survive):

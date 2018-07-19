@@ -115,9 +115,9 @@ def min_num_nodes(configs):
     assert(directed) #too lazy to make undirected version now
 
     if self_loops:
-        min_num = edge_node_ratio
+        min_num = math.ceil(edge_node_ratio)
     else:
-        min_num = edge_node_ratio + 1
+        min_num = math.ceil(edge_node_ratio) + 1
 
     if input_output_e2n:
         min_num_for_inputs = math.ceil(float(configs['from_inputs_edge_ratio']))

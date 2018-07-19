@@ -223,12 +223,13 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
 
     if (bias and bias_on == 'edges'): bias.assign_an_edge_bias(net, [node1,node2], configs['bias_distribution'], given_bias=given_bias)
 
-    if net.node[node1]['layer']=='input' and node1_layer != 'input':
-        add_this_edge(net,configs) # need to compensate for rm'd edge, add first to help with ensure_single_cc
-        rm_an_edge(net,configs, layer='input') # need to rebalance input layer
-    if net.node[node2]['layer']=='output' and node2_layer != 'output':
-        add_this_edge(net,configs)
-        rm_an_edge(net,configs,layer='output')
+    if util.boool(configs['input_output_e2n']):
+        if net.node[node1]['layer']=='input' and node1_layer != 'input':
+            add_this_edge(net,configs) # need to compensate for rm'd edge, add first to help with ensure_single_cc
+            rm_an_edge(net,configs, layer='input') # need to rebalance input layer
+        if net.node[node2]['layer']=='output' and node2_layer != 'output':
+            add_this_edge(net,configs)
+            rm_an_edge(net,configs,layer='output')
 
 
 def rm_an_edge(net, configs, layer=None):
@@ -274,9 +275,10 @@ def rm_an_edge(net, configs, layer=None):
 
     ensure_single_cc(net, configs, node1=edge[0], node2=edge[1], sign_orig=sign_orig, bias_orig=bias_orig)
 
-    if layer is None and (node1_layer is not None or node2_layer is not None):
-        add_this_edge(net,configs, node1_layer=node1_layer, node2_layer=node2_layer)
-        rm_an_edge(net, configs)
+    if util.boool(configs['input_output_e2n']):
+        if layer is None and (node1_layer is not None or node2_layer is not None):
+            add_this_edge(net,configs, node1_layer=node1_layer, node2_layer=node2_layer)
+            rm_an_edge(net, configs)
 
     return bias_orig
 

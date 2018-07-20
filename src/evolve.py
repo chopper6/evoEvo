@@ -24,10 +24,9 @@ def evolve(config_file):
 
     for i in range(num_sims):
 
+        init_sim(configs, num_sims, i, orig_output_dir,rank)
         if (num_sims > 1):
             util.cluster_print(orig_output_dir, "\n######################### STARTING EVOLUTION OF SIM #" + str(i) + " #########################\n")
-
-        init_sim(configs, num_sims, i, orig_output_dir,rank)
 
         if rank == 0:  # MASTER
             log_text = 'Evolve_root(): in dir ' + str(os.getcwd()) + ', config file = ' + str(config_file) + ', num_workers = ' + str(num_workers) + "\n"

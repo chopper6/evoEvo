@@ -117,7 +117,7 @@ def extract_and_combine(output_dir, num_sims):
             a_mean_data = np.mean(all_data[:,i,j])
             mean_data[i][j] = a_mean_data
 
-    with open(output_dir + "/info.csv", 'w') as final_info:
+    with open(output_dir + "/net_data.csv", 'w') as final_info:
         file = csv.writer(final_info)
         titles[-1] = titles[-1].replace("\n",'')
         file.writerow(titles)

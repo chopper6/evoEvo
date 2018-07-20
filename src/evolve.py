@@ -24,6 +24,9 @@ def evolve(config_file):
 
     for i in range(num_sims):
 
+        if (num_sims > 1):
+            util.cluster_print(orig_output_dir, "\n######################### STARTING EVOLUTION OF SIM #" + str(i) + " #########################\n")
+
         init_sim(configs, num_sims, i, orig_output_dir,rank)
 
         if rank == 0:  # MASTER
@@ -90,7 +93,7 @@ def extract_and_combine(output_dir, num_sims):
     all_data, titles = None, None #just for warnings
 
     for i in range(num_sims):
-        info_file = output_dir + "sim_" + str(i) + "/info.csv"
+        info_file = output_dir + "sim_" + str(i) + "/net_data.csv"
 
         if (os.path.isfile(info_file)):
             with open(info_file) as info:

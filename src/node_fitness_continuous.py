@@ -75,7 +75,7 @@ def retrieve_states(net, node, configs):
     if feedfwd: prev = 'prev_iteration_state'
     else: prev = 'prev_state'
 
-    if net.node[node]['error']: #also add the ideal output as it is inputted to calc err (ie activate the node)
+    if net.node[node]['layer'] == 'error': #also add the ideal output as it is inputted to calc err (ie activate the node)
         inputs.append(net.node[node]['ideal_output'])
         prev_inputs.append(net.node[node]['prev_ideal_output'])
 

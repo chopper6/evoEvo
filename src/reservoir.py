@@ -155,8 +155,6 @@ def stochastic_backprop(net, ideal_output, configs):
                 if net.node[in_edge[0]]['state']:
                     weight_contribution = net.node[in_edge[0]]['state'] #'weight contribution' is a misnomer...
 
-                    if not util.boool(configs['out_edges_from_outputs']): assert(net.node[in_edge[0]] is not net.node[output_node])
-
                     partial_err = delta * weight_contribution
                     if verbose: print("delta = " + str(delta) + ", weight_contrib = " + str(weight_contribution) + ", curr_weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
                     w_change = partial_err*learning_rate
@@ -217,7 +215,7 @@ def activate_err_nodes(net, ideal_output, configs):
             err = math.pow(ideal_output[i] - output, 2) #TODO: use partial error instead?
             net.node[err_node]['state'] = err
             if net.node[err_node]['ideal_output'] is not None:
-                net.node[err_node]['prev_ideal_output'] = err_node['ideal_output']
+                net.node[err_node]['prev_ideal_output'] = net.node[err_node]['ideal_output']
             net.node[err_node]['ideal_output'] = ideal_output[i] #TODO: clean this sloppy shit
 
 

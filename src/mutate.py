@@ -523,6 +523,7 @@ def apply_directed_attributes(node, net, layer, configs):
     net.node[node]['state'], net.node[node]['prev_iteration_state'] = None, None
     if layer=='error':   net.node[node]['neuron_bias'] = 0
     else: net.node[node]['neuron_bias'] = build_nets.assign_edge_weight(configs)
+    net.node[node]['prev_neuron_bias'] = None
 
 
 def find_output_buddy(net):

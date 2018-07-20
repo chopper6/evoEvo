@@ -188,7 +188,7 @@ def step_fwd(net, configs):
         net.node[n]['prev_state'] = net.node[n]['state']
 
     for n in net.nodes():
-        if (net.node[n]['layer'] != ('input' or 'error')):
+        if (net.node[n]['layer'] != 'input' and net.node[n]['layer'] !='error'):
             net.node[n]['state'] = activation(net, n, configs)
 
         if util.boool(configs['debug']):
@@ -215,10 +215,10 @@ def activate_err_nodes(net, ideal_output, configs):
             err_node = find_error_buddy(net,output_node)
             output = net.node[output_node]['state']
             err = math.pow(ideal_output[i] - output, 2) #TODO: use partial error instead?
-            err_node['state'] = err
-            if err_node['ideal_output'] is not None:
-                err_node['prev_ideal_output'] = err_node['ideal_output']
-            err_node['ideal_output'] = ideal_output[i] #TODO: clean this sloppy shit
+            net.node[err_node]['state'] = err
+            if net.node[err_node]['ideal_output'] is not None:
+                net.node[err_node]['prev_ideal_output'] = err_node['ideal_output']
+            net.node[err_node]['ideal_output'] = ideal_output[i] #TODO: clean this sloppy shit
 
 
         i+=1

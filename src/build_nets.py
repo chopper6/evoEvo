@@ -138,7 +138,7 @@ def double_check(net, configs):
 
     if directed:
 
-        ideal_num_nodes = start_size + num_inputs + num_outputs
+        ideal_num_nodes = start_size + num_inputs + num_outputs*2 #num_outputs*2 due to error nodes
         num_edges = round(ideal_num_nodes * edge_node_ratio)
         assert (len(net.edges()) == num_edges)
         assert (len(net.nodes()) == ideal_num_nodes)

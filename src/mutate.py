@@ -393,7 +393,8 @@ def check_constraints(net, node1, node2, configs):
 
     if directed:
         if net.node[node2]['layer'] == 'input': return False
-        if net.node[node2]['layer'] == 'error': return False #should only have input from 1 error node
+        if net.node[node2]['layer'] == 'error':
+            if len(net.in_edges(node2))>0 : return False #should only have input from 1 error node
 
         if net.node[node1]['layer'] == 'input' and net.node[node2]['layer'] == 'output': return False
         #this one is not objectionable to the model, it's just a giant flagpole up the ass
@@ -528,7 +529,8 @@ def find_output_buddy(net):
     output_buddy = None
     i=0
     while output_buddy is None:
-        output_buddy = rd.sample([net.graph['output_nodes']])
+        output_buddy = rd.sample(net.graph['output_nodes'], 1)
+        output_buddy = output_buddy[0]
         for out_edge in net.out_edges(output_buddy):
             if net.node[out_edge[1]]['layer'] == 'error':
                 output_buddy = None

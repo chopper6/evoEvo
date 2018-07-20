@@ -188,7 +188,7 @@ def apply_directed_node_attributes(node, net, layer, configs):
     net.node[node]['state'], net.node[node]['prev_iteration_state'] = None, None #prev_iteration_state really just for feedforward
     if layer=='error':   net.node[node]['neuron_bias'] = 0
     else: net.node[node]['neuron_bias'] = assign_edge_weight(configs)
-    net.node[node]['prev_neuron_bias'] = None
+    net.node[node]['prev_neuron_bias'] = net.node[node]['neuron_bias']
 
 
 

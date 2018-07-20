@@ -88,6 +88,8 @@ def calc_states(net, node, configs):
     if feedfwd: prev= 'prev_iteration_state'
     else: prev = 'prev_state'
 
+    assert(configs['state_type'] == 'state_only')
+
 
     if net.node[node]['error']: #also add the ideal output as it is inputted to calc err (ie activate the node)
         if net.node[node]['ideal_output'] == 0: num0 += 1

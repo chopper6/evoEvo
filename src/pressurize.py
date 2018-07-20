@@ -21,7 +21,7 @@ def pressurize(configs, net, gen, problem_instances = None):
             # note that node states are not reset
             if not feedfwd: err = reservoir.step(net, configs, problem_instance = problem_instances[i])
             else: err = reservoir.feedfwd_step(net, configs)
-            if (err is not None): #TODO: error nodes may not yet be active
+            if (err is not None):
                 total_err += err
                 num_outputs += 1
             fitness.calc_node_fitness(net, configs)

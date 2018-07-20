@@ -215,7 +215,7 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
             net.add_edge(node1, node2, sign=sign)
             if directed:
                 net[node1][node2]['weight'] = build_nets.assign_edge_weight(configs)
-                net[node1][node2]['prev_weight'] = None
+                net[node1][node2]['prev_weight'] = net[node1][node2]['weight'] #since some won't ever change
 
         post_size = len(net.edges())
         if constraints_check: assert(post_size != pre_size)

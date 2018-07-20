@@ -67,6 +67,8 @@ def calc (net, node, fitness_metric, configs):
 
 
 def retrieve_states(net, node, configs):
+    #TODO: double debug this bit
+
     inputs, prev_inputs = [], []
     feedfwd = util.boool(configs['feedforward'])
     state_type = configs['state_type']
@@ -77,7 +79,7 @@ def retrieve_states(net, node, configs):
 
     if net.node[node]['layer'] == 'error': #also add the ideal output as it is inputted to calc err (ie activate the node)
         inputs.append(net.node[node]['ideal_output'])
-        prev_inputs.append(net.node[node]['prev_ideal_output'])
+        if net.node[node]['prev_ideal_output'] is not None: prev_inputs.append(net.node[node]['prev_ideal_output'])
 
     inputs, prev_inputs = [], []
     for in_edge in net.in_edges(node):

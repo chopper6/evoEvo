@@ -63,7 +63,7 @@ def add_nodes(net, num_add, configs, biases=None, layer = None, init=False):
         if biases and bias_on == 'nodes': bias.assign_a_node_bias(net, new_node, configs['bias_distribution'], given_bias=biases[i])
 
         if directed:
-            apply_directed_attributes(new_node, net, layer, configs)
+            build_nets.apply_directed_node_attributes(new_node, net, layer, configs)
 
 
         # ADD EDGE TO NEW NODE TO KEEP CONNECTED
@@ -213,7 +213,9 @@ def add_this_edge(net, configs, node1=None, node2=None, sign=None, given_bias=No
 
         if constraints_check:
             net.add_edge(node1, node2, sign=sign)
-            if directed: net[node1][node2]['weight'] = build_nets.assign_edge_weight(configs)
+            if directed:
+                net[node1][node2]['weight'] = build_nets.assign_edge_weight(configs)
+                net[node1][node2]['prev_weight'] = None
 
         post_size = len(net.edges())
         if constraints_check: assert(post_size != pre_size)
@@ -510,20 +512,6 @@ def correct_off_by_one_edges(net, configs, layer, init=False):
         assert(False) #shouldn't be more than off-by-one unles initiallizing with input_output_e2n active
 
 
-
-def apply_directed_attributes(node, net, layer, configs):
-    if not layer: net.node[node]['layer'] = 'hidden'
-    else:
-        net.node[node]['layer'] = layer
-        if layer=='input': net.graph['input_nodes'].append(node)
-        elif layer=='output': net.graph['output_nodes'].append(node)
-        elif layer=='error':
-            net.graph['error_nodes'].append(node)
-            net.node[node]['ideal_output'], net.node[node]['prev_ideal_output'] = None, None
-    net.node[node]['state'], net.node[node]['prev_iteration_state'] = None, None
-    if layer=='error':   net.node[node]['neuron_bias'] = 0
-    else: net.node[node]['neuron_bias'] = build_nets.assign_edge_weight(configs)
-    net.node[node]['prev_neuron_bias'] = None
 
 
 def find_output_buddy(net):

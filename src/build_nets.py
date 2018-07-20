@@ -172,11 +172,24 @@ def init_directed_attributes(net, configs):
 
     # THESE SHOULD JUST BE FOR THE INITIAL NODES OF THE EMPTY GRAPH
     for n in net.nodes():
-        net.node[n]['state'] = None
-        if feedfwd: net.node[n]['prev_iteration_state'] = None
-        net.node[n]['neuron_bias'] = assign_edge_weight(configs)
-        net.node[n]['prev_neuron_bias'] = None
-        net.node[n]['layer'] = 'hidden'
+        apply_directed_node_attributes(n, net, 'hidden', configs)
+
+
+
+def apply_directed_node_attributes(node, net, layer, configs):
+    if not layer: net.node[node]['layer'] = 'hidden'
+    else:
+        net.node[node]['layer'] = layer
+        if layer=='input': net.graph['input_nodes'].append(node)
+        elif layer=='output': net.graph['output_nodes'].append(node)
+        elif layer=='error':
+            net.graph['error_nodes'].append(node)
+            net.node[node]['ideal_output'], net.node[node]['prev_ideal_output'] = None, None
+    net.node[node]['state'], net.node[node]['prev_iteration_state'] = None, None #prev_iteration_state really just for feedforward
+    if layer=='error':   net.node[node]['neuron_bias'] = 0
+    else: net.node[node]['neuron_bias'] = assign_edge_weight(configs)
+    net.node[node]['prev_neuron_bias'] = None
+
 
 
 def custom_to_directed(population):

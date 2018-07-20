@@ -1,4 +1,4 @@
-import instances, node_fitness, fitness, util, reservoir, output
+import instances, node_fitness_discrete, node_fitness_continuous, fitness, util, reservoir, output
 
 def pressurize(configs, net, gen, problem_instances = None):
     # configs:

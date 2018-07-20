@@ -38,6 +38,25 @@ def single_run_plots (configs):
     degree_distrib_change(dirr) #may require debugging
 
 
+
+def feature_plots_only(dirr, configs):
+    if not os.path.exists(dirr):
+        print("ERROR plot_nets(): given directory not found: " + str(dirr))
+        return
+
+    net_info, titles = parse_info(dirr)
+
+    img_dirs = ["/images_by_size/", "/images_by_time/", "/images_by_time_logScaled/"]
+    for img_dir in img_dirs:
+        if not os.path.exists(dirr + img_dir):
+            os.makedirs(dirr + img_dir)
+
+    mins, maxs = 0,0
+    features_over_size(dirr, net_info, titles, mins, maxs, False)
+    features_over_time(dirr, net_info, titles, mins, maxs, False)
+
+
+
 def plot_undir(configs):
 
     output_dir = configs['output_directory']

@@ -40,7 +40,7 @@ def evolve(config_file):
             import minion
             minion.work(configs, rank)
 
-    if (num_sims > 1 and rank==0): close_out_mult_sims(num_sims, orig_output_dir)
+    if (num_sims > 1 and rank==0): close_out_mult_sims(num_sims, orig_output_dir, configs)
 
 
     if (rank==0):
@@ -80,9 +80,9 @@ def init_sim(configs, num_sims, sim_num, orig_output_dir, rank):
                 sleep(1)
 
 
-def close_out_mult_sims(num_sims, orig_output_dir):
+def close_out_mult_sims(num_sims, orig_output_dir, configs):
     extract_and_combine(orig_output_dir, num_sims)
-    plot_nets.feature_plots_only(orig_output_dir)
+    plot_nets.feature_plots_only(orig_output_dir, configs)
     for i in range(num_sims-1):
         if (os.path.exists(orig_output_dir + "sim_" + str(i))):
             shutil.rmtree(orig_output_dir + "sim_" + str(i)) #clean up, leave last run as sample

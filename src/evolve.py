@@ -70,7 +70,6 @@ def init_sim(configs, num_sims, sim_num, orig_output_dir, rank):
 
     if (num_sims > 1):
         configs['output_directory'] = orig_output_dir + "sim_" + str(sim_num) + "/"
-        configs['instance_file'] = (util.slash(configs['output_directory']) + "/instances/" + configs['stamp'])
         if (rank == 0):
             if not os.path.exists(configs['output_directory']): os.makedirs(configs['output_directory'])
         else:

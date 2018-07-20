@@ -175,6 +175,7 @@ def init_directed_attributes(net, configs):
         net.node[n]['state'] = None
         if feedfwd: net.node[n]['prev_iteration_state'] = None
         net.node[n]['neuron_bias'] = assign_edge_weight(configs)
+        net.node[n]['prev_neuron_bias'] = None
         net.node[n]['layer'] = 'hidden'
 
 

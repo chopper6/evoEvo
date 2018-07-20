@@ -517,6 +517,9 @@ def apply_directed_attributes(node, net, layer, configs):
         net.node[node]['layer'] = layer
         if layer=='input': net.graph['input_nodes'].append(node)
         elif layer=='output': net.graph['output_nodes'].append(node)
+        elif layer=='error':
+            net.graph['error_nodes'].append(node)
+            net.node[node]['ideal_output'] = None
     net.node[node]['state'], net.node[node]['prev_iteration_state'] = None, None
     if layer=='error':   net.node[node]['neuron_bias'] = 0
     else: net.node[node]['neuron_bias'] = build_nets.assign_edge_weight(configs)

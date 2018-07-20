@@ -1,6 +1,5 @@
 import math
-from operator import attrgetter
-import node_fitness, util
+import node_fitness_discrete, node_fitness_continuous, util
 
 def eval_fitness(population, fitness_direction):
     #determines fitness of each individual and orders the population by fitness
@@ -16,8 +15,10 @@ def eval_fitness(population, fitness_direction):
     #for p in population:
     #    print(p.graph['fitness'])
     if (len(population) > 1):
-        if (fitness_direction == 'min'): assert(population[0].graph['fitness'] <= population[1].graph['fitness'] )
-        elif (fitness_direction == 'max'): assert(population[0].graph['fitness'] >= population[1].graph['fitness'] )
+
+        # AGAIN THIS IS REVERSED DUE TO NODE PRODUCT
+        if (fitness_direction == 'max'): assert(population[0].graph['fitness'] <= population[1].graph['fitness'] )
+        elif (fitness_direction == 'min'): assert(population[0].graph['fitness'] >= population[1].graph['fitness'] )
     #print("\n")
 
     return population
@@ -32,50 +33,36 @@ def calc_node_fitness(net, configs):
     directed = util.boool(configs['directed'])
     fitness_metric = str(configs['fitness_metric'])
     interval = configs['interval']
+    debug = configs['debug']
+
+    if (fitness_metric == 'error'):
+        return #calc at net lvl
 
     if interval == 'discrete':
-        # WARNING: this likely needs a good bit of debugging
-
+        if debug: print("WARNING: discrete fitness likely needs a lotto debugging!")
         if directed:
             for n in net.nodes():
                 if net.node[n]['layer'] != 'input':
-                    net.node[n]['fitness'] += node_fitness.calc_discrete_directed(net, n, fitness_metric, configs)
-
-            if net.graph['output'] is not None and net.graph['prev_output']:
-                assert(len(net.graph['output']) == len(net.graph['prev_output']) == len(net.graph['output_nodes']))
-                for i in range(len(net.graph['output'])):
-                    net.graph['output_fitness'] +=  node_fitness.calc_discrete_directed(net, i, fitness_metric, configs, ideal_output = True)
-                net.graph['output_fitness'] /= len(net.graph['output'])
+                    net.node[n]['fitness'] += node_fitness_discrete.calc_directed(net, n, fitness_metric, configs)
 
         else:
             assert(False) #i may have screwed this up, not sure what # up and down refer to anymore...
             for n in net.nodes():
                 up, down = net.node[n]['up'], net.node[n]['down']
-                net.node[n]['fitness'] += node_fitness.calc_discrete_undirected(fitness_metric, up, down)
+                net.node[n]['fitness'] += node_fitness_discrete.calc_undirected(fitness_metric, up, down)
 
 
     elif interval == 'continuous':
 
         if directed:
-            distrib_lng = calc_distrib_lng(configs['activation_function'])
-
             for n in net.nodes():
-
-                fitness = node_fitness.calc_continuous(net, n, fitness_metric, configs, distrib_lng=distrib_lng)
+                fitness = node_fitness_continuous.calc(net, n, fitness_metric, configs)
                 if fitness is not None: #for ex input nodes or nodes with no inputs will yield none
                     net.node[n]['fitness'] += fitness
 
 
-            #TODO: need sep one for each output
-            if net.graph['output'] is not None and net.graph['prev_output'] is not None:
-
-                assert (len(net.graph['output']) == len(net.graph['prev_output']) == len(net.graph['output_nodes']))
-                for i in range(len(net.graph['output'])):
-                    net.graph['output_fitness'] += node_fitness.calc_continuous(net, i, fitness_metric, configs, ideal_output=True)
-                net.graph['output_fitness'] /= len(net.graph['output'])
-
-
         else:
+            assert(False) #needs a whole bunch of debugging
             for n in net.nodes():
                 states = []
                 for in_edge in net.in_edges(n):
@@ -85,13 +72,13 @@ def calc_node_fitness(net, configs):
                     if net[out_edge[0]][out_edge[1]]['state'] is not None:
                         states.append(net[out_edge[0]][out_edge[1]]['state'])
 
-                fitness = node_fitness.calc_continuous(states, fitness_metric)
+                fitness = node_fitness_continuous.calc(states, fitness_metric)
                 if fitness is not None: net.node[n]['fitness'] += fitness
 
 
 def node_product(net, scale_node_fitness, configs):
-    directed = util.boool(configs['directed'])
-    debug = util.boool(configs['debug'])
+
+    if configs['fitness_metric'] == 'error': return net.graph['error']
 
     fitness_score = 0
     num_0 = 0
@@ -108,15 +95,6 @@ def node_product(net, scale_node_fitness, configs):
                 # NOTE THAT THIS SEEMS TO INVERT THE MEANING, IE INFO --> ENTROPY : MAX --> MIN
                 fitness_score += -1*math.log(net.node[n]['fitness'])
 
-    # include output
-    # TODO: this shit
-    if not debug:
-        assert(False)
-        '''
-        if directed and net.graph['output_fitness'] is not None:
-            net.graph['output_fitness'] += node_fitness.calc_continuous(net, i, fitness_metric, configs, ideal_output=True)
-            net.graph['output_fitness'] /= len(net.graph['output'])
-        '''
 
     if (num_over != 0 or num_under != 0):
         print("# I < 0 = " + str(num_under) + "\t # I > 1 = " + str(num_over) + "\n")
@@ -144,14 +122,3 @@ def reset_nodes(net, configs):
     net.graph['output_fitness'] = 0
 
 
-
-
-def calc_distrib_lng(actvn_fn):
-    if actvn_fn == 'sigmoid':
-        distrib_lng = 1
-    elif actvn_fn == 'tanh':
-        distrib_lng = 2
-    else:
-        assert (False)
-
-    return distrib_lng

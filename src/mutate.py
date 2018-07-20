@@ -44,6 +44,7 @@ def add_nodes(net, num_add, configs, biases=None, layer = None, init=False):
     if input_output_e2n:
         if layer == 'input':     node1_layer = 'input'
         elif layer == 'output':  node2_layer = 'output'
+        elif layer == 'error':   node1_layer = 'error'
 
     if directed: assert(not biased) #not ready for that shit yet
 
@@ -66,8 +67,12 @@ def add_nodes(net, num_add, configs, biases=None, layer = None, init=False):
 
 
         # ADD EDGE TO NEW NODE TO KEEP CONNECTED
-        if single_cc:
-            if not input_output_e2n and not biases: add_this_edge(net, configs, node1=new_node)
+        if single_cc or layer == 'error':
+            if layer=='error': #connect to a lonely output node that doesn't have an error node
+                output_buddy = find_output_buddy(net)
+                add_this_edge(net, configs, node1=output_buddy, node2= new_node)
+
+            elif not input_output_e2n and not biases: add_this_edge(net, configs, node1=new_node)
             elif biases and bias_on=='edges': add_this_edge(net, configs, node1=new_node, given_bias=biases[i])
             else:
                 if layer is None or layer == 'input': add_this_edge(net, configs, node1=new_node, node1_layer = node1_layer, node2_layer = node2_layer)
@@ -87,7 +92,7 @@ def add_nodes(net, num_add, configs, biases=None, layer = None, init=False):
         else: assert(False)
     else: num_edge_add = round(num_add * float(configs['edge_to_node_ratio'])) - num_add
 
-    if not single_cc: num_edge_add += 1 #since haven't added one to start
+    if not single_cc and layer != 'error': num_edge_add += 1 #since haven't added one to start
 
     if biases and bias_on == 'edges':
         assert(len(biases) == num_edge_add + num_add)
@@ -264,7 +269,9 @@ def rm_an_edge(net, configs, layer=None):
             if net.node[edge[1]]['layer'] == 'output': node2_layer = 'output'
             #output as source node is irrelevant (not separately tracked)
 
-        net.remove_edge(edge[0], edge[1])
+        if not directed or not (net.node[edge[0]]['layer']=='output' and net.node[edge[1]]['layer']=='error'):
+            # don't want to rm an error buddy
+            net.remove_edge(edge[0], edge[1])
 
         post_size = len(net.edges())
         i += 1
@@ -386,8 +393,7 @@ def check_constraints(net, node1, node2, configs):
 
     if directed:
         if net.node[node2]['layer'] == 'input': return False
-        if not util.boool(configs['out_edges_from_outputs']):
-            if net.node[node1]['layer'] == 'output': return False
+        if net.node[node2]['layer'] == 'error': return False #should only have input from 1 error node
 
         if net.node[node1]['layer'] == 'input' and net.node[node2]['layer'] == 'output': return False
         #this one is not objectionable to the model, it's just a giant flagpole up the ass
@@ -511,4 +517,25 @@ def apply_directed_attributes(node, net, layer, configs):
         if layer=='input': net.graph['input_nodes'].append(node)
         elif layer=='output': net.graph['output_nodes'].append(node)
     net.node[node]['state'], net.node[node]['prev_iteration_state'] = None, None
-    net.node[node]['neuron_bias'] = build_nets.assign_edge_weight(configs)
+    if layer=='error':   net.node[node]['neuron_bias'] = 0
+    else: net.node[node]['neuron_bias'] = build_nets.assign_edge_weight(configs)
+
+
+def find_output_buddy(net):
+    # used with error nodes to find a lonely output node that has no associated error node
+
+    assert(len(net.graph['output_nodes']) > 0)
+    output_buddy = None
+    i=0
+    while output_buddy is None:
+        output_buddy = rd.sample([net.graph['output_nodes']])
+        for out_edge in net.out_edges(output_buddy):
+            if net.node[out_edge[1]]['layer'] == 'error':
+                output_buddy = None
+        i+=1
+
+        if (i > 100000):
+            print("ERROR in mutate.find_output_buddy(): looping a ton, are all output nodes taken?")
+            assert(False)
+
+    return output_buddy

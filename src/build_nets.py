@@ -78,8 +78,8 @@ def gen_a_rd_net(configs):
 
         # input and output layers
         assert(num_input_nodes > 0 and num_output_nodes > 0)
-        net.graph['input_nodes'], net.graph['output_nodes'] = [], []
         mutate.add_nodes(net, num_output_nodes, configs, layer='output', init=True)
+        mutate.add_nodes(net, num_output_nodes, configs, layer='error', init=True)
         mutate.add_nodes(net, num_input_nodes, configs, layer='input', init=True)
 
         # more to hidden layer
@@ -147,10 +147,6 @@ def double_check(net, configs):
         for i in net.graph['input_nodes']:
             assert (not net.in_edges(i))
 
-        if not util.boool(configs['out_edges_from_outputs']):
-            for o in net.graph['output_nodes']:
-                assert (not net.out_edges(o))
-
         if input_output_e2n:
 
             mutate.check_layers(net, configs)
@@ -162,6 +158,8 @@ def double_check(net, configs):
 
 def init_directed_attributes(net, configs):
 
+    feedfwd = configs['feedforward']
+
     net.graph['fitness'] = 0
     net.graph['error'] = 0
 
@@ -170,10 +168,12 @@ def init_directed_attributes(net, configs):
     net.graph['prev_input'] = None
     net.graph['prev_output'] = None
 
+    net.graph['input_nodes'], net.graph['output_nodes'], net.graph['error_nodes'] = [], [], []
+
     # THESE SHOULD JUST BE FOR THE INITIAL NODES OF THE EMPTY GRAPH
     for n in net.nodes():
         net.node[n]['state'] = None
-        net.node[n]['prev_iteration_state'] = None
+        if feedfwd: net.node[n]['prev_iteration_state'] = None
         net.node[n]['neuron_bias'] = assign_edge_weight(configs)
         net.node[n]['layer'] = 'hidden'
 

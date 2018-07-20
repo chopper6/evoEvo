@@ -8,7 +8,8 @@ def step(net, configs,  problem_instance = None):
     else: input, output = problem_instance
     apply_input(net, input)
     step_fwd(net, configs)
-    MSE = stochastic_backprop (net, configs, output)
+    activate_err_nodes(net, output, configs)
+    MSE = stochastic_backprop (net, output, configs)
     lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases
 
     return MSE
@@ -22,7 +23,8 @@ def feedfwd_step(net, configs):
     diameter = nx.diameter(net.to_undirected())
     for i in range(diameter): #all nodes should have had a chance to effect one another (except for directed aspect...)
         step_fwd(net, configs)
-    MSE = stochastic_backprop (net, configs, output) #i.e. only care about last iteration
+    activate_err_nodes(net, output, configs) #shouldn't really effect a feedfwd net
+    MSE = stochastic_backprop (net, output, configs) #i.e. only care about last iteration
     lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases
 
     return MSE
@@ -34,6 +36,7 @@ def activation(net, node, configs):
     # could add a few diff activation fns()
     # tech should exclude input_nodes, but shouldn't matter
 
+    assert(net.node[node]['layer'] != 'input' and  net.node[node]['layer'] !='error') #inputs shouldn't be activated and errors have special activations
     activation_fn = configs['activation_function']
 
     # curr 2nd gen neurons
@@ -115,8 +118,7 @@ def lvl_1_reservoir_learning(net, configs):
 
 
 
-
-def stochastic_backprop(net, configs, ideal_output):
+def stochastic_backprop(net, ideal_output, configs):
     # returns a float for error
     verbose = util.boool(configs['verbose_backprop'])
 
@@ -159,11 +161,15 @@ def stochastic_backprop(net, configs, ideal_output):
                     if verbose: print("delta = " + str(delta) + ", weight_contrib = " + str(weight_contribution) + ", curr_weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
                     w_change = partial_err*learning_rate
                     if regularization and abs(net[in_edge[0]][in_edge[1]]['weight']) > .01: w_change /= abs(net[in_edge[0]][in_edge[1]]['weight'])
+                    #TODO: add more intelligent regularization, add to bias too, and test it
+
+                    net[in_edge[0]][in_edge[1]]['prev_weight'] = net[in_edge[0]][in_edge[1]]['weight']
                     net[in_edge[0]][in_edge[1]]['weight'] -= w_change
                     if verbose: print("now weight = " + str(net[in_edge[0]][in_edge[1]]['weight']))
 
             # could add diff learning rate for the bias (typically lower)
             if verbose: print("old bias = " + str(net.node[output_node]['neuron_bias']) + ", its err contrib is delta = " + str(delta))
+            net.node[output_node]['prev_neuron_bias'] = net.node[output_node]['neuron_bias']
             net.node[output_node]['neuron_bias'] -= delta*bias_learning_rate
             if verbose: print("new bias = " + str(net.node[output_node]['neuron_bias']))
 
@@ -182,11 +188,44 @@ def step_fwd(net, configs):
         net.node[n]['prev_state'] = net.node[n]['state']
 
     for n in net.nodes():
-        if (net.node[n]['layer'] != 'input'):
+        if (net.node[n]['layer'] != ('input' or 'error')):
             net.node[n]['state'] = activation(net, n, configs)
+
+        if util.boool(configs['debug']):
+            if net.node[n]['layer'] == 'error':
+                assert(net.node[n]['neuron_bias']==0) #backprop should never touch it, but later additions might
+
 
 def save_prev_iteration_states(net, configs):
     assert(configs['feedforward'])
 
     for n in net.nodes():
         net.node[n]['prev_iteration_state'] = net.node[n]['state']
+
+
+def activate_err_nodes(net, ideal_output, configs):
+
+    sorted_output_nodes = sorted(net.graph['output_nodes'])
+    i=0
+    for output_node in sorted_output_nodes:
+
+        if (net.node[output_node]['state'] is not None):
+            # input hasn't reached all outputs yet, although outputs may now be emitting earlier (due to bias)
+
+            err_node = find_error_buddy(net,output_node)
+            output = net.node[output_node]['state']
+            err = math.pow(ideal_output[i] - output, 2) #TODO: use partial error instead?
+            err_node['state'] = err
+            if err_node['ideal_output'] is not None:
+                err_node['prev_ideal_output'] = err_node['ideal_output']
+            err_node['ideal_output'] = ideal_output[i] #TODO: clean this sloppy shit
+
+
+        i+=1
+
+def find_error_buddy(net,output_node):
+    for out_edge in net.out_edges(output_node):
+        if net.node[out_edge[1]]['layer'] == 'error': return out_edge[1]
+
+    print("ERROR in reservoir.find_error_buddy(): output has no associated error nodes.")
+    assert(False)

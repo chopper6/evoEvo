@@ -85,6 +85,7 @@ def init_run(configs):
             gen = int(gen)-2 #latest may not have finished
             population = parse_worker_popn(num_workers, gen, output_dir, num_survive, fitness_direction)
             if net_base_problem: teacher_net = parse_teacher_net(configs)
+            else: teacher_net = None
 
             size = len(population[0].nodes())
             gen += 1

@@ -47,7 +47,8 @@ def evolve_master(configs):
     del_mpi_dirs(output_dir)
 
     util.cluster_print(output_dir,"Evolution finished, generating images.")
-    if (num_sims == 1): plot_nets.single_run_plots(configs)
+    if (num_sims == 1): plot_nets.all_plots(configs)
+    else: plot_nets.all_plots(configs, feature_plots=False)
 
     util.cluster_print(output_dir,"Master finished config file.\n")
 

@@ -6,54 +6,40 @@ from decimal import Decimal
 
 
 ################## ORGANIZER FUNCTIONS ##################
-def single_run_plots (configs):
-    dirr = configs['output_directory']
+def all_plots (configs, feature_plots=True, indiv_plots = True, orig_output_directory=None):
+
+    if orig_output_directory: dirr = orig_output_directory
+    else: dirr = configs['output_directory']
     #plots features_over_time and degree_distrib
     #only uses most fit indiv in population
     if not os.path.exists(dirr):
         print("ERROR plot_nets(): given directory not found: " + str(dirr))
         return
 
-    net_info, titles = parse_info(dirr)
+    if feature_plots:
+        net_info, titles = parse_info(dirr)
 
-    img_dirs = ["/images_by_size/", "/images_by_time/", "/images_by_time_logScaled/"]
-    for img_dir in img_dirs:
-        if not os.path.exists(dirr + img_dir):
-            os.makedirs(dirr + img_dir)
+        img_dirs = ["/images_by_size/", "/images_by_time/", "/images_by_time_logScaled/"]
+        for img_dir in img_dirs:
+            if not os.path.exists(dirr + img_dir):
+                os.makedirs(dirr + img_dir)
 
-    mins, maxs = 0,0
-    features_over_size(dirr, net_info, titles, mins, maxs, False)
-    features_over_time(dirr, net_info, titles, mins, maxs, False)
+        mins, maxs = 0,0
+        features_over_size(dirr, net_info, titles, mins, maxs, False)
+        features_over_time(dirr, net_info, titles, mins, maxs, False)
 
-    print("Generating directed degree distribution plots.")
-    degree_distrib(dirr)
+    if indiv_plots:
+        print("Generating directed degree distribution plots.")
+        degree_distrib(dirr)
 
-    print("Generating base error plots.")
-    base_problem_error(dirr, configs)
+        print("Generating base error plots.")
+        base_problem_error(dirr, configs)
 
-    print("Generating undirected degree distribution plots.")
-    plot_undir(configs) #last two args for Biased and bias on, which haven't really been implemented
+        print("Generating undirected degree distribution plots.")
+        plot_undir(configs) #last two args for Biased and bias on, which haven't really been implemented
 
-    print("Generating degree change plot.\n")
-    degree_distrib_change(dirr) #may require debugging
-
-
-
-def feature_plots_only(dirr, configs):
-    if not os.path.exists(dirr):
-        print("ERROR plot_nets(): given directory not found: " + str(dirr))
-        return
-
-    net_info, titles = parse_info(dirr)
-
-    img_dirs = ["/images_by_size/", "/images_by_time/", "/images_by_time_logScaled/"]
-    for img_dir in img_dirs:
-        if not os.path.exists(dirr + img_dir):
-            os.makedirs(dirr + img_dir)
-
-    mins, maxs = 0,0
-    features_over_size(dirr, net_info, titles, mins, maxs, False)
-    features_over_time(dirr, net_info, titles, mins, maxs, False)
+        print("Generating degree change plot.\n")
+        degree_distrib_change(dirr) #may require debugging
 
 
 

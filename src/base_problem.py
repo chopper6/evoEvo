@@ -1,7 +1,7 @@
 import random as rd
 import pressurize, reservoir, build_nets, util, mutate
 
-def generate_net_instances(teacher_net, configs):
+def generate_net_instances(teacher_net, num_instances, configs):
     # reservoir steps fwd to generate instances
     # does NOT handle mutation of net
 
@@ -9,10 +9,10 @@ def generate_net_instances(teacher_net, configs):
     feedfwd = util.boool(configs['feedforward'])
     assert(base_problem == 'teacher' and not feedfwd) #could add feedfwd version later
 
-    num_samples_relative = pressurize.num_samples(teacher_net, configs) #assumes that all nets are same size
+    #num_samples_relative = pressurize.num_samples(teacher_net, configs) #assumes that all nets are same size
     instances = []
 
-    for i in range(num_samples_relative):
+    for i in range(num_instances):
         inputs, outputs = [], []
         finished_reservoir_outputs = None
         while not finished_reservoir_outputs:
@@ -27,18 +27,21 @@ def generate_net_instances(teacher_net, configs):
         for output in teacher_net.graph['output_nodes']:
             outputs.append(teacher_net.node[output]['state'])
         instances.append([inputs, outputs])
+        if util.boool(configs['debug']): print("base_problem generated instances: " + str(instances))
 
     return instances
 
 
-def step_teacher_net(teacher_net, gen, configs):
+def step_teacher_net(teacher_net, dummy_net, gen, configs):
 
     assert(not util.boool(configs['biased'])) #else need to pass to mutate
 
     #returns problem instances
+    if gen != 0: mutate.mutate(configs, dummy_net)
+    num_instances = pressurize.num_samples(dummy_net, configs)  # assumes that all nets are same size
     reservoir.initialize_input(teacher_net, configs) #for fully online learning this may not be nec
     #if gen !=0: mutate.mutate(configs, teacher_net) #as in minion
-    instances = generate_net_instances(teacher_net, configs)
+    instances = generate_net_instances(teacher_net, num_instances, configs)
 
     return instances
 

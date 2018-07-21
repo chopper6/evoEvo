@@ -15,7 +15,7 @@ def evolve_master(configs):
     init_data = init_run(configs)
     if not init_data: return #for example if run already done
 
-    population, teacher_net, gen, size, num_survive, keep_running = init_data
+    population, teacher_net, dummy_net, gen, size, num_survive, keep_running = init_data
 
     while keep_running:
         t_start = time.time()
@@ -27,7 +27,8 @@ def evolve_master(configs):
         if biased: biases = bias.gen_biases(configs) #all nets must have same bias to have comparable fitness
         else: biases = None
 
-        if net_base_problem: problem_instances = base_problem.step_teacher_net(teacher_net, gen, configs)
+        if net_base_problem:
+            problem_instances = base_problem.step_teacher_net(teacher_net, dummy_net, gen, configs)
         else: problem_instances = None
 
         distrib_workers(population, gen, worker_pop_size, num_survive, biases, problem_instances, configs)
@@ -94,12 +95,16 @@ def init_run(configs):
             else:
                 plot_nets.all_plots(configs, feature_plots=False)
 
+            return None
+
 
         elif (int(gen) > 2): #IS CONTINUATION RUN
             gen = int(gen)-2 #latest may not have finished
             population = parse_worker_popn(num_workers, gen, output_dir, num_survive, fitness_direction)
-            if net_base_problem: teacher_net = parse_teacher_net(configs)
-            else: teacher_net = None
+            if net_base_problem:
+                teacher_net = parse_teacher_net(configs)
+                dummy_net = build_nets.gen_a_rd_net(configs, size=len(population[0].nodes()))
+            else: teacher_net, dummy_net = None, None
 
             size = len(population[0].nodes())
             gen += 1
@@ -117,16 +122,17 @@ def init_run(configs):
         population = build_nets.init_population(pop_size, configs)
         if net_base_problem:
             teacher_net = build_nets.gen_a_rd_net(configs, size=configs['teacher_net_size'])
+            dummy_net = build_nets.gen_a_rd_net(configs)
             # TODO: if online learning, need to initiliaze teacher_net (and not reapply input at each gen)
             #reservoir.initialize_input(teacher_net, configs)
         else:
-            teacher_net = None
+            teacher_net, dummy_net = None, None
 
         gen = 0
         keep_running = util.test_stop_condition(start_size, gen, configs)
 
     #init_data =  population, teacher_net, gen, size, num_survive, keep_running
-    return [population, teacher_net, gen, size, num_survive, keep_running]
+    return [population, teacher_net, dummy_net, gen, size, num_survive, keep_running]
 
 
 def init_dirs(num_workers, output_dir):

@@ -27,7 +27,7 @@ def generate_net_instances(teacher_net, num_instances, configs):
         for output in teacher_net.graph['output_nodes']:
             outputs.append(teacher_net.node[output]['state'])
         instances.append([inputs, outputs])
-        if util.boool(configs['debug']): print("base_problem generated instances: " + str(instances))
+    #if util.boool(configs['debug']): print("base_problem generated instances: " + str(instances))
 
     return instances
 

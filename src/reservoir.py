@@ -18,7 +18,7 @@ def step(net, configs,  problem_instance = None):
 def feedfwd_step(net, configs):
     # possibly make this the more general model?
 
-    verbose = True
+    verbose = False
     input, output = base_problem.generate_instance(net, configs)
     apply_input(net, input)
     diameter = nx.diameter(net.to_undirected())

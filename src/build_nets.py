@@ -225,7 +225,7 @@ def assign_edge_weight(configs):
 
 def assign_bias_weight(configs):
     #called by mutate
-    basis = 'small_activation'
+    basis = 'activation'
 
     if basis == 'activation':
         activn_fn = configs['activation_function']

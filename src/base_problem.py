@@ -14,19 +14,19 @@ def generate_net_instances(teacher_net, num_instances, configs):
     diameter = nx.diameter(teacher_net.to_undirected())
 
     for i in range(num_instances):
+        reservoir.initialize_input(teacher_net, configs)
         inputs, outputs = [], []
-        #finished_reservoir_outputs = None
+        finished_reservoir_outputs = None
 
-        for i in range(math.pow(diameter,2)):
-            reservoir.one_step_fwd(teacher_net, configs)
-        '''
+        #for i in range(int(math.pow(diameter,2))):
+        #for i in range(diameter):
+        #    reservoir.one_step_fwd(teacher_net, configs)
         while not finished_reservoir_outputs:
             reservoir.one_step_fwd(teacher_net, configs) #occurs at least once per instance
             finished_reservoir_outputs = True
             for output in teacher_net.graph['output_nodes']:
                 if teacher_net.node[output]['state'] is None:
                     finished_reservoir_outputs = False
-        '''
 
         for input in teacher_net.graph['input_nodes']:
             inputs.append(teacher_net.node[input]['state'])
@@ -46,7 +46,7 @@ def step_teacher_net(teacher_net, dummy_net, gen, configs):
     #returns problem instances
     if gen != 0: mutate.mutate(configs, dummy_net)
     num_instances = pressurize.num_samples(dummy_net, configs)  # assumes that all nets are same size
-    reservoir.initialize_input(teacher_net, configs) #for fully online learning this may not be nec
+    #reservoir.initialize_input(teacher_net, configs) #for fully online learning this may not be nec
     #if gen !=0: mutate.mutate(configs, teacher_net) #as in minion
     instances = generate_net_instances(teacher_net, num_instances, configs)
 

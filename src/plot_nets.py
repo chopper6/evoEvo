@@ -195,7 +195,10 @@ def base_problem_features(dirr, configs):
 
         i, curr_gen, t, feature = 0, 0, [], []
 
-        feature_description = all_lines[0][2]
+        line = all_lines[0]
+        line = line.replace('[', '').replace(']', '').replace("\n", '')
+        line = line.split(',')
+        feature_description = line[2]
 
         for line in all_lines[1:]:
 

@@ -50,7 +50,7 @@ def activation(net, node, configs):
 
             sum += edge_val
             num_active += 1
-        sum += net.node[node]['neuron_bias']
+    sum += net.node[node]['neuron_bias']
 
     #if num_active > 0: sum /= num_active #don't normalize like this, since will always be < 1
     # if num_active == 0: return None

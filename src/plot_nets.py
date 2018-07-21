@@ -195,6 +195,8 @@ def base_problem_features(dirr, configs):
 
         i, curr_gen, t, feature = 0, 0, [], []
 
+        feature_description = all_lines[0][2]
+
         for line in all_lines[1:]:
 
             line = line.replace('[', '').replace(']', '').replace("\n", '')
@@ -215,10 +217,10 @@ def base_problem_features(dirr, configs):
                 i += 1
 
         # plot last recorded gen
-        one_base_feature_plot(dirr, feature, t, curr_gen, feature_name)
+        one_base_feature_plot(dirr, feature, t, curr_gen, feature_name,  feature_description)
 
 
-def one_base_feature_plot(dirr, feature, t, curr_gen, title):
+def one_base_feature_plot(dirr, feature, t, curr_gen, title,  feature_description):
 
     # trimming number of data points
     if len(feature) > 40:
@@ -239,7 +241,7 @@ def one_base_feature_plot(dirr, feature, t, curr_gen, title):
 
     plt.plot(x, y)
 
-    plt.ylabel(str(title))
+    plt.ylabel(str(feature_description))
     plt.title("Gen " + str(curr_gen) + " Base Problem " + str(title))
     plt.xlabel("Iteration")
     plt.xticks(xticks, xticks)

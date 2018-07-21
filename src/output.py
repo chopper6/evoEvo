@@ -22,7 +22,7 @@ def master_info(population, gen, size, pop_size, num_survive, configs):
 
     if (num_data_output > 0):
         if (gen % int(end / num_data_output) == 0):
-            popn_data(population, output_dir, gen)
+            popn_data(population, output_dir, gen, configs)
             util.cluster_print(output_dir, "Master at gen " + str(gen) + ", with net size = " + str(len(population[0].nodes())) + " nodes and " + str(len(population[0].edges())) + " edges, " + str(num_survive) + "<=" + str(len(population)) + " survive out of " + str(pop_size))
 
     if (num_net_output > 0):
@@ -76,9 +76,17 @@ def write_base_features(configs, gen, iter, err, curr_fitness):
 
 def init_csv(out_dir, configs):
  
-    net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Mean Fitness, Variance in Fitness, Fitness_Div_#Edges, Fitness_Div_#Nodes, Error of Base Problem, Diameter\n"
+
+    if util.boool(configs['directed']):
+        net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Mean Fitness, Variance in Fitness, Fitness_Div_#Edges, Fitness_Div_#Nodes, Error of Base Problem, Diameter, In Edges to Outputs, Out Edges from Inputs, Out Edges from Errors\n"
+
+    else:
+        net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Mean Fitness, Variance in Fitness, Fitness_Div_#Edges, Fitness_Div_#Nodes, Error of Base Problem, Diameter\n"
+
+
     deg_distrib_title = "Generation, Net Size, In Degrees, In Degree Frequencies, Out Degrees, Out Degree Frequencies, Degs, Deg Freqs\n"
     err_file_title = "Generation, Iteration, Error (MSE)\n"
+    fitness_title = "Generation, Iteration, " + str(configs['fitness_metric']) + "\n"
 
 
     with open(out_dir+"/net_data.csv",'w') as csv_out:
@@ -87,6 +95,8 @@ def init_csv(out_dir, configs):
         csv_out.write(deg_distrib_title)
     with open(out_dir+"/base_problem/error.csv",'w') as csv_out:
         csv_out.write(err_file_title)
+    with open(out_dir + "/base_problem/fitness.csv", 'w') as csv_out:
+        csv_out.write(fitness_title)
 
     out_configs = out_dir + "/configs_used.csv"
 
@@ -95,7 +105,7 @@ def init_csv(out_dir, configs):
             outConfigs.write(config + "," + str(configs[config]) + "\n")
 
 
-def popn_data(population, output_dir, gen):
+def popn_data(population, output_dir, gen, configs):
 
     if (population[0].edges()):
         output_csv = output_dir + "/net_data.csv"
@@ -111,6 +121,12 @@ def popn_data(population, output_dir, gen):
             diameter = nx.diameter(net.to_undirected())
             nets_info = [gen, len(net.nodes()), net.graph['fitness'], sum(net.degree().values())/len(net.nodes()),len(net.edges())/len(net.nodes()),
                          mean_fitness, var_fitness, net.graph['fitness']/float(len(net.edges())), net.graph['fitness']/float(len(net.nodes())), net.graph['error'], diameter]
+
+            if util.boool(configs['directed']) and False:
+                nets_info.append(len(net.in_edges(net.graph['output_nodes'])))
+                nets_info.append(len(net.out_edges(net.graph['input_nodes'])))
+                nets_info.append(len(net.out_edges(net.graph['error_nodes'])))
+
 
             output.writerow(nets_info)
 

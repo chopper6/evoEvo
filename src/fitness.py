@@ -55,13 +55,12 @@ def calc_node_fitness(net, configs):
     elif interval == 'continuous':
 
         if directed:
-            curr_fitness = 0
+            curr_fitness = 1
             for n in net.nodes():
                 fitness = node_fitness_continuous.calc(net, n, fitness_metric, configs)
                 if fitness is not None: #for ex input nodes or nodes with no inputs will yield none
                     net.node[n]['fitness'] += fitness
-                    curr_fitness += fitness
-            curr_fitness /= len(net.nodes())
+                    if fitness != 0: curr_fitness += -1*math.log(net.node[n]['fitness'])
             return curr_fitness
 
 

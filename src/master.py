@@ -42,7 +42,7 @@ def evolve_master(configs):
 
         keep_running = util.test_stop_condition(size, gen, configs)
 
-    with open(output_dir + "/progress.txt", 'w') as out: out.write("Done")
+    with open(output_dir + "/progress.txt", 'w') as out: out.write("Plotting")
     output.final_master_info(population, gen, configs)
     del_mpi_dirs(output_dir)
 
@@ -50,6 +50,8 @@ def evolve_master(configs):
     if (num_sims == 1): plot_nets.all_plots(configs)
     else: plot_nets.all_plots(configs, feature_plots=False)
 
+
+    with open(output_dir + "/progress.txt", 'w') as out: out.write("Done.")
     util.cluster_print(output_dir,"Master finished config file.\n")
 
 
@@ -81,6 +83,19 @@ def init_run(configs):
         if (gen == 'Done'):
             util.cluster_print(output_dir, "Run already finished, exiting...\n")
             return None
+
+        elif (gen == 'Plotting'):
+
+            util.cluster_print(output_dir, "####################### JUST PLOTTING #######################\n")
+
+            del_mpi_dirs(output_dir)
+
+            util.cluster_print(output_dir, "Evolution finished, generating images.")
+            if (num_sims == 1):
+                plot_nets.all_plots(configs)
+            else:
+                plot_nets.all_plots(configs, feature_plots=False)
+
 
         elif (int(gen) > 2): #IS CONTINUATION RUN
             gen = int(gen)-2 #latest may not have finished

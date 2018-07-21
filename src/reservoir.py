@@ -28,7 +28,17 @@ def feedfwd_step(net, configs):
     MSE = stochastic_backprop (net, output, configs) #i.e. only care about last iteration
     lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases
 
-    if verbose and util.boool(configs['debug']): print("input = " + str(input) + "\t, ideal output = " + str(output) + "\t, error = " + str(MSE))
+
+    if verbose and util.boool(configs['debug']):
+        print("\n")
+        for node in net.nodes():
+            if net.node[node]['layer'] == 'input': print("INPUT: " + str(net.node[node]['state']))
+
+            if net.node[node]['layer'] == 'output': print("OUTPUT: " + str(net.node[node]['state']))
+
+            if net.node[node]['layer'] == 'error': print("ERROR: " + str(net.node[node]['state']))
+
+        #print("input = " + str(input) + "\t, ideal output = " + str(output) + "\t, error = " + str(MSE))
 
     return MSE
 

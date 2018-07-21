@@ -57,13 +57,15 @@ def write_base_features(configs, gen, iter, err, curr_fitness):
 
     if (stop_condition == 'size'):
         end = int(configs['ending_size'])
+        start = int(configs['starting_size'])
         #this sort of assumes simulation starts near size 0
     elif (stop_condition == 'generation' or stop_condition == 'gen'):
         end = int(configs['max_generations'])
+        start = 0
     else: assert(False)
 
     if (num_net_output > 0):
-        if (gen % int(end / num_net_output) == 0):
+        if (gen % int((end-start) / num_net_output) == 0):
 
             with open(output_dir+"/base_problem/error.csv",'a') as csv_out:
                 csv_out.write(str(gen) + "," + str(iter) + "," + str(err) + "\n")

@@ -82,6 +82,7 @@ def calc_node_fitness(net, configs):
 def node_product(net, scale_node_fitness, configs):
 
     if configs['fitness_metric'] == 'error': return net.graph['error']
+    elif configs['fitness_metric'] == 'None': return 0
 
     fitness_score = 0
     num_0 = 0

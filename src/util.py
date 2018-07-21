@@ -123,6 +123,12 @@ def test_stop_condition(size, gen, configs):
     max_gen = int(configs['max_generations'])
     end_size = int(configs['ending_size'])
     output_dir = configs['output_directory']
+    directed = boool(configs['directed'])
+
+    num_input_nodes = int(configs['num_input_nodes'])
+    num_output_nodes = int(configs['num_output_nodes'])
+
+    if directed: end_size += (num_input_nodes+2*num_output_nodes) #2*output for error nodes
 
     if (stop_condition == 'size'):
         if (size < end_size): cont = True

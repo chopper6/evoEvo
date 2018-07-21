@@ -36,6 +36,7 @@ def activation(net, node, configs):
     # could add a few diff activation fns()
     # tech should exclude input_nodes, but shouldn't matter
 
+    verbose_activation = False
     assert(net.node[node]['layer'] != 'input' and  net.node[node]['layer'] !='error') #inputs shouldn't be activated and errors have special activations
     activation_fn = configs['activation_function']
 
@@ -47,11 +48,11 @@ def activation(net, node, configs):
         #use previous state, since state is reserved for the new iteration (see one_step_fwd())
         if (net.node[edge[0]]['prev_state'] is not None):
             edge_val = net.node[edge[0]]['prev_state'] * net[edge[0]][edge[1]]['weight']
-            print("in = " + str(net.node[edge[0]]['prev_state']) + ", w = " +str(net[edge[0]][edge[1]]['weight']))
+            if verbose_activation: print("in = " + str(net.node[edge[0]]['prev_state']) + ", w = " +str(net[edge[0]][edge[1]]['weight']))
 
             sum += edge_val
             num_active += 1
-    print("sum = " + str(sum) + ", bias = " + str(net.node[node]['neuron_bias']))
+    if verbose_activation: print("sum = " + str(sum) + ", bias = " + str(net.node[node]['neuron_bias']))
     sum += net.node[node]['neuron_bias']
 
     #if num_active > 0: sum /= num_active #don't normalize like this, since will always be < 1
@@ -186,13 +187,15 @@ def stochastic_backprop(net, ideal_output, configs):
 
 
 def one_step_fwd(net, configs):
+    verbose = False
+
     for n in net.nodes():
         net.node[n]['prev_state'] = net.node[n]['state']
 
     for n in net.nodes():
         if (net.node[n]['layer'] != 'input' and net.node[n]['layer'] !='error'):
             net.node[n]['state'] = activation(net, n, configs)
-        print(net.node[n]['prev_state'], net.node[n]['state'], "\n")
+        if verbose: print(net.node[n]['prev_state'], net.node[n]['state'], "\n")
 
         if util.boool(configs['debug']):
             if net.node[n]['layer'] == 'error':

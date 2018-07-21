@@ -1,4 +1,4 @@
-import random as rd, networkx as nx
+import random as rd, networkx as nx, math
 import pressurize, reservoir, build_nets, util, mutate
 
 def generate_net_instances(teacher_net, num_instances, configs):
@@ -17,7 +17,7 @@ def generate_net_instances(teacher_net, num_instances, configs):
         inputs, outputs = [], []
         #finished_reservoir_outputs = None
 
-        for i in range(diameter):
+        for i in range(math.pow(diameter,2)):
             reservoir.one_step_fwd(teacher_net, configs)
         '''
         while not finished_reservoir_outputs:
@@ -33,7 +33,8 @@ def generate_net_instances(teacher_net, num_instances, configs):
         for output in teacher_net.graph['output_nodes']:
             outputs.append(teacher_net.node[output]['state'])
         instances.append([inputs, outputs])
-    #if util.boool(configs['debug']): print("base_problem generated instances: " + str(instances))
+
+    if util.boool(configs['debug']): print("base_problem generated instances: " + str(instances))
 
     return instances
 

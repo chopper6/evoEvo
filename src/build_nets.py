@@ -101,7 +101,7 @@ def gen_a_rd_net(configs, size=None):
 
 
     mutate.ensure_single_cc(net, configs)
-    if debug: double_check(net, configs)
+    if debug and not size: double_check(net, configs)
 
     return net
 

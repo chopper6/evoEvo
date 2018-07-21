@@ -24,7 +24,8 @@ def calc (net, node, fitness_metric, configs):
         return info
 
     elif (fitness_metric == 'directed_info'):
-        info = entropish - cond_entropish
+        #info = entropish - cond_entropish
+        info = 1 - cond_entropish
         assert(info >= 0 and info <= 1)
         return info
 
@@ -33,7 +34,8 @@ def calc (net, node, fitness_metric, configs):
         if prev_output is None: return None
         mean, var, entropish, predictive_cond_entropish = calc_features(inputs, prev_output, distrib_lng)
 
-        predictive_info = entropish - predictive_cond_entropish
+        predictive_info = 1 - predictive_cond_entropish
+        #predictive_info = entropish - predictive_cond_entropish
         assert(predictive_info >= 0 and predictive_info <= 1)
         return predictive_info
 
@@ -45,8 +47,11 @@ def calc (net, node, fitness_metric, configs):
         prev_mean, prev_var, prev_entropish, prev_cond_entropish = calc_features(prev_inputs, prev_output, distrib_lng)
         mean, var, entropish, predictive_cond_entropish = calc_features(inputs, prev_output, distrib_lng)
 
-        predictive_info = entropish - predictive_cond_entropish
-        prev_info = prev_entropish - prev_cond_entropish
+        #predictive_info = entropish - predictive_cond_entropish
+        #prev_info = prev_entropish - prev_cond_entropish
+
+        predictive_info = 1 - predictive_cond_entropish
+        prev_info = 1 - prev_cond_entropish
         flux = prev_info - predictive_info
         assert(flux >= 0 and flux <= 1)
         return flux

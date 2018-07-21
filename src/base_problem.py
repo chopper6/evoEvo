@@ -37,7 +37,7 @@ def step_teacher_net(teacher_net, gen, configs):
 
     #returns problem instances
     reservoir.initialize_input(teacher_net, configs) #for fully online learning this may not be nec
-    if gen !=0: mutate.mutate(configs, teacher_net) #as in minion
+    #if gen !=0: mutate.mutate(configs, teacher_net) #as in minion
     instances = generate_net_instances(teacher_net, configs)
 
     return instances

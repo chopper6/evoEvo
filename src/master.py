@@ -116,7 +116,7 @@ def init_run(configs):
 
         population = build_nets.init_population(pop_size, configs)
         if net_base_problem:
-            teacher_net = build_nets.gen_a_rd_net(configs)
+            teacher_net = build_nets.gen_a_rd_net(configs, size=configs['teacher_net_size'])
             # TODO: if online learning, need to initiliaze teacher_net (and not reapply input at each gen)
             #reservoir.initialize_input(teacher_net, configs)
         else:

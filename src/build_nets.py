@@ -50,9 +50,10 @@ def gen_rd_nets(pop_size, configs):
     return population
 
 
-def gen_a_rd_net(configs):
+def gen_a_rd_net(configs, size=None):
 
-    start_size = int(configs['starting_size'])
+    if size: start_size = int(size)
+    else: start_size = int(configs['starting_size'])
     num_init_nodes = min_num_nodes(configs)
     assert (start_size >= num_init_nodes)
 

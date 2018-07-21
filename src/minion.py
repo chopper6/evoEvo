@@ -32,7 +32,7 @@ def read_progress_file(progress, output_dir, rank):
 
     with open(progress, 'r') as file:
         line = file.readline()
-        if (line == 'Done' or line == 'Done\n'):
+        if (line == 'Done' or line == 'Done\n' or line == 'Plotting' or line == 'Plotting\n'):
             if (rank == 1 or rank==32 or rank==63): util.cluster_print(output_dir,"Worker #" + str(rank) + " + exiting.")
             return  # no more work to be done
         else:

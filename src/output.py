@@ -122,7 +122,7 @@ def popn_data(population, output_dir, gen, configs):
             nets_info = [gen, len(net.nodes()), net.graph['fitness'], sum(net.degree().values())/len(net.nodes()),len(net.edges())/len(net.nodes()),
                          mean_fitness, var_fitness, net.graph['fitness']/float(len(net.edges())), net.graph['fitness']/float(len(net.nodes())), net.graph['error'], diameter]
 
-            if util.boool(configs['directed']) and False:
+            if util.boool(configs['directed']):
                 nets_info.append(len(net.in_edges(net.graph['output_nodes'])))
                 nets_info.append(len(net.out_edges(net.graph['input_nodes'])))
                 nets_info.append(len(net.out_edges(net.graph['error_nodes'])))

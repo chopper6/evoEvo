@@ -24,8 +24,8 @@ def pressurize(configs, net, gen, problem_instances = None):
             if (err is not None):
                 total_err += err
                 num_outputs += 1
-            fitness.calc_node_fitness(net, configs)
-            output.write_base_err(configs, gen, i, err)
+            curr_fitness = fitness.calc_node_fitness(net, configs)
+            output.write_base_features(configs, gen, i, err, curr_fitness)
             if feedfwd: reservoir.save_prev_iteration_states(net, configs) #TODO: might not make sense if problem_instances given
 
         if num_outputs==0:  net.graph['error'] = None

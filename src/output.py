@@ -50,7 +50,7 @@ def final_master_info(population, gen, configs):
         bias.pickle_bias(population[0], output_dir+"/bias", configs['bias_on'])
 
 
-def write_base_err(configs, gen, iter, err):
+def write_base_features(configs, gen, iter, err, curr_fitness):
     output_dir = configs['output_directory']
     num_net_output = int(configs['num_net_output'])
     stop_condition = configs['stop_condition']
@@ -67,6 +67,10 @@ def write_base_err(configs, gen, iter, err):
 
             with open(output_dir+"/base_problem/error.csv",'a') as csv_out:
                 csv_out.write(str(gen) + "," + str(iter) + "," + str(err) + "\n")
+
+
+            with open(output_dir+"/base_problem/fitness.csv",'a') as csv_out:
+                csv_out.write(str(gen) + "," + str(iter) + "," + str(curr_fitness) + "\n")
 
 
 

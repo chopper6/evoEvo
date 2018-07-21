@@ -185,50 +185,51 @@ def undir_deg_distrib(net_file, destin_path, title, biased, bias_on):
 
 
 
-def base_problem_error(dirr, configs):
+def base_problem_features(dirr, configs):
 
-    err_file_name = dirr + "/base_problem/error.csv"
+    for feature_name in ['error', 'fitness']:
+        file_name = dirr + "/base_problem/" + str(feature_name) + ".csv"
 
-    all_lines = [Line.strip() for Line in (open(err_file_name, 'r')).readlines()]
-    #titles = all_lines[0]
+        all_lines = [Line.strip() for Line in (open(file_name, 'r')).readlines()]
+        #titles = all_lines[0]
 
-    i, curr_gen, t, err = 0, 0, [], []
+        i, curr_gen, t, feature = 0, 0, [], []
 
-    for line in all_lines[1:]:
+        for line in all_lines[1:]:
 
-        line = line.replace('[', '').replace(']', '').replace("\n", '')
-        line = line.split(',')
-        an_err = line[2]
-        if an_err != None and an_err != "None" and an_err:
-            gen = int(line[0])
-            if gen != curr_gen:
-                # PLOT AND RESET
-                # plot before appending current line, since that is for diff gen
-                one_base_err_plot(dirr, err, t, curr_gen)
-                # reset for next plot
-                curr_gen, i, t, err = gen, 0, [], []
+            line = line.replace('[', '').replace(']', '').replace("\n", '')
+            line = line.split(',')
+            a_feature = line[2]
+            if a_feature != None and a_feature != "None" and a_feature:
+                gen = int(line[0])
+                if gen != curr_gen:
+                    # PLOT AND RESET
+                    # plot before appending current line, since that is for diff gen
+                    one_base_feature_plot(dirr, feature, t, curr_gen, feature_name)
+                    # reset for next plot
+                    curr_gen, i, t, feature = gen, 0, [], []
 
-            err.append(float(an_err))
-            t.append(i)
+                feature.append(float(a_feature))
+                t.append(i)
 
-            i += 1
+                i += 1
 
-    # plot last recorded gen
-    one_base_err_plot(dirr, err, t, curr_gen)
+        # plot last recorded gen
+        one_base_feature_plot(dirr, feature, t, curr_gen, feature_name)
 
 
-def one_base_err_plot(dirr, err, t, curr_gen):
+def one_base_feature_plot(dirr, feature, t, curr_gen, title):
 
     # trimming number of data points
-    if len(err) > 40:
+    if len(feature) > 40:
         x, y = [], []
-        for j in range(len(err)):
-            if (j % int(len(err) / 40)) == 0:
+        for j in range(len(feature)):
+            if (j % int(len(feature) / 40)) == 0:
                 x.append(t[j])
-                y.append(err[j])
+                y.append(feature[j])
     else:
         x = t
-        y = err
+        y = feature
 
     if len(x) > 11:
         xticks = [int(j * x[-1] / 10) for j in range(11)]
@@ -238,11 +239,11 @@ def one_base_err_plot(dirr, err, t, curr_gen):
 
     plt.plot(x, y)
 
-    plt.ylabel("Mean Squared Error")
-    plt.title("Gen " + str(curr_gen) + " Base Problem Error")
+    plt.ylabel(str(title))
+    plt.title("Gen " + str(curr_gen) + " Base Problem " + str(title))
     plt.xlabel("Iteration")
     plt.xticks(xticks, xticks)
-    plt.savefig(dirr + "/base_problem/Error_Gen" + str(curr_gen) + ".png")
+    plt.savefig(dirr + "/base_problem/" + str(title) + "_gen" + str(curr_gen) + ".png")
     plt.clf()
 
 

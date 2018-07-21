@@ -18,6 +18,7 @@ def step(net, configs,  problem_instance = None):
 def feedfwd_step(net, configs):
     # possibly make this the more general model?
 
+    verbose = True
     input, output = base_problem.generate_instance(net, configs)
     apply_input(net, input)
     diameter = nx.diameter(net.to_undirected())
@@ -26,6 +27,8 @@ def feedfwd_step(net, configs):
     activate_err_nodes(net, output, configs) #shouldn't really effect a feedfwd net
     MSE = stochastic_backprop (net, output, configs) #i.e. only care about last iteration
     lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases
+
+    if verbose and util.boool(configs['debug']): print("input = " + str(input) + "\t, ideal output = " + str(output) + "\t, error = " + str(MSE))
 
     return MSE
 

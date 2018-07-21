@@ -91,12 +91,14 @@ def initialize_input(net, configs):
 
     if activn_fn == 'sigmoid':
         for i in range(num_inputs):
-            inputs.append(rd.uniform(0,1))
+            inputs.append(rd.choice[0, 1])
+            #inputs.append(rd.uniform(0,1))
 
 
     elif activn_fn == 'tanh':
         for i in range(num_inputs):
-            inputs.append(rd.uniform(-1,1))
+            inputs.append(rd.choice[-1,1]) #makes problem harder
+            #inputs.append(rd.uniform(-1,1))
 
     else: assert(False)
 

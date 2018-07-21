@@ -1,4 +1,4 @@
-import random as rd
+import random as rd, networkx as nx
 import pressurize, reservoir, build_nets, util, mutate
 
 def generate_net_instances(teacher_net, num_instances, configs):
@@ -11,16 +11,22 @@ def generate_net_instances(teacher_net, num_instances, configs):
 
     #num_samples_relative = pressurize.num_samples(teacher_net, configs) #assumes that all nets are same size
     instances = []
+    diameter = nx.diameter(teacher_net.to_undirected())
 
     for i in range(num_instances):
         inputs, outputs = [], []
-        finished_reservoir_outputs = None
+        #finished_reservoir_outputs = None
+
+        for i in range(diameter):
+            reservoir.one_step_fwd(teacher_net, configs)
+        '''
         while not finished_reservoir_outputs:
             reservoir.one_step_fwd(teacher_net, configs) #occurs at least once per instance
             finished_reservoir_outputs = True
             for output in teacher_net.graph['output_nodes']:
                 if teacher_net.node[output]['state'] is None:
                     finished_reservoir_outputs = False
+        '''
 
         for input in teacher_net.graph['input_nodes']:
             inputs.append(teacher_net.node[input]['state'])

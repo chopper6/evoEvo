@@ -93,7 +93,7 @@ def init_run(configs):
 
             keep_running = util.test_stop_condition(size, gen, configs)
             cont = True
-
+            util.cluster_print(output_dir, "####################### CONTINUATION RUN STARTING AT GEN " + str(gen) + "#######################\n")
         #else not cont runs
 
     if not cont: #FRESH START

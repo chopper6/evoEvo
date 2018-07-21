@@ -33,7 +33,7 @@ def all_plots (configs, feature_plots=True, indiv_plots = True, orig_output_dire
         degree_distrib(dirr)
 
         print("Generating base error plots.")
-        base_problem_error(dirr, configs)
+        base_problem_features(dirr, configs)
 
         print("Generating undirected degree distribution plots.")
         plot_undir(configs) #last two args for Biased and bias on, which haven't really been implemented

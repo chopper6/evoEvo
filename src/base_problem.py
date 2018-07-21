@@ -16,7 +16,7 @@ def generate_net_instances(teacher_net, num_instances, configs):
         inputs, outputs = [], []
         finished_reservoir_outputs = None
         while not finished_reservoir_outputs:
-            reservoir.step_fwd(teacher_net, configs) #occurs at least once
+            reservoir.one_step_fwd(teacher_net, configs) #occurs at least once per instance
             finished_reservoir_outputs = True
             for output in teacher_net.graph['output_nodes']:
                 if teacher_net.node[output]['state'] is None:

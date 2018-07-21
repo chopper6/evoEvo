@@ -7,7 +7,7 @@ def step(net, configs,  problem_instance = None):
     if problem_instance is None: input, output = base_problem.generate_instance(net, configs)
     else: input, output = problem_instance
     apply_input(net, input)
-    step_fwd(net, configs)
+    one_step_fwd(net, configs)
     activate_err_nodes(net, output, configs)
     MSE = stochastic_backprop (net, output, configs)
     lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases
@@ -22,7 +22,7 @@ def feedfwd_step(net, configs):
     apply_input(net, input)
     diameter = nx.diameter(net.to_undirected())
     for i in range(diameter): #all nodes should have had a chance to effect one another (except for directed aspect...)
-        step_fwd(net, configs)
+        one_step_fwd(net, configs)
     activate_err_nodes(net, output, configs) #shouldn't really effect a feedfwd net
     MSE = stochastic_backprop (net, output, configs) #i.e. only care about last iteration
     lvl_1_reservoir_learning(net, configs)  # TODO: add this fn() and see if err decreases
@@ -44,7 +44,7 @@ def activation(net, node, configs):
     sum = 0
     num_active = 0
     for edge in net.in_edges(node):
-        #use previous state, since state is reserved for the new iteration (see step_fwd())
+        #use previous state, since state is reserved for the new iteration (see one_step_fwd())
         if (net.node[edge[0]]['prev_state'] is not None):
             edge_val = net.node[edge[0]]['prev_state'] * net[edge[0]][edge[1]]['weight']
 
@@ -181,7 +181,7 @@ def stochastic_backprop(net, ideal_output, configs):
     return MSE
 
 
-def step_fwd(net, configs):
+def one_step_fwd(net, configs):
     for n in net.nodes():
         net.node[n]['prev_state'] = net.node[n]['state']
 

@@ -52,7 +52,7 @@ def evolve_master(configs):
     else: plot_nets.all_plots(configs, feature_plots=False)
 
 
-    with open(output_dir + "/progress.txt", 'w') as out: out.write("Done.")
+    with open(output_dir + "/progress.txt", 'w') as out: out.write("Done")
     util.cluster_print(output_dir,"Master finished config file.\n")
 
 

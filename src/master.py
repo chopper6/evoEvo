@@ -42,9 +42,9 @@ def evolve_master(configs):
 
         keep_running = util.test_stop_condition(size, gen, configs)
 
-    with open(output_dir + "/progress.txt", 'w') as out: out.write("Plotting")
     output.final_master_info(population, gen, configs)
     del_mpi_dirs(output_dir)
+    with open(output_dir + "/progress.txt", 'w') as out: out.write("Plotting")
 
     util.cluster_print(output_dir,"Evolution finished, generating images.")
     if (num_sims == 1): plot_nets.all_plots(configs)
@@ -87,8 +87,6 @@ def init_run(configs):
         elif (gen == 'Plotting'):
 
             util.cluster_print(output_dir, "####################### JUST PLOTTING #######################\n")
-
-            del_mpi_dirs(output_dir)
 
             util.cluster_print(output_dir, "Evolution finished, generating images.")
             if (num_sims == 1):

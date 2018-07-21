@@ -207,7 +207,7 @@ def base_problem_features(dirr, configs):
                 if gen != curr_gen:
                     # PLOT AND RESET
                     # plot before appending current line, since that is for diff gen
-                    one_base_feature_plot(dirr, feature, t, curr_gen, feature_name)
+                    one_base_feature_plot(dirr, feature, t, curr_gen, feature_name, feature_description)
                     # reset for next plot
                     curr_gen, i, t, feature = gen, 0, [], []
 

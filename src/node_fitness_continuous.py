@@ -9,7 +9,7 @@ def calc (net, node, fitness_metric, configs):
     if len(inputs)==0: return None
 
     mean, var, entropish, cond_entropish = None, None, None, None #those annoying ass warnings...
-    if (fitness_metric != 'predictive_info' and fitness_metric != 'flux_info'): mean, var, entropish, cond_entropish  = calc_features(inputs, output, distrib_lng)
+    if (fitness_metric != 'predictive_info' and fitness_metric != 'flux_info'): mean, var, entropish, cond_entropish  = calc_features(inputs, output, configs)
 
     if (fitness_metric == 'entropish'):
         return entropish
@@ -32,7 +32,7 @@ def calc (net, node, fitness_metric, configs):
     elif (fitness_metric == 'predictive_info'):
 
         if prev_output is None: return None
-        mean, var, entropish, predictive_cond_entropish = calc_features(inputs, prev_output, distrib_lng)
+        mean, var, entropish, predictive_cond_entropish = calc_features(inputs, prev_output, configs)
 
         predictive_info = 1 - predictive_cond_entropish
         #predictive_info = entropish - predictive_cond_entropish
@@ -44,8 +44,8 @@ def calc (net, node, fitness_metric, configs):
 
         if prev_output is None or prev_inputs is None or len(prev_inputs)==0: return None
 
-        prev_mean, prev_var, prev_entropish, prev_cond_entropish = calc_features(prev_inputs, prev_output, distrib_lng)
-        mean, var, entropish, predictive_cond_entropish = calc_features(inputs, prev_output, distrib_lng)
+        prev_mean, prev_var, prev_entropish, prev_cond_entropish = calc_features(prev_inputs, prev_output, configs)
+        mean, var, entropish, predictive_cond_entropish = calc_features(inputs, prev_output, configs)
 
         #predictive_info = entropish - predictive_cond_entropish
         #prev_info = prev_entropish - prev_cond_entropish
@@ -55,6 +55,42 @@ def calc (net, node, fitness_metric, configs):
         flux = prev_info - predictive_info
         assert(flux >= 0 and flux <= 1)
         return flux
+
+    elif (fitness_metric == 'flux_info_positive'):
+        # poss a problem related to the base problem?
+
+        if prev_output is None or prev_inputs is None or len(prev_inputs)==0: return None
+
+        prev_mean, prev_var, prev_entropish, prev_cond_entropish = calc_features(prev_inputs, prev_output, configs)
+        mean, var, entropish, predictive_cond_entropish = calc_features(inputs, prev_output, configs)
+
+        #predictive_info = entropish - predictive_cond_entropish
+        #prev_info = prev_entropish - prev_cond_entropish
+
+        predictive_info = 1 - predictive_cond_entropish
+        prev_info = 1 - prev_cond_entropish
+        flux = prev_info - predictive_info
+        if flux<0:  flux = 0
+        assert(flux >= 0 and flux <= 1)
+        return flux
+
+    elif (fitness_metric == 'flux_info_abs'):
+        # poss a problem related to the base problem?
+
+        if prev_output is None or prev_inputs is None or len(prev_inputs)==0: return None
+
+        prev_mean, prev_var, prev_entropish, prev_cond_entropish = calc_features(prev_inputs, prev_output, configs)
+        mean, var, entropish, predictive_cond_entropish = calc_features(inputs, prev_output, configs)
+
+        #predictive_info = entropish - predictive_cond_entropish
+        #prev_info = prev_entropish - prev_cond_entropish
+
+        predictive_info = 1 - predictive_cond_entropish
+        prev_info = 1 - prev_cond_entropish
+        flux = abs(prev_info - predictive_info)
+        assert(flux >= 0 and flux <= 1)
+        return flux
+
 
 
     elif (fitness_metric == 'entropish_old'):
@@ -113,8 +149,10 @@ def retrieve_states(net, node, configs):
     return  inputs, prev_inputs, output, prev_output
 
 
-def calc_features(inputs, output, distrib_lng):
+def calc_features(inputs, output, configs):
     if len(inputs)==0 or inputs is None: assert(False) #this case should already be handled higher up
+    entropish_factor = configs['entropish_factor']
+    distrib_lng = calc_distrib_lng(configs['activation_function'])
 
     var, entropish, cond_entropish = 0, 0, 0
     if output is None: cond_entropish = None
@@ -122,12 +160,16 @@ def calc_features(inputs, output, distrib_lng):
 
     for input in inputs:
         var += math.pow((mean-input),2)
-        pr = 1-abs(mean-input)/ float(distrib_lng)
+        if entropish_factor == 'abs': pr = 1-abs(mean-input)/ float(distrib_lng)
+        elif entropish_factor == 'sq' or entropish_factor == 'squared': pr = 1-math.pow(abs(mean-input)/ float(distrib_lng),2)
+        else: assert(False)
+
         assert(pr >= 0 and pr <= 1)
         if pr != 0:
             entropish -= math.log2(pr)
             if output is not None:
                 cond_weight = abs(input-output)/float(distrib_lng)
+                if entropish_factor == 'sq' or entropish_factor=='squared': cond_weight = math.pow(cond_weight,2)
                 cond_entropish -= math.log2(pr)*cond_weight
 
     if (len(inputs) > 1): var /= len(inputs) - 1

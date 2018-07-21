@@ -87,7 +87,7 @@ def gen_a_rd_net(configs, size=None):
         mutate.add_nodes(net, start_size - num_init_nodes, configs, init=True)
 
         # attempt to patch bias introduced into input and output wiring
-        num_rewire = len(net.edges()) * 10
+        num_rewire = min(len(net.edges()) * 10, 100)
         mutate.rewire(net, num_rewire, configs)
 
 

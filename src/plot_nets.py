@@ -450,20 +450,23 @@ def features_over_time(dirr, net_info, titles, mins, maxs, use_lims):
 
 def comparison_plots(dirr):
     data, run_names = [], []
-    prev_titles, titles = None, None
+    titles = None
     colors = ['red', 'blue', 'green', 'magenta', 'cyan']
 
     if os.path.exists(dirr):
 
         for root, dirs, files in os.walk(dirr):
             for d in dirs:
-                net_info, titles = parse_info(dirr + d)
-                data.append(net_info)
-                name = d
-                run_names.append(name)
+                net_file_exists = False
+                for root, dirs, files in os.walk(dirr + d):
+                    for f in files:
+                        if f == 'net_info.csv': net_file_exists = True
 
-                if prev_titles: assert(titles == prev_titles)
-                prev_titles = titles
+                if net_file_exists:
+                    net_info, titles = parse_info(dirr + d)
+                    data.append(net_info)
+                    name = d
+                    run_names.append(name)
 
     else: assert(False) #cannot find directory
 

@@ -457,7 +457,7 @@ def comparison_plots(dirr):
 
         for root, dirs, files in os.walk(dirr):
             for d in dirs:
-                net_info, titles = parse_info(d)
+                net_info, titles = parse_info(dirr + d)
                 data.append(net_info)
                 name = d
                 run_names.append(name)

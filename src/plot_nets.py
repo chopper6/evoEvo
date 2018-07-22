@@ -449,6 +449,8 @@ def features_over_time(dirr, net_info, titles, mins, maxs, use_lims):
 
 
 def comparison_plots(dirr):
+    # TODO: if mult sims, don't want to use net_data of every sub-sim
+
     data, run_names = [], []
     titles = None
     colors = ['red', 'blue', 'green', 'magenta', 'cyan']
@@ -460,7 +462,7 @@ def comparison_plots(dirr):
                 net_file_exists = False
                 for root, dirs, files in os.walk(dirr + d):
                     for f in files:
-                        if f == 'net_info.csv': net_file_exists = True
+                        if f == 'net_data.csv': net_file_exists = True
 
                 if net_file_exists:
                     net_info, titles = parse_info(dirr + d)
@@ -470,16 +472,19 @@ def comparison_plots(dirr):
 
     else: assert(False) #cannot find directory
 
+    assert(len(titles) > 0) #otherwise couldn't find anything to fill data with (net_data.csv DNE?)
+
     if not os.path.exists(dirr + "/comparison_plots/"):
         os.makedirs(dirr + "/comparison_plots/")
-    # regular images
+
+    last_net_info = net_info
     for i in range(len(titles)):
 
         xdata, legend_pieces = [], []
 
         for k in range(len(data)): #i.e. for each run
             net_info = data[k]
-            assert(len(net_info) == len(titles)) #checking dim
+            assert(len(net_info) == len(last_net_info)) #checking dim
 
             num_outputs = len(net_info)
             ydata = []

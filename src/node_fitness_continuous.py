@@ -13,7 +13,8 @@ def calc (net, node, fitness_metric, configs):
     if len(inputs)==0: return None
 
     mean, var, entropish, cond_entropish = None, None, None, None #those annoying ass warnings...
-    if (fitness_metric != 'predictive_info' and fitness_metric != 'flux_info'): mean, var, entropish, cond_entropish  = calc_features(inputs, output, configs)
+    if (fitness_metric != 'predictive_info' and fitness_metric != 'flux_info' and fitness_metric != 'Ipred' and fitness_metric != 'Iflux'):
+        mean, var, entropish, cond_entropish  = calc_features(inputs, output, configs)
 
     if (fitness_metric == 'entropish'):
         return entropish
@@ -27,13 +28,13 @@ def calc (net, node, fitness_metric, configs):
         assert(info >= 0 and info <= 1)
         return info
 
-    elif (fitness_metric == 'directed_info'):
+    elif (fitness_metric == 'directed_info' or fitness_metric == 'Idir'):
         #info = entropish - cond_entropish
         info = 1 - cond_entropish
         assert(info >= 0 and info <= 1)
         return info
 
-    elif (fitness_metric == 'predictive_info'):
+    elif (fitness_metric == 'predictive_info' or fitness_metric == 'Ipred'):
 
         if prev_output is None: return None
         mean, var, entropish, predictive_cond_entropish = calc_features(inputs, prev_output, configs)
@@ -43,7 +44,7 @@ def calc (net, node, fitness_metric, configs):
         assert(predictive_info >= 0 and predictive_info <= 1)
         return predictive_info
 
-    elif (fitness_metric == 'flux_info'):
+    elif (fitness_metric == 'flux_info' or fitness_metric == 'Iflux'):
         # poss a problem related to the base problem?
 
         if prev_output is None or prev_inputs is None or len(prev_inputs)==0: return None
@@ -60,7 +61,7 @@ def calc (net, node, fitness_metric, configs):
         assert(flux >= 0 and flux <= 1)
         return flux
 
-    elif (fitness_metric == 'flux_info_positive'):
+    elif (fitness_metric == 'flux_info_positive' or fitness_metric == 'Iflux+'):
         # poss a problem related to the base problem?
 
         if prev_output is None or prev_inputs is None or len(prev_inputs)==0: return None
@@ -78,7 +79,7 @@ def calc (net, node, fitness_metric, configs):
         assert(flux >= 0 and flux <= 1)
         return flux
 
-    elif (fitness_metric == 'flux_info_abs'):
+    elif (fitness_metric == 'flux_info_abs' or fitness_metric == 'Iflux_abs'):
         # poss a problem related to the base problem?
 
         if prev_output is None or prev_inputs is None or len(prev_inputs)==0: return None

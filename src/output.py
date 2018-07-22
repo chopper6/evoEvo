@@ -17,16 +17,17 @@ def master_info(population, gen, size, pop_size, num_survive, configs):
         #this sort of assumes simulation starts near size 0
     elif (stop_condition == 'generation' or stop_condition == 'gen'):
         end = int(configs['max_generations'])
+        start = 0
         assert(end >= num_data_output and end >= num_net_output)
     else: assert(False)
 
     if (num_data_output > 0):
-        if (gen % int(end / num_data_output) == 0):
+        if (gen % int((end-start) / num_data_output) == 0):
             popn_data(population, output_dir, gen, configs)
             util.cluster_print(output_dir, "Master at gen " + str(gen) + ", with net size = " + str(len(population[0].nodes())) + " nodes and " + str(len(population[0].edges())) + " edges, " + str(num_survive) + "<=" + str(len(population)) + " survive out of " + str(pop_size))
 
     if (num_net_output > 0):
-        if (gen % int(end / num_net_output) == 0):
+        if (gen % int((end-start) / num_net_output) == 0):
             nx.write_edgelist(population[0], output_dir + "nets_nx/" + str(gen))
             pickle_file = output_dir + "/nets_pickled/" + str(gen)
             with open(pickle_file, 'wb') as file:

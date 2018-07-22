@@ -95,6 +95,9 @@ def close_out_mult_sims(num_sims, orig_output_dir, configs):
 
 def extract_and_combine(output_dir, num_sims):
     # takes info.csv from mult runs and combines into one info.csv in main dir
+
+    #TODO: as of now combined csv if just 2 rows that are identical (title's good)
+
     all_data, titles = None, None #just for warnings
 
     for i in range(num_sims):

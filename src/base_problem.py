@@ -11,7 +11,7 @@ def generate_net_instances(teacher_net, num_instances, configs):
 
     #num_samples_relative = pressurize.num_samples(teacher_net, configs) #assumes that all nets are same size
     instances = []
-    diameter = nx.diameter(teacher_net.to_undirected())
+    #diameter = nx.diameter(teacher_net.to_undirected())
 
     for i in range(num_instances):
         reservoir.initialize_input(teacher_net, configs)

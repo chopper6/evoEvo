@@ -4,6 +4,10 @@ def calc (net, node, fitness_metric, configs):
     if net.node[node]['layer'] == 'input': return None
     distrib_lng = calc_distrib_lng(configs['activation_function'])
 
+
+    if (fitness_metric == 'None' or fitness_metric == 'none' or fitness_metric == 'error'):
+        return 0
+
     inputs, prev_inputs, output, prev_output = retrieve_states(net, node, configs)
 
     if len(inputs)==0: return None
@@ -100,8 +104,6 @@ def calc (net, node, fitness_metric, configs):
         assert(fitness >= 0 and fitness <= 1)
         return fitness
 
-    elif (fitness_metric == 'None' or fitness_metric == 'none' or fitness_metric == 'error'):
-        return 1
 
     assert(False) #unknown fitness metric/shouldn't get here
 

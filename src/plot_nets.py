@@ -445,6 +445,61 @@ def features_over_time(dirr, net_info, titles, mins, maxs, use_lims):
 
     return
 
+
+def comparison_plots(dirr):
+    data = []
+    prev_titles, titles = None, None
+    colors = ['red', 'blue', 'green', 'magenta', 'cyan']
+
+    if os.path.exists(dirr):
+        if not os.path.exists(dirr + "/comparison_plots/"):
+            os.makedirs(dirr + "/comparison_plots/")
+    else: assert(False) #cannot find directory
+
+    for root, dirs, files in os.walk(dirr):
+        for d in dirs:
+            net_info, titles = parse_info(d)
+            data.append(net_info)
+
+            if prev_titles: assert(titles == prev_titles)
+            prev_titles = titles
+
+    # regular images
+    for i in range(len(titles)):
+
+        xdata = []
+
+        for k in range(len(data)): #i.e. for each run
+            net_info = data[k]
+            assert(len(net_info) == len(titles)) #checking dim
+
+            num_outputs = len(net_info)
+            ydata = []
+            xdata = []
+            for j in range(num_outputs):
+                ydata.append(net_info[j, i])
+                xdata.append(net_info[j, 0])
+
+            plt.plot(xdata, ydata, color=colors[k % len(colors)])
+
+        max_gen = xdata[-1]
+        x_ticks = [int((max_gen / 10) * j) for j in range(11)]
+        plt.ylabel(titles[i])
+        plt.title(titles[i])
+        #if (use_lims == True): plt.ylim(mins[i], maxs[i])
+        plt.xlabel("Generation")
+        plt.xticks(x_ticks, x_ticks)
+        plt.savefig(dirr + "/comparison_plots/" + str(titles[i]) + ".png")
+        plt.clf()
+
+
+    return
+
+
+
+
+
+
 ################## HELPER FUNCTIONS ##################
 def parse_info(dirr):
     #returns 2d array of outputs by features
@@ -470,18 +525,11 @@ def parse_info(dirr):
 
 if __name__ == "__main__":
     #first bash arg should be parent directory, then each child directory
-    base_dir = "/home/2014/choppe1/Documents/EvoNet/virt_workspace/data/output/"
+    base_dir = "/home/2014/choppe1/Documents/evoEvo/data/output/"
 
     if sys.argv[1] == 'comparison': #poss needs to be updated
-        net1_path = sys.argv[2]
-        net2_path = sys.argv[3]
-        biased = False  # sys.argv[2]
-        bias_on = None  # sys.argv[3]
-
-        dirs = ["/undirected_degree_distribution/"]
-        for dirr in dirs:
-            if not os.path.exists(net1_path + dirr):
-                os.makedirs(net1_path + dirr)
+        dirr = sys.argv[2]
+        comparison_plots(base_dir + dirr)
 
     elif sys.argv[1] == 'undir':
         biased = None

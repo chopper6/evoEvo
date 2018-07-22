@@ -224,6 +224,11 @@ def save_prev_iteration_states(net, configs):
 
 def activate_err_nodes(net, ideal_output, configs):
 
+    actvn = configs['activation_function']
+    if actvn == 'tanh': distrib_lng = 2
+    elif actvn == 'sigmoid': distrib_lng = 1
+    else: assert(False)
+
     sorted_output_nodes = sorted(net.graph['output_nodes'])
     i=0
     for output_node in sorted_output_nodes:
@@ -233,7 +238,10 @@ def activate_err_nodes(net, ideal_output, configs):
 
             err_node = find_error_buddy(net,output_node)
             output = net.node[output_node]['state']
-            err = math.pow(ideal_output[i] - output, 2) #TODO: use partial error instead?
+            err = math.pow((ideal_output[i] - output)/distrib_lng, 2)
+            #TODO: use partial error instead?
+            # div by distrib lng to ensure it is btwn 0,1
+
             net.node[err_node]['state'] = err
             if net.node[err_node]['ideal_output'] is not None:
                 net.node[err_node]['prev_ideal_output'] = net.node[err_node]['ideal_output']

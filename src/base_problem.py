@@ -14,7 +14,6 @@ def generate_net_instances(teacher_net, num_instances, configs):
     #diameter = nx.diameter(teacher_net.to_undirected())
 
     for i in range(num_instances):
-        reservoir.initialize_input(teacher_net, configs)
         inputs, outputs = [], []
         finished_reservoir_outputs = None
 
@@ -22,6 +21,7 @@ def generate_net_instances(teacher_net, num_instances, configs):
         #for i in range(diameter):
         #    reservoir.one_step_fwd(teacher_net, configs)
         while not finished_reservoir_outputs:
+            reservoir.initialize_input(teacher_net, configs)
             reservoir.one_step_fwd(teacher_net, configs) #occurs at least once per instance
             finished_reservoir_outputs = True
             for output in teacher_net.graph['output_nodes']:

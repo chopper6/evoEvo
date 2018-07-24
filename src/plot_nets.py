@@ -505,6 +505,7 @@ def comparison_plots(dirr):
 
         for k in range(len(data)): #i.e. for each run
             net_info = data[k]
+            if var_exists: var_info = var_data[k]
             assert(len(net_info) == len(last_net_info)) #checking dim
 
             num_outputs = len(net_info)
@@ -519,11 +520,11 @@ def comparison_plots(dirr):
             if not var_exists:
                 plt.plot(xdata, ydata, color=color_choice)
             else:
-                assert (len(var_data) == len(net_info))
-                assert (len(var_data[0]) == len(net_info[0]))
+                assert (len(var_data) == len(data))
+                assert (len(var_data[0]) == len(data[0]))
                 y_var = []
                 for j in range(num_outputs):
-                    y_var.append(var_data[j, i])
+                    y_var.append(var_info[j, i])
 
                 plt.errorbar(xdata, ydata, yerr=y_var, color=color_choice, elinewidth=.1, capsize=.1)
 

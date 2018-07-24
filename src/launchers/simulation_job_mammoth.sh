@@ -4,7 +4,7 @@
 #PBS -l pmem=4gb
 #PBS -q qfbb
 #PBS -A ymj-002-aa
-#   PBS -M mosha5581@gmail.com
+#   PBS -M corbin.hopper@mail.mcgill.ca
 #   PBS -m e
 
 module unload intel64/12.0.5.220
@@ -15,8 +15,8 @@ module load pathscale/5.0.5
 module load pgi64/12.5
 module load openmpi_intel64/1.6.5
 
-echo 'simulating: python '$SIMULATION_BATCH_ROOT' 72 '$SIMULATION_CONFIGS
+echo 'simulating on Mammoth.'
 
-cd $SIMULATION_DIRECTORY
+cd $EVOEVO_SIMULATION_DIRECTORY
 
-python $SIMULATION_BATCH_ROOT 72 $SIMULATION_CONFIGS
+python $EVOEVO_SIMULATION_ROOT 72 $SIMULATION_CONFIGS

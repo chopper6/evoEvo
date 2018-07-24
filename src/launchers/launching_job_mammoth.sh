@@ -11,8 +11,10 @@ module load pathscale/5.0.5
 module load pgi64/12.5
 module load openmpi_intel64/1.6.5
 
-echo 'launching python3 '$LAUNCHING_SCRIPT' '$SIMULATION_CONFIGS
 
-cd $LAUNCHING_DIRECTORY
+echo 'launching python3 '$EVOEVO_LAUNCHING_SCRIPT' '$SIMULATION_CONFIGS
 
-python3 $LAUNCHING_SCRIPT $SIMULATION_CONFIGS
+cd $EVOEVO_LAUNCHING_DIRECTORY
+
+python3 $EVOEVO_LAUNCHING_SCRIPT $SIMULATION_CONFIGS
+

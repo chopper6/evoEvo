@@ -158,9 +158,6 @@ def double_check(net, configs):
         assert (len(net.nodes()) == start_size)
 
 def init_directed_attributes(net, configs):
-
-    feedfwd = configs['feedforward']
-
     net.graph['fitness'] = 0
     net.graph['error'] = 0
 

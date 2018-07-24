@@ -56,7 +56,7 @@ def plot_undir(configs):
         if not os.path.exists(output_dir + dirr):
             os.makedirs(output_dir + dirr)
 
-    for root, dirs, files in os.walk(output_dir + "/nets_nx/"):
+    for root, dirs, files in os.walk(output_dir + "/nets_pickled/"):
         for f in files:
             #print("plot_dir(): file " + str(f))
             undir_deg_distrib(root + "/" + f, output_dir + "/undirected_degree_distribution/", f, biased, bias_on)
@@ -90,7 +90,8 @@ def undir_deg_distrib(net_file, destin_path, title, biased, bias_on):
             net = pickle.load(file)
             file.close()
     else:
-        net = nx.read_edgelist(net_file, nodetype=int, create_using=nx.DiGraph())
+        #net = nx.read_edgelist(net_file, nodetype=int, create_using=nx.DiGraph())
+        net = pickle.load(net_file)
 
     colors = ['#0099cc','#ff5050', '#6699ff']
     color_choice = colors[0]
@@ -419,7 +420,7 @@ def features_over_time(dirr, net_info, titles, mins, maxs, use_lims, var_data=No
             for j in range(num_outputs):
                 y_var.append(var_data[j, i])
 
-            plt.errorbar(xdata,ydata,yerr=y_var, elinewidth=.1, capsize=.1)
+            plt.errorbar(xdata,ydata,yerr=y_var, linewidth=2, elinewidth=.5, capsize=4, capthick = 2)
 
         plt.ylabel(titles[i])
         plt.title(titles[i])

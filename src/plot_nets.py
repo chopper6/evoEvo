@@ -27,7 +27,7 @@ def all_plots (configs, feature_plots=True, indiv_plots = True, orig_output_dire
 
         mins, maxs = 0,0
         features_over_size(dirr, net_info, titles, mins, maxs, False)
-        if var: features_over_time(dirr, net_info, titles, mins, maxs, False, var=net_info_var)
+        if var: features_over_time(dirr, net_info, titles, mins, maxs, False, var_data=net_info_var)
         else: features_over_time(dirr, net_info, titles, mins, maxs, False)
 
     if indiv_plots:

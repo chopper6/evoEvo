@@ -523,7 +523,7 @@ def comparison_plots(dirr):
                 for j in range(num_outputs):
                     y_var.append(var_data[j, i])
 
-                plt.errorbar(xdata, ydata, yerr=y_var, color=color_choice)
+                plt.errorbar(xdata, ydata, yerr=y_var, color=color_choice, elinewidth=.1, capsize=.1)
 
             patch = mpatches.Patch(color=color_choice, label=run_names[k])
             legend_pieces.append(patch)

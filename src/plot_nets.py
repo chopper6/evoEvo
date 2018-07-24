@@ -536,7 +536,7 @@ def comparison_plots(dirr):
         plt.xlabel("Generation")
         plt.xticks(x_ticks, x_ticks)
 
-        plt.legend(loc='upper right', handles=legend_pieces)
+        plt.legend(loc='best', handles=legend_pieces)
 
         plt.savefig(dirr + "/comparison_plots/" + str(titles[i]) + ".png")
         plt.clf()

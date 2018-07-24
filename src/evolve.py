@@ -84,7 +84,7 @@ def init_sim(configs, num_sims, sim_num, orig_output_dir, rank):
 
 def close_out_mult_sims(num_sims, orig_output_dir, configs):
     extract_and_combine(orig_output_dir, num_sims)
-    plot_nets.all_plots(configs, indiv_plots=False, orig_output_directory=orig_output_dir)
+    plot_nets.all_plots(configs, indiv_plots=False, orig_output_directory=orig_output_dir, var=True)
 
     rm_base_dirs = True
     if rm_base_dirs:
@@ -98,8 +98,6 @@ def close_out_mult_sims(num_sims, orig_output_dir, configs):
 
 def extract_and_combine(output_dir, num_sims):
     # takes info.csv from mult runs and combines into one info.csv in main dir
-
-    #TODO: as of now combined csv if just 2 rows that are identical (title's good)
 
     all_data, titles = None, None #just for warnings
 
@@ -123,16 +121,26 @@ def extract_and_combine(output_dir, num_sims):
         else: print("ERROR evolve_root.extract(): no file found: " + str(info_file))
 
     mean_data = np.empty((len(lines)-1, len(titles)))
+    var_data = np.empty((len(lines)-1, len(titles)))
     for i in range(len(lines)-1):
         for j in range(len(titles)):
             a_mean_data = np.mean(all_data[:,i,j])
             mean_data[i][j] = a_mean_data
+            a_var_data = np.var(all_data[:,i,j])
+            var_data[i][j] = a_var_data
 
     with open(output_dir + "/net_data.csv", 'w') as final_info:
         file = csv.writer(final_info)
         titles[-1] = titles[-1].replace("\n",'')
         file.writerow(titles)
         for row in mean_data:
+            file.writerow(row)
+
+    with open(output_dir + "/net_data_variance.csv", 'w') as final_info:
+        file = csv.writer(final_info)
+        titles[-1] = titles[-1].replace("\n",'')
+        file.writerow(titles)
+        for row in var_data:
             file.writerow(row)
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ from decimal import Decimal
 
 
 ################## ORGANIZER FUNCTIONS ##################
-def all_plots (configs, feature_plots=True, indiv_plots = True, orig_output_directory=None):
+def all_plots (configs, feature_plots=True, indiv_plots = True, orig_output_directory=None, var = False):
 
     if orig_output_directory: dirr = orig_output_directory
     else: dirr = configs['output_directory']
@@ -17,7 +17,8 @@ def all_plots (configs, feature_plots=True, indiv_plots = True, orig_output_dire
         return
 
     if feature_plots:
-        net_info, titles = parse_info(dirr)
+        if var: net_info, net_info_var, titles = parse_info(dirr, var=var)
+        else: net_info, titles = parse_info(dirr)
 
         img_dirs = ["/images_by_size/", "/images_by_time/", "/images_by_time_logScaled/"]
         for img_dir in img_dirs:
@@ -26,7 +27,8 @@ def all_plots (configs, feature_plots=True, indiv_plots = True, orig_output_dire
 
         mins, maxs = 0,0
         features_over_size(dirr, net_info, titles, mins, maxs, False)
-        features_over_time(dirr, net_info, titles, mins, maxs, False)
+        if var: features_over_time(dirr, net_info, titles, mins, maxs, False, var=net_info_var)
+        else: features_over_time(dirr, net_info, titles, mins, maxs, False)
 
     if indiv_plots:
         print("Generating directed degree distribution plots.")
@@ -388,7 +390,7 @@ def degree_distrib_change(dirr):
     plt.clf()
 
 
-def features_over_time(dirr, net_info, titles, mins, maxs, use_lims):
+def features_over_time(dirr, net_info, titles, mins, maxs, use_lims, var_data=None):
     img_dirr = dirr + "/images_by_time/"
     logscaled_img_dirr = dirr + "/images_by_time_logScaled/"
 
@@ -401,7 +403,6 @@ def features_over_time(dirr, net_info, titles, mins, maxs, use_lims):
             ydata.append(net_info[j, i])
             xdata.append(net_info[j, 0])
 
-        x_ticks = []
         max_gen = xdata[-1]
         x_ticks = [int((max_gen / 10) * j) for j in range(11)]
         plt.plot(xdata, ydata)
@@ -433,7 +434,18 @@ def features_over_time(dirr, net_info, titles, mins, maxs, use_lims):
         max_gen = xdata[-1]
         for j in range(0, 11):
             x_ticks.append(int((max_gen / 10) * j))
-        plt.plot(xdata, ydata)
+
+
+        if var_data is None: plt.plot(xdata, ydata)
+        else:
+            assert(len(var_data) == len(net_info))
+            assert(len(var_data[0]) == len(net_info[0]))
+            y_var = []
+            for j in range(num_outputs):
+                y_var.append(var_data[j, i])
+
+            plt.errorbar(xdata,ydata,yerr=y_var)
+
 
         plt.ylabel(titles[i])
         plt.title(titles[i])
@@ -449,30 +461,37 @@ def features_over_time(dirr, net_info, titles, mins, maxs, use_lims):
 
 
 def comparison_plots(dirr):
-    # TODO: if mult sims, don't want to use net_data of every sub-sim
 
-    data, run_names = [], []
+    data, run_names, var_data = [], [], []
+    var_exists = False
     titles = None
-    colors = ['red', 'blue', 'green', 'magenta', 'cyan']
+    #colors = ['red', 'blue', 'green', 'magenta', 'cyan']
+    colors = ['#cc0066', '#006699', '#6600ff', '#ff9900', '#33cc33', '#009933', '#0000ff', '#cc00cc', '#663300', '#666633']
 
     if os.path.exists(dirr):
 
         for root, dirs, files in os.walk(dirr):
             for d in dirs:
-                net_file_exists = False
+                net_file_exists, var_exists = False, False
                 for root, dirs, files in os.walk(dirr + d):
                     for f in files:
                         if f == 'net_data.csv': net_file_exists = True
+                        if f == 'net_data_variance.csv':  var_exists = True
 
                 if net_file_exists:
-                    net_info, titles = parse_info(dirr + d)
+                    if var_exists:
+                        net_info, net_info_var, titles = parse_info(dirr, var=True)
+                        var_data.append(net_info_var)
+                    else: net_info, titles = parse_info(dirr)
                     data.append(net_info)
                     name = d
                     run_names.append(name)
 
+
     else: assert(False) #cannot find directory
 
     assert(len(titles) > 0) #otherwise couldn't find anything to fill data with (net_data.csv DNE?)
+    if var_exists: assert(len(data) == len(var_data)) #otherwise complicates things
 
     if not os.path.exists(dirr + "/comparison_plots/"):
         os.makedirs(dirr + "/comparison_plots/")
@@ -494,7 +513,17 @@ def comparison_plots(dirr):
                 xdata.append(net_info[j, 0])
 
             color_choice = colors[k % len(colors)]
-            plt.plot(xdata, ydata, color=color_choice)
+
+            if not var_exists:
+                plt.plot(xdata, ydata, color=color_choice)
+            else:
+                assert (len(var_data) == len(net_info))
+                assert (len(var_data[0]) == len(net_info[0]))
+                y_var = []
+                for j in range(num_outputs):
+                    y_var.append(var_data[j, i])
+
+                plt.errorbar(xdata, ydata, yerr=y_var, color=color_choice)
 
             patch = mpatches.Patch(color=color_choice, label=run_names[k])
             legend_pieces.append(patch)
@@ -521,7 +550,7 @@ def comparison_plots(dirr):
 
 
 ################## HELPER FUNCTIONS ##################
-def parse_info(dirr):
+def parse_info(dirr, var = False):
     #returns 2d array of outputs by features
     #note that feature[0] is the net size
 
@@ -540,7 +569,26 @@ def parse_info(dirr):
             row[-1] = piece[0]
             master_info[i] = row
 
-    return master_info, titles 
+    if var:
+        with open(dirr + "/net_data_variance.csv", 'r') as info_csv:
+            lines = info_csv.readlines()
+            titles = lines[0].split(",")
+            piece = titles[-1].split("\n")
+            titles[-1] = piece[0]
+            num_features = len(titles)
+            num_output = len(lines) - 1
+            master_info_var = np.empty((num_output, num_features))
+
+            for i in range(0, num_output):
+                row = lines[i + 1].split(",", num_features)
+                piece = row[-1].split("\n")
+                row[-1] = piece[0]
+                master_info_var[i] = row
+
+        assert(len(master_info) == len(master_info_var))
+        return master_info, master_info_var, titles
+
+    else: return master_info, titles
 
 
 if __name__ == "__main__":
@@ -570,3 +618,4 @@ if __name__ == "__main__":
             dirr_addon = arg
             dirr= base_dir + dirr_addon
             single_run_plots(dirr)
+

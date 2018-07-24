@@ -91,7 +91,8 @@ def undir_deg_distrib(net_file, destin_path, title, biased, bias_on):
             file.close()
     else:
         #net = nx.read_edgelist(net_file, nodetype=int, create_using=nx.DiGraph())
-        net = pickle.load(net_file)
+        with open(net_file, 'rb') as file:
+            net = pickle.load(file)
 
     colors = ['#0099cc','#ff5050', '#6699ff']
     color_choice = colors[0]

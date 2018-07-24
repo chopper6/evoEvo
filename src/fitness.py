@@ -1,14 +1,20 @@
 import math
 import node_fitness_discrete, node_fitness_continuous, util
 
-def eval_fitness(population, fitness_direction):
+def eval_fitness(population, fitness_direction, fitness_metric):
     #determines fitness of each individual and orders the population by fitness
 
+    if fitness_metric=='error' or fitness_metric == 'Error': reverse = False
+    else: reverse = True  # MAKING FITNESS A -PRODUCT OF NODES ACTUALLY INVERTS THE MAX/MIN VALUE OF NET RELATIVE TO ITS NODES
 
-    # MAKING FITNESS A -PRODUCT OF NODES ACTUALLY INVERTS THE MAX/MIN VALUE OF NET RELATIVE TO ITS NODES
-    if (fitness_direction == 'min'): population = sorted(population,key=fitness_key, reverse=True)
-    elif (fitness_direction == 'max'):  population = sorted(population,key=fitness_key)
-    else: print("ERROR in fitness.eval_fitness(): unknown fitness_direction " + str(fitness_direction) + ", population not sorted.")
+    if (reverse and fitness_direction == 'min') or (not reverse and fitness_direction == 'max'): direction = 'max'
+    else: direction = 'min'
+
+    assert(fitness_direction == 'min' or fitness_direction == 'max')
+
+    if (direction == 'max'): population = sorted(population,key=fitness_key, reverse=True)
+    elif (direction == 'min'):  population = sorted(population,key=fitness_key)
+    #else: print("ERROR in fitness.eval_fitness(): unknown fitness_direction " + str(fitness_direction) + ", population not sorted.")
 
     #temp for debug purposes
     #print("\nIn fitness line 11: order of " + str(fitness_direction) + " sorted population:")
@@ -16,9 +22,8 @@ def eval_fitness(population, fitness_direction):
     #    print(p.graph['fitness'])
     if (len(population) > 1):
 
-        # AGAIN THIS IS REVERSED DUE TO NODE PRODUCT
-        if (fitness_direction == 'max'): assert(population[0].graph['fitness'] <= population[1].graph['fitness'] )
-        elif (fitness_direction == 'min'): assert(population[0].graph['fitness'] >= population[1].graph['fitness'] )
+        if (direction == 'min'): assert(population[0].graph['fitness'] <= population[1].graph['fitness'] )
+        elif (direction == 'max'): assert(population[0].graph['fitness'] >= population[1].graph['fitness'] )
     #print("\n")
 
     return population

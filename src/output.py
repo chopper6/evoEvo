@@ -81,7 +81,10 @@ def init_csv(out_dir, configs):
  
 
     if util.boool(configs['directed']):
-        net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Mean Fitness, Variance in Fitness, Fitness_Div_#Edges, Fitness_Div_#Nodes, Error of Base Problem, Diameter, In Edges to Outputs, Out Edges from Inputs, Out Edges from Errors\n"
+        net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Fitness Mean, Fitness Variance, Fitness_Div_#Edges, Fitness_Div_#Nodes, Error of Base Problem," \
+                         "Diameter, Betweenness Centrality, Betweenness Centrality Weighted , Assortativity by Degree, Assortativity by State, Clustering Coefficient,"\
+                         "#In Edges to Outputs, #Out Edges from Inputs, #Out Edges from Errors\n"
+
 
     else:
         net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Mean Fitness, Variance in Fitness, Fitness_Div_#Edges, Fitness_Div_#Nodes, Error of Base Problem, Diameter\n"
@@ -110,6 +113,8 @@ def init_csv(out_dir, configs):
 
 def popn_data(population, output_dir, gen, configs):
 
+    assert(util.boool(configs['directed'])) #pretty simple fix for undirected features, but I'm lazy
+
     if (population[0].edges()):
         output_csv = output_dir + "/net_data.csv"
 
@@ -121,14 +126,17 @@ def popn_data(population, output_dir, gen, configs):
             var_fitness = np.var(all_fitness)
 
             net = population[0] #most fit net
-            diameter = nx.diameter(net.to_undirected())
+            undir = net.to_undirected()
             nets_info = [gen, len(net.nodes()), net.graph['fitness'], sum(net.degree().values())/len(net.nodes()),len(net.edges())/len(net.nodes()),
-                         mean_fitness, var_fitness, net.graph['fitness']/float(len(net.edges())), net.graph['fitness']/float(len(net.nodes())), net.graph['error'], diameter]
+                         mean_fitness, var_fitness, net.graph['fitness']/float(len(net.edges())), net.graph['fitness']/float(len(net.nodes())),
+                         net.graph['error'], nx.diameter(undir), nx.betweenness_centrality(undir), nx.betweenness_centrality(undir, weight='weight'),
+                         nx.degree_assortativity_coefficient(net), nx.attribute_assortativity_coefficient(net, 'state'), nx.average_clustering(net) ]
 
             if util.boool(configs['directed']):
                 nets_info.append(len(net.in_edges(net.graph['output_nodes'])))
                 nets_info.append(len(net.out_edges(net.graph['input_nodes'])))
                 nets_info.append(len(net.out_edges(net.graph['error_nodes'])))
+
 
 
             output.writerow(nets_info)
@@ -142,7 +150,11 @@ def deg_distrib_csv(output_dir, population, gen):
         distrib_info.append(gen)
         distrib_info.append(len(population[0].nodes()))
 
-        in_degrees, out_degrees = list(population[0].in_degree().values()), list(population[0].out_degree().values())
+        reservoir_nodes = []
+        for n in population[0].nodes():
+            if population[0].node[n]['layer'] == 'hidden': reservoir_nodes.append(n) #this will throw an error if undirected version
+
+        in_degrees, out_degrees = list(population[0].in_degree(reservoir_nodes).values()), list(population[0].out_degree(reservoir_nodes).values())
 
         indegs, indegs_freqs = np.unique(in_degrees, return_counts=True)
         indegs = np.array2string(indegs).replace('\n', '')

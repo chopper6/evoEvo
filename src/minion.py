@@ -77,7 +77,7 @@ def evolve_minion(worker_file, gen, rank, output_dir):
     for p in range(pop_size):
         net = population[p]
         if gen != 0: mutate.mutate(configs, net, biases=biases) #0th gen is just for pressurizing
-        pressurize.pressurize(configs, net, gen, problem_instances = problem_instances)
+        pressurize.pressurize(configs, net, gen, problem_instances = problem_instances, thread_num = rank)
 
     population = sort_popn(population, fitness_direction)
     write_out_worker(output_dir + "/to_master/" + str(gen) + "/" + str(rank), population, num_return)

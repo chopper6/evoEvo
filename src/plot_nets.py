@@ -95,10 +95,14 @@ def undir_deg_distrib(net_file, destin_path, title, biased, bias_on):
     colors = ['#0099cc','#ff5050', '#6699ff']
     color_choice = colors[0]
 
+    reservoir_nodes = []
+    for n in net.nodes():
+        if net.node[n]['layer'] == 'hidden': reservoir_nodes.append(n)  # this will throw an error if undirected version
+
     for type in ['loglog%']: #can also use ['loglog', 'scatter', 'scatter%']
         H = []
         #loglog
-        degrees = list(net.degree().values())
+        degrees = list(net.degree(reservoir_nodes).values())
         degs, freqs = np.unique(degrees, return_counts=True)
         tot = float(sum(freqs))
         if (type=='loglog%' or type=='scatter%'): freqs = [(f/tot)*100 for f in freqs]

@@ -1,7 +1,7 @@
 import os, pickle, time, shutil, sys
 from random import SystemRandom as sysRand
 from time import sleep
-import fitness, minion, output, plot_nets, build_nets, pressurize, util, init, bias, base_problem, reservoir
+import fitness, minion, output, plot_nets, build_nets, util, init, bias, base_problem
 
 #MASTER EVOLUTION
 def evolve_master(configs):

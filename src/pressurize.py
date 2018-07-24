@@ -1,6 +1,6 @@
 import instances, node_fitness_discrete, node_fitness_continuous, fitness, util, reservoir, output
 
-def pressurize(configs, net, gen, problem_instances = None):
+def pressurize(configs, net, gen, problem_instances = None, thread_num=None):
     # configs:
     scale_node_fitness = util.boool(configs['scale_node_fitness'])
     directed = util.boool(configs['directed'])
@@ -25,7 +25,9 @@ def pressurize(configs, net, gen, problem_instances = None):
                 total_err += err
                 num_outputs += 1
             curr_fitness = fitness.calc_node_fitness(net, configs)
-            output.write_base_features(configs, gen, i, err, curr_fitness)
+            if thread_num is not None:
+                if thread_num == 1 or thread_num == 0: #master or worker #1 can write
+                    output.write_base_features(configs, gen, i, err, curr_fitness)
             if feedfwd: reservoir.save_prev_iteration_states(net, configs) #TODO: might not make sense if problem_instances given
 
         if num_outputs==0:  net.graph['error'] = None

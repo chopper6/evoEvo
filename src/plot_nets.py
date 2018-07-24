@@ -415,7 +415,7 @@ def features_over_time(dirr, net_info, titles, mins, maxs, use_lims, var_data=No
             for j in range(num_outputs):
                 y_var.append(var_data[j, i])
 
-            plt.errorbar(xdata,ydata,yerr=y_var)
+            plt.errorbar(xdata,ydata,yerr=y_var, elinewidth=.1, capsize=.1)
 
         plt.ylabel(titles[i])
         plt.title(titles[i])

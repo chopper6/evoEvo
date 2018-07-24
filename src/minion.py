@@ -79,7 +79,7 @@ def evolve_minion(worker_file, gen, rank, output_dir):
         if gen != 0: mutate.mutate(configs, net, biases=biases) #0th gen is just for pressurizing
         pressurize.pressurize(configs, net, gen, problem_instances = problem_instances, thread_num = rank)
 
-    population = sort_popn(population, fitness_direction)
+    population = sort_popn(population, fitness_direction, configs['fitness_metric'])
     write_out_worker(output_dir + "/to_master/" + str(gen) + "/" + str(rank), population, num_return)
     report_timing(t_start, rank, gen, output_dir)
 
@@ -118,9 +118,9 @@ def gen_population_from_seed(seed, num_survive):
     return population
 
 
-def sort_popn(population, fitness_direction):
+def sort_popn(population, fitness_direction, fitness_metric):
     old_popn = population
-    population = fitness.eval_fitness(old_popn, fitness_direction)
+    population = fitness.eval_fitness(old_popn, fitness_direction, fitness_metric)
     del old_popn
     return population
 

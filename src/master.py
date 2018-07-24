@@ -100,7 +100,7 @@ def init_run(configs):
 
         elif (int(gen) > 2): #IS CONTINUATION RUN
             gen = int(gen)-2 #latest may not have finished
-            population = parse_worker_popn(num_workers, gen, output_dir, num_survive, fitness_direction)
+            population = parse_worker_popn(num_workers, gen, output_dir, num_survive, configs)
             if net_base_problem:
                 teacher_net = parse_teacher_net(configs)
                 dummy_net = build_nets.gen_a_rd_net(configs, size=len(population[0].nodes()))
@@ -186,7 +186,11 @@ def distrib_workers(population, gen, worker_pop_size, num_survive, biases, probl
     if (debug == True and gen % 10 == 0): util.cluster_print(output_dir, "debug is ON")
 
 
-def parse_worker_popn (num_workers, gen, output_dir, num_survive, fitness_direction):
+def parse_worker_popn (num_workers, gen, output_dir, num_survive, configs):
+
+    fitness_direction = str(configs['fitness_direction'])
+    fitness_metric = str(configs['fitness_metric'])
+
     popn = []
     print('master.parse_worker_popn(): num workers = ' + str(num_workers) + " and gen " + str(gen))
     print("parse worker pop params: dir = " + str(output_dir) + ".")
@@ -199,7 +203,7 @@ def parse_worker_popn (num_workers, gen, output_dir, num_survive, fitness_direct
             popn.append(indiv)
             i+=1
 
-    sorted_popn = fitness.eval_fitness(popn, fitness_direction)
+    sorted_popn = fitness.eval_fitness(popn, fitness_direction, fitness_metric)
     return sorted_popn[:num_survive]
 
 def parse_teacher_net(configs):
@@ -224,6 +228,7 @@ def watch(configs, gen, num_survive):
     num_workers = int(configs['number_of_workers'])
     output_dir = configs['output_directory']
     fitness_direction = str(configs['fitness_direction'])
+    fitness_metric = str(configs['fitness_metric'])
     debug = util.boool(configs['debug'])
 
     dump_dir = output_dir + "/to_master/" + str(gen)
@@ -248,7 +253,7 @@ def watch(configs, gen, num_survive):
                                 except: pass
 
             #sort and delete some
-            sorted_popn = fitness.eval_fitness(popn, fitness_direction)
+            sorted_popn = fitness.eval_fitness(popn, fitness_direction, fitness_metric)
             popn = sorted_popn[:num_survive]
             del sorted_popn
     assert (not ids)

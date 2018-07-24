@@ -405,7 +405,17 @@ def features_over_time(dirr, net_info, titles, mins, maxs, use_lims, var_data=No
 
         max_gen = xdata[-1]
         x_ticks = [int((max_gen / 10) * j) for j in range(11)]
-        plt.plot(xdata, ydata)
+
+
+        if var_data is None: plt.plot(xdata, ydata)
+        else:
+            assert(len(var_data) == len(net_info))
+            assert(len(var_data[0]) == len(net_info[0]))
+            y_var = []
+            for j in range(num_outputs):
+                y_var.append(var_data[j, i])
+
+            plt.errorbar(xdata,ydata,yerr=y_var)
 
         plt.ylabel(titles[i])
         plt.title(titles[i])
@@ -435,17 +445,7 @@ def features_over_time(dirr, net_info, titles, mins, maxs, use_lims, var_data=No
         for j in range(0, 11):
             x_ticks.append(int((max_gen / 10) * j))
 
-
-        if var_data is None: plt.plot(xdata, ydata)
-        else:
-            assert(len(var_data) == len(net_info))
-            assert(len(var_data[0]) == len(net_info[0]))
-            y_var = []
-            for j in range(num_outputs):
-                y_var.append(var_data[j, i])
-
-            plt.errorbar(xdata,ydata,yerr=y_var)
-
+        plt.plot(xdata, ydata)
 
         plt.ylabel(titles[i])
         plt.title(titles[i])

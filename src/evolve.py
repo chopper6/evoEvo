@@ -129,8 +129,8 @@ def extract_and_combine(output_dir, num_sims):
             mean_data[i][j] = a_mean_data
             a_var_data = np.var(all_data[:,i,j], ddof=1) # ddof: want sample variance (/n-1)
 
-            float_var_data = a_var_data.astype(np.float)
-            var_data[i][j] = float_var_data
+            #float_var_data = a_var_data.astype(np.float)
+            var_data[i][j] = a_var_data
 
     with open(output_dir + "/net_data.csv", 'w') as final_info:
         file = csv.writer(final_info)

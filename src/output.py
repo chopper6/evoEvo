@@ -130,7 +130,7 @@ def popn_data(population, output_dir, gen, configs):
             nets_info = [gen, len(net.nodes()), net.graph['fitness'], sum(net.degree().values())/len(net.nodes()),len(net.edges())/len(net.nodes()),
                          mean_fitness, var_fitness, net.graph['fitness']/float(len(net.edges())), net.graph['fitness']/float(len(net.nodes())),
                          net.graph['error'], nx.diameter(undir), nx.betweenness_centrality(undir), nx.betweenness_centrality(undir, weight='weight'),
-                         nx.degree_assortativity_coefficient(net), nx.attribute_assortativity_coefficient(net, 'state'), nx.average_clustering(net) ]
+                         nx.degree_assortativity_coefficient(net), nx.attribute_assortativity_coefficient(net, 'state'), nx.average_clustering(undir) ]
 
             if util.boool(configs['directed']):
                 nets_info.append(len(net.in_edges(net.graph['output_nodes'])))

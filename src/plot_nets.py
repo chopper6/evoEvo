@@ -470,7 +470,7 @@ def comparison_plots(dirr):
 
     if os.path.exists(dirr):
 
-        for root, dirs, files in os.walk(dirr):
+        for root, dirs, files in os.walk(dirr + "/"):
             for d in dirs:
                 net_file_exists, var_exists = False, False
                 for root, dirs, files in os.walk(dirr + d):

@@ -92,8 +92,8 @@ def close_out_mult_sims(num_sims, orig_output_dir, configs):
             if (os.path.exists(orig_output_dir + "sim_" + str(i))):
                 shutil.rmtree(orig_output_dir + "sim_" + str(i)) #clean up, leave last run as sample
 
-        if (os.path.isfile(orig_output_dir + "sim_" + str(num_sims) + "/net_data.csv" )):
-            os.remove(orig_output_dir + "sim_" + str(num_sims) + "/net_data.csv") #otherwise will confuse multiple plots
+        if (os.path.isfile(orig_output_dir + "sim_" + str(num_sims-1) + "/net_data.csv" )):
+            os.remove(orig_output_dir + "sim_" + str(num_sims-1) + "/net_data.csv") #otherwise will confuse multiple plots
 
 
 def extract_and_combine(output_dir, num_sims):

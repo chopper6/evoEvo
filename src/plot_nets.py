@@ -472,14 +472,16 @@ def comparison_plots(dirr):
 
         for root, dirs, files in os.walk(dirr + "/"):
             for d in dirs:
-                net_file_exists, var_exists = False, False
+                net_file_exists, net_var_exists = False, False
                 for root, dirs, files in os.walk(dirr + "/" + d):
                     for f in files:
                         if f == 'net_data.csv': net_file_exists = True
-                        if f == 'net_data_variance.csv':  var_exists = True
+                        if f == 'net_data_variance.csv':  
+                            net_var_exists = True
+                            var_exists = True
 
                 if net_file_exists:
-                    if var_exists:
+                    if net_var_exists:
                         net_info, net_info_var, titles = parse_info(dirr + "/" + d, var=True)
                         var_data.append(net_info_var)
                     else: net_info, titles = parse_info(dirr + "/" + d)

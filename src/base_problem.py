@@ -35,6 +35,7 @@ def generate_net_instances(teacher_net, num_instances, configs):
         instances.append([inputs, outputs])
 
     if util.boool(configs['debug']): print("base_problem generated instances: " + str(instances))
+    assert(len(instances) == num_instances)
 
     return instances
 

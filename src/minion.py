@@ -71,13 +71,13 @@ def wait_for_worker_file(worker_file, estim_time, gen, output_dir, rank):
 def evolve_minion(worker_file, gen, rank, output_dir):
     t_start = time.time()
 
-    worker_ID, seed, pop_size, num_return, randSeed, biases, problem_instances, configs = load_worker_file(worker_file)
+    worker_ID, seed, pop_size, num_return, randSeed, biases, problem_instances, teacher_net, configs = load_worker_file(worker_file)
     output_dir, fitness_direction, population = init_minion(configs, randSeed, seed, pop_size)
 
     for p in range(pop_size):
         net = population[p]
         if gen != 0: mutate.mutate(configs, net, biases=biases) #0th gen is just for pressurizing
-        pressurize.pressurize(configs, net, gen, problem_instances = problem_instances, thread_num = rank)
+        pressurize.pressurize(configs, net, gen, problem_instances = problem_instances, thread_num = rank, teacher_net = teacher_net)
 
     population = sort_popn(population, fitness_direction, configs['fitness_metric'])
     write_out_worker(output_dir + "/to_master/" + str(gen) + "/" + str(rank), population, num_return)
@@ -93,12 +93,12 @@ def load_worker_file(worker_file):
     with open(str(worker_file), 'rb') as file:
         while (loaded==False):
             try:
-                worker_ID, seed, pop_size, num_return, randSeed, biases, problem_instances, configs = pickle.load(file)
+                worker_ID, seed, pop_size, num_return, randSeed, biases, problem_instances, teacher_net, configs = pickle.load(file)
                 loaded = True
             except EOFError: time.sleep(2)
         file.close()
 
-    return worker_ID, seed, pop_size, num_return, randSeed, biases, problem_instances, configs
+    return worker_ID, seed, pop_size, num_return, randSeed, biases, problem_instances, teacher_net, configs
 
 
 def init_minion(configs, randSeed, seed, pop_size):

@@ -28,9 +28,12 @@ def generate_net_instances(teacher_net, num_instances, configs):
                 if teacher_net.node[output]['state'] is None:
                     finished_reservoir_outputs = False
 
-        for input in teacher_net.graph['input_nodes']:
+        sorted_inputs = sorted(teacher_net.graph['input_nodes'])
+        sorted_outputs = sorted(teacher_net.graph['output_nodes'])
+
+        for input in sorted_inputs:
             inputs.append(teacher_net.node[input]['state'])
-        for output in teacher_net.graph['output_nodes']:
+        for output in sorted_outputs:
             outputs.append(teacher_net.node[output]['state'])
         instances.append([inputs, outputs])
 

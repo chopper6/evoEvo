@@ -31,7 +31,7 @@ def evolve_master(configs):
             problem_instances = base_problem.step_teacher_net(teacher_net, dummy_net, gen, configs)
         else: problem_instances = None
 
-        distrib_workers(population, gen, worker_pop_size, num_survive, biases, problem_instances, configs)
+        distrib_workers(population, gen, worker_pop_size, num_survive, biases, problem_instances, teacher_net, configs)
 
         report_timing(t_start, gen, output_dir)
         population = watch(configs, gen, num_survive)
@@ -164,7 +164,7 @@ def write_mpi_info(output_dir, gen):
         shutil.rmtree(output_dir + "/to_workers/" + str(prev_gen))
 
 
-def distrib_workers(population, gen, worker_pop_size, num_survive, biases, problem_instances, configs):
+def distrib_workers(population, gen, worker_pop_size, num_survive, biases, problem_instances, teacher_net, configs):
     num_workers = int(configs['number_of_workers'])
     output_dir = configs['output_directory']
     debug = util.boool(configs['debug'])
@@ -174,7 +174,7 @@ def distrib_workers(population, gen, worker_pop_size, num_survive, biases, probl
         seed = population[w % num_survive].copy()
         randSeeds = os.urandom(sysRand().randint(0, 1000000))
         assert (seed != population[w % num_survive])
-        worker_args = [w, seed, worker_pop_size, min(worker_pop_size, num_survive), randSeeds, biases, problem_instances, configs]
+        worker_args = [w, seed, worker_pop_size, min(worker_pop_size, num_survive), randSeeds, biases, problem_instances, teacher_net, configs]
         with open(dump_file, 'wb') as file:
             pickle.dump(worker_args, file)
         if (debug == True):  # sequential debug

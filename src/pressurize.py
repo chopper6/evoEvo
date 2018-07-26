@@ -1,12 +1,15 @@
 import instances, node_fitness_discrete, node_fitness_continuous, fitness, util, reservoir, output
 
-def pressurize(configs, net, gen, problem_instances = None, thread_num=None):
+def pressurize(configs, net, gen, problem_instances = None, thread_num=None, teacher_net = None):
     # configs:
     scale_node_fitness = util.boool(configs['scale_node_fitness'])
     directed = util.boool(configs['directed'])
     feedfwd = util.boool(configs['feedforward'])
 
-    num_samples_relative = num_samples(net, configs)
+    if teacher_net is None: num_samples_relative = num_samples(net, configs)
+    else:
+        assert(problem_instances)
+        num_samples_relative = num_samples(teacher_net, configs)
     if problem_instances:
         assert(len(problem_instances) == num_samples_relative)
         assert(not feedfwd)

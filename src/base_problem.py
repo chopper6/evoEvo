@@ -49,7 +49,7 @@ def step_teacher_net(teacher_net, dummy_net, gen, configs):
 
     #returns problem instances
     if gen != 0: mutate.mutate(configs, dummy_net)
-    num_instances = pressurize.num_samples(dummy_net, configs)  # assumes that all nets are same size
+    num_instances = pressurize.num_samples(teacher_net, configs)  # assumes that all nets are same size
     #reservoir.initialize_input(teacher_net, configs) #for fully online learning this may not be nec
     #if gen !=0: mutate.mutate(configs, teacher_net) #as in minion
     instances = generate_net_instances(teacher_net, num_instances, configs)

@@ -34,7 +34,7 @@ def evolve_master(configs):
         distrib_workers(population, gen, worker_pop_size, num_survive, biases, problem_instances, teacher_net, configs)
 
         report_timing(t_start, gen, output_dir)
-        population = watch(configs, gen, num_survive)
+        population = watch_and_extract_workers(configs, gen, num_survive)
 
         size = len(population[0].nodes())
         output.master_info(population, gen, size, pop_size, num_survive, configs)
@@ -223,7 +223,7 @@ def write_teacher_net(teacher_net, configs):
         pickle.dump(teacher_net, file)
 
 
-def watch(configs, gen, num_survive):
+def watch_and_extract_workers(configs, gen, num_survive):
 
     num_workers = int(configs['number_of_workers'])
     output_dir = configs['output_directory']
@@ -256,6 +256,10 @@ def watch(configs, gen, num_survive):
             sorted_popn = fitness.eval_fitness(popn, fitness_direction, fitness_metric)
             popn = sorted_popn[:num_survive]
             del sorted_popn
+
+        if dir_checks > 10000000000:
+            util.cluster_print(output_dir, "ERROR: master stuck at gen " + str(gen) + " waiting for workers.")
+            assert (False)
     assert (not ids)
 
     t_end = time.time()

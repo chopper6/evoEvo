@@ -7,9 +7,9 @@ def work(configs, rank):
     output_dir = configs['output_directory']
     progress_file = output_dir + "/progress.txt"
 
-    print ("\t\t\t\tworker #"+str(rank)+" is working,\t")
-
     gen = read_progress_file(progress_file, output_dir, rank)
+
+    util.cluster_print(output_dir, "\t\t\t\tworker #"+str(rank)+" is working, starting at gen " + str(gen) + ".\t")
 
     estim_time = 4
     keep_running = True
@@ -55,6 +55,10 @@ def wait_for_worker_file(worker_file, estim_time, gen, output_dir, rank):
             time.sleep(4)
             estim_time += 4
         i += 1
+        if (i>100000000):
+            util.cluster_print(output_dir, "ERROR: minion stuck at gen " + str(gen) + " waiting for its pickle.")
+            assert(False)
+
     estim_time /= 2
 
     while not (os.path.getmtime(worker_file) + 1 < time.time()):

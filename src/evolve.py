@@ -5,7 +5,6 @@ import init, util, plot_nets
 import numpy as np
 from time import sleep
 
-# WARNING: MULTIPLE SIMULATIONS MAY BE OUTDATED
 
 def evolve(config_file):
 
@@ -22,6 +21,9 @@ def evolve(config_file):
     assert(num_workers == num_workers_config or debug)
     assert(num_workers > 0 or debug)
 
+    if rank ==0: import master
+    else: import minion
+
     for i in range(num_sims):
 
         init_sim(configs, num_sims, i, orig_output_dir,rank)
@@ -32,12 +34,12 @@ def evolve(config_file):
 
             log_text = 'Evolve_root(): in dir ' + str(os.getcwd()) + ', config file = ' + str(config_file) + ', num_workers = ' + str(num_workers) + "\n"
 
-            import master
+            #import master
             util.cluster_print(configs['output_directory'], log_text)
             master.evolve_master(configs)
 
         else: # WORKERS
-            import minion
+            #import minion
             minion.work(configs, rank)
 
     if (num_sims > 1 and rank==0):

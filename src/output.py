@@ -83,6 +83,7 @@ def init_csv(out_dir, configs):
     if util.boool(configs['directed']):
         net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Fitness Mean, Fitness Variance, Fitness_Div_#Edges, Fitness_Div_#Nodes, Error of Base Problem," \
                          "Diameter, Assortativity by Degree, Assortativity by State, Clustering Coefficient,"\
+                         "Assortativity by Degree x #Nodes, Assortativity by State x #Nodes, Clustering Coefficient x #Nodes,"\
                          "#In Edges to Outputs, #Out Edges from Inputs, #Out Edges from Errors\n"
 
 
@@ -129,7 +130,8 @@ def popn_data(population, output_dir, gen, configs):
             undir = net.to_undirected()
             nets_info = [gen, len(net.nodes()), net.graph['fitness'], sum(net.degree().values())/len(net.nodes()),len(net.edges())/len(net.nodes()),
                          mean_fitness, var_fitness, net.graph['fitness']/float(len(net.edges())), net.graph['fitness']/float(len(net.nodes())),
-                         net.graph['error'], nx.diameter(undir), nx.degree_assortativity_coefficient(net), nx.attribute_assortativity_coefficient(net, 'state'), nx.average_clustering(undir) ]
+                         net.graph['error'], nx.diameter(undir), nx.degree_assortativity_coefficient(net), nx.attribute_assortativity_coefficient(net, 'state'), nx.average_clustering(undir),
+                        nx.degree_assortativity_coefficient(net) * len(net.nodes()), nx.attribute_assortativity_coefficient(net, 'state') * len(net.nodes()), nx.average_clustering(undir) * len(net.nodes())]
 
             if util.boool(configs['directed']):
                 nets_info.append(len(net.in_edges(net.graph['output_nodes'])))

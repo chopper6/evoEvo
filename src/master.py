@@ -65,7 +65,6 @@ def init_run(configs):
     num_workers = int(configs['number_of_workers'])
     output_dir = configs['output_directory']
     start_size = int(configs['starting_size'])
-    fitness_direction = str(configs['fitness_direction'])
     net_base_problem = util.boool(configs['net_base_problem']) #a teacher net is used for the base problem
     if net_base_problem: assert(not util.boool(configs['feedforward']))
 
@@ -87,7 +86,7 @@ def init_run(configs):
 
         elif (gen == 'Plotting'):
 
-            util.cluster_print(output_dir, "####################### JUST PLOTTING #######################\n")
+            util.cluster_print(output_dir, "\n####################### JUST PLOTTING #######################\n")
 
             util.cluster_print(output_dir, "Evolution finished, generating images.")
             if (num_sims == 1):
@@ -111,7 +110,7 @@ def init_run(configs):
 
             keep_running = util.test_stop_condition(size, gen, configs)
             cont = True
-            util.cluster_print(output_dir, "####################### CONTINUATION RUN STARTING AT GEN " + str(gen) + "#######################\n")
+            util.cluster_print(output_dir, "\n####################### CONTINUATION RUN STARTING AT GEN " + str(gen) + " #######################\n")
         #else not cont runs
 
     if not cont: #FRESH START
@@ -150,6 +149,7 @@ def write_mpi_info(output_dir, gen):
 
     with open(output_dir + "/progress.txt", 'w') as out:
         out.write(str(gen))
+
     #util.cluster_print(output_dir, 'Master wrote progress.txt, now checking dir: ' + str(output_dir + "/to_workers/" + str(itern)))
     if not os.path.exists(output_dir + "/to_workers/" + str(gen)):
         os.makedirs(output_dir + "/to_workers/" + str(gen))

@@ -9,6 +9,8 @@ def work(configs, rank):
 
     gen = read_progress_file(progress_file, output_dir, rank)
 
+    util.cluster_print(output_dir, ' DEBUG: worker at gen ' + str(gen))
+
     util.cluster_print(output_dir, "\t\t\t\tworker #"+str(rank)+" is working, starting at gen " + str(gen) + ".\t")
 
     estim_time = 4

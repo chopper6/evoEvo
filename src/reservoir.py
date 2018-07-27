@@ -225,6 +225,10 @@ def save_prev_iteration_states(net, configs):
 def activate_err_nodes(net, ideal_output, configs):
 
     actvn = configs['activation_function']
+    err_fn = configs['error_function']
+
+    assert(err_fn == 'MSE' or err_fn == "partial")
+
     if actvn == 'tanh': distrib_lng = 2
     elif actvn == 'sigmoid': distrib_lng = 1
     else: assert(False)
@@ -238,8 +242,8 @@ def activate_err_nodes(net, ideal_output, configs):
 
             err_node = find_error_buddy(net,output_node)
             output = net.node[output_node]['state']
-            err = math.pow((ideal_output[i] - output)/distrib_lng, 2)
-            #TODO: use partial error instead?
+            if err_fn == 'MSE': err = math.pow((ideal_output[i] - output)/distrib_lng, 2)
+            elif err_fn == 'partial': err = abs(ideal_output[i] - output)/distrib_lng
             # div by distrib lng to ensure it is btwn 0,1
 
             net.node[err_node]['state'] = err

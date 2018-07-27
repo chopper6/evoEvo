@@ -79,6 +79,7 @@ def calc (net, node, fitness_metric, configs):
         assert(flux >= 0 and flux <= 1)
         return flux
 
+
     elif (fitness_metric == 'flux_info_abs' or fitness_metric == 'Iflux_abs'):
         # poss a problem related to the base problem?
 

@@ -101,7 +101,8 @@ def node_product(net, scale_node_fitness, configs):
             if scale_node_fitness: #hasn't really worked so far, in progress
                 num_edges = len(net.edges(n))
                 Inode = net.node[n]['fitness']
-                fitness_score += -1*math.log(net.node[n]['fitness'], base)
+                fitness_score += 1-1*math.log(net.node[n]['fitness'], base)
+                # SHOULD AVOID INVERSION THIS WAY
             else:
                 # NOTE THAT THIS SEEMS TO INVERT THE MEANING, IE INFO --> ENTROPY : MAX --> MIN
                 fitness_score += -1*math.log(net.node[n]['fitness'])

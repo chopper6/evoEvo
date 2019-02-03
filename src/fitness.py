@@ -103,7 +103,7 @@ def node_product(net, scale_node_fitness, configs):
             if scale_node_fitness: #hasn't really worked so far, in progress
                 num_edges = len(net.edges(n))
                 Inode = net.node[n]['fitness']
-                fitness_score += 1-1*math.log(net.node[n]['fitness'], base)
+                fitness_score += -1*math.log(net.node[n]['fitness'], base)
                 # SHOULD AVOID INVERSION THIS WAY
             else:
                 # NOTE THAT THIS SEEMS TO INVERT THE MEANING, IE INFO --> ENTROPY : MAX --> MIN
@@ -117,6 +117,10 @@ def node_product(net, scale_node_fitness, configs):
         if (num_0 > len(net.nodes())/100 and num_0 > 10): print("WARNING: fitness.node_product(): " + str(num_0) + " nodes had 0 fitness out of " + str(len(net.nodes())))
 
     if scale_node_fitness:
+        fitness_score = 1-fitness_score #change from entropy to info
+        if fitness_score > 1 or fitness_score < 0:
+            print("Total net fitness before adjustment = " + str(fitness_score))
+            assert(False)
         fitness_score = math.pow(base,fitness_score)/base
         if fitness_score > 1 or fitness_score < 0:
             print("Total net fitness OOB = " + str(fitness_score))

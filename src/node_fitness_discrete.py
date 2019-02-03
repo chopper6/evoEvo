@@ -51,8 +51,9 @@ def calc_undirected (fitness_metric, net, node):
         I = 1-entropy_normz(up,down,base)
         bits = math.pow(base,I)
         if bits > 1 or bits < 0:
-            print("Bits fitness OOB = " + str(bits))
-            assert(False)
+            print("\nBits fitness OOB = " + str(bits))
+            print('from I = ' + str(I) + " and base = " + str(base) + "\n")
+            #assert(False)
 
     elif (fitness_metric == 'None' or fitness_metric == 'none'):
         return 1

@@ -36,8 +36,10 @@ def calc_directed (net, node, fitness_metric, configs):
 
 
 
-def calc_undirected (fitness_metric, up, down, node):
+def calc_undirected (fitness_metric, net, node):
     # might be broken by now
+    up, down = net.node[node]['up'], net.node[node]['down']
+
     if (up + down ==0): return 0
 
     if (fitness_metric == 'info'):

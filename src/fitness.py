@@ -53,8 +53,7 @@ def calc_node_fitness(net, configs):
         else:
             #assert(False) #i may have screwed this up, not sure what # up and down refer to anymore...
             for n in net.nodes():
-                up, down = net.node[n]['up'], net.node[n]['down']
-                net.node[n]['fitness'] += node_fitness_discrete.calc_undirected(fitness_metric, up, down)
+                net.node[n]['fitness'] += node_fitness_discrete.calc_undirected(fitness_metric,net, n)
 
 
     elif interval == 'continuous':

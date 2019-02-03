@@ -5,6 +5,7 @@ def generate_net_instances(teacher_net, num_instances, configs):
     # reservoir steps fwd to generate instances
     # does NOT handle mutation of net
 
+    assert(False) #added while fixing up undirected, should be fine if directed
     base_problem = configs['base_problem']
     feedfwd = util.boool(configs['feedforward'])
     assert(base_problem == 'teacher' and not feedfwd) #could add feedfwd version later

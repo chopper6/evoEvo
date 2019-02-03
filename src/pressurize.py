@@ -4,7 +4,7 @@ def pressurize(configs, net, gen, problem_instances = None, thread_num=None, tea
     # configs:
     scale_node_fitness = util.boool(configs['scale_node_fitness'])
     directed = util.boool(configs['directed'])
-    feedfwd = util.boool(configs['feedforward'])
+    if directed: feedfwd = util.boool(configs['feedforward'])
 
     if teacher_net is None: num_samples_relative = num_samples(net, configs)
     else:

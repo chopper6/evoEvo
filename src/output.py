@@ -32,7 +32,7 @@ def master_info(population, gen, size, pop_size, num_survive, configs):
             pickle_file = output_dir + "/nets_pickled/" + str(gen)
             with open(pickle_file, 'wb') as file:
                 pickle.dump(population[0], file)
-            deg_distrib_csv(output_dir, population, gen)
+            deg_distrib_csv(output_dir, population, gen, configs)
 
 
 
@@ -43,7 +43,7 @@ def final_master_info(population, gen, configs):
     pickle_file = output_dir + "/nets_pickled/" + str(gen)
     with open(pickle_file, 'wb') as file: pickle.dump(population[0], file)
     popn_data(population, output_dir, gen, configs)
-    deg_distrib_csv(output_dir, population, gen)
+    deg_distrib_csv(output_dir, population, gen, configs)
     #draw_nets.basic(population, output_dir, total_gens)
 
     if util.boool(configs['biased']):
@@ -142,7 +142,7 @@ def popn_data(population, output_dir, gen, configs):
 
             output.writerow(nets_info)
 
-def deg_distrib_csv(output_dir, population, gen):
+def deg_distrib_csv(output_dir, population, gen, configs):
     with open(output_dir + "/degree_distrib.csv", 'a') as deg_file:
         #only distribution of most fit net
         output = csv.writer(deg_file)
@@ -152,8 +152,11 @@ def deg_distrib_csv(output_dir, population, gen):
         distrib_info.append(len(population[0].nodes()))
 
         reservoir_nodes = []
-        for n in population[0].nodes():
-            if population[0].node[n]['layer'] == 'hidden': reservoir_nodes.append(n) #this will throw an error if undirected version
+        if util.boool(configs['directed']):
+            for n in population[0].nodes():
+                if population[0].node[n]['layer'] == 'hidden': reservoir_nodes.append(n) #this will throw an error if undirected version
+        else:
+            for n in population[0].nodes(): reservoir_nodes.append(n)
 
         in_degrees, out_degrees = list(population[0].in_degree(reservoir_nodes).values()), list(population[0].out_degree(reservoir_nodes).values())
 

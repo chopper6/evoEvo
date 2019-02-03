@@ -110,7 +110,9 @@ def cleanPaths(path):
 def boool(val):
     if (val == "True" or val=='true' or val==1 or val==True): return True
     elif (val == "False" or val=='false' or val==0 or val == False): return False
-    else: print("ERROR util.boool(): unknown truth value for " + str(val))
+    else:
+        print("ERROR util.boool(): unknown truth value for " + str(val))
+        assert(False)
 
 def is_it_none(val):
     if (val == "None" or val=="none" or val==None or val==0): return None

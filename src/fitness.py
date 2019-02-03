@@ -4,8 +4,10 @@ import node_fitness_discrete, node_fitness_continuous, util
 def eval_fitness(population, fitness_direction, fitness_metric):
     #determines fitness of each individual and orders the population by fitness
 
-    if fitness_metric=='error' or fitness_metric == 'Error': reverse = False
-    else: reverse = True  # MAKING FITNESS A -PRODUCT OF NODES ACTUALLY INVERTS THE MAX/MIN VALUE OF NET RELATIVE TO ITS NODES
+    #if fitness_metric=='error' or fitness_metric == 'Error': reverse = False
+    #else: reverse = True  # MAKING FITNESS A -PRODUCT OF NODES ACTUALLY INVERTS THE MAX/MIN VALUE OF NET RELATIVE TO ITS NODES
+
+    reverse = False #TODO: may fuck up earlier models, but just too confusing otherwise
 
     if (reverse and fitness_direction == 'min') or (not reverse and fitness_direction == 'max'): direction = 'max'
     else: direction = 'min'

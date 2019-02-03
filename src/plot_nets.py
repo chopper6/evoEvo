@@ -3,6 +3,7 @@ import matplotlib, os, sys, numpy as np, networkx as nx, math, re, pickle
 matplotlib.use('Agg') # This must be done before importing matplotlib.pyplot
 import matplotlib.pyplot as plt, matplotlib.patches as mpatches
 from decimal import Decimal
+import util
 
 
 ################## ORGANIZER FUNCTIONS ##################
@@ -59,7 +60,7 @@ def plot_undir(configs):
     for root, dirs, files in os.walk(output_dir + "/nets_pickled/"):
         for f in files:
             #print("plot_dir(): file " + str(f))
-            undir_deg_distrib(root + "/" + f, output_dir + "/undirected_degree_distribution/", f, biased, bias_on)
+            undir_deg_distrib(root + "/" + f, output_dir + "/undirected_degree_distribution/", f, biased, bias_on, configs)
             #LATER: variance_and_entropy_distrib(root + "/" + f, output_dir, f)
 
 
@@ -83,7 +84,7 @@ def variance_and_entropy_distrib(net_file, destin_dir, title):
 
 
 
-def undir_deg_distrib(net_file, destin_path, title, biased, bias_on):
+def undir_deg_distrib(net_file, destin_path, title, biased, bias_on, configs):
 
     if (re.match(re.compile("[a-zA-Z0-9]*pickle"), net_file)):
         with open(net_file, 'rb') as file:
@@ -98,8 +99,12 @@ def undir_deg_distrib(net_file, destin_path, title, biased, bias_on):
     color_choice = colors[0]
 
     reservoir_nodes = []
-    for n in net.nodes():
-        if net.node[n]['layer'] == 'hidden': reservoir_nodes.append(n)  # this will throw an error if undirected version
+    if util.boool(configs['directed']):
+        for n in net.nodes():
+            if net.node[n]['layer'] == 'hidden': reservoir_nodes.append(
+                n)  # this will throw an error if undirected version
+    else:
+        for n in net.nodes(): reservoir_nodes.append(n)
 
     for type in ['loglog%']: #can also use ['loglog', 'scatter', 'scatter%']
         H = []

@@ -49,7 +49,7 @@ def calc_undirected (fitness_metric, net, node):
 
         base = math.pow(2,len(net.in_edges(node)) + len(net.out_edges(node)))
         I = 1-entropy_normz(up,down,base)
-        bits = math.pow(base,I)
+        bits = math.pow(base,I)/base
         if bits > 1 or bits < 0:
             print("\nBits fitness OOB = " + str(bits))
             print('from I = ' + str(I) + " and base = " + str(base) + "\n")

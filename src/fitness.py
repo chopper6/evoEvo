@@ -44,7 +44,7 @@ def calc_node_fitness(net, configs):
         return #calc at net lvl
 
     if interval == 'discrete':
-        if debug: print("WARNING: discrete fitness likely needs a lotto debugging!")
+        #if debug: print("WARNING: discrete fitness likely needs a lotto debugging!")
         if directed:
             for n in net.nodes():
                 if net.node[n]['layer'] != 'input':
@@ -114,7 +114,7 @@ def node_product(net, scale_node_fitness, configs):
         if (num_0 > len(net.nodes())/100 and num_0 > 10): print("WARNING: fitness.node_product(): " + str(num_0) + " nodes had 0 fitness out of " + str(len(net.nodes())))
 
     if scale_node_fitness:
-        fitness_score = math.pow(base,fitness_score)
+        fitness_score = math.pow(base,fitness_score)/base
         if fitness_score > 1 or fitness_score < 0:
             print("Total net fitness OOB = " + str(fitness_score))
             assert(False)

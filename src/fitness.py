@@ -51,7 +51,7 @@ def calc_node_fitness(net, configs):
                     net.node[n]['fitness'] += node_fitness_discrete.calc_directed(net, n, fitness_metric, configs)
 
         else:
-            assert(False) #i may have screwed this up, not sure what # up and down refer to anymore...
+            #assert(False) #i may have screwed this up, not sure what # up and down refer to anymore...
             for n in net.nodes():
                 up, down = net.node[n]['up'], net.node[n]['down']
                 net.node[n]['fitness'] += node_fitness_discrete.calc_undirected(fitness_metric, up, down)
@@ -92,14 +92,17 @@ def node_product(net, scale_node_fitness, configs):
     fitness_score = 0
     num_0 = 0
     num_under, num_over = 0,0
+
+    base = math.pow(2, len(net.in_edges()) + len(net.out_edges()))
+
     for n in net.nodes():
         if net.node[n]['fitness'] == 0:
             num_0 += 1
         else:
             if scale_node_fitness: #hasn't really worked so far, in progress
-                e2n = len(net.edges(n))
+                num_edges = len(net.edges(n))
                 Inode = net.node[n]['fitness']
-                fitness_score += -1*math.log(net.node[n]['fitness'], len(net.edges()))
+                fitness_score += -1*math.log(net.node[n]['fitness'], base)
             else:
                 # NOTE THAT THIS SEEMS TO INVERT THE MEANING, IE INFO --> ENTROPY : MAX --> MIN
                 fitness_score += -1*math.log(net.node[n]['fitness'])
@@ -110,6 +113,13 @@ def node_product(net, scale_node_fitness, configs):
 
     if util.boool(configs['debug']):
         if (num_0 > len(net.nodes())/100 and num_0 > 10): print("WARNING: fitness.node_product(): " + str(num_0) + " nodes had 0 fitness out of " + str(len(net.nodes())))
+
+    if scale_node_fitness:
+        fitness_score = math.pow(base,fitness_score)
+        if fitness_score > 1 or fitness_score < 0:
+            print("Total net fitness OOB = " + str(fitness_score))
+            assert(False)
+
     return fitness_score
 
 

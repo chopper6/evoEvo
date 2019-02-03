@@ -19,6 +19,9 @@ def init_population(pop_size, configs):
     elif (init_type == 'random'):
         population = gen_rd_nets(pop_size, configs)
 
+    elif (init_type == 'N'):
+        population = [basic_distributed(configs) for i in range(pop_size)]
+
     else:
         print("ERROR in master.gen_init_population(): unknown init_type.")
         return
@@ -263,3 +266,14 @@ def print_inout_edges(net, configs):
     print("# input edges = " + str(len(net.out_edges(net.graph['input_nodes']))) + " vs " + str(
         round(num_input_nodes * float(configs['from_inputs_edge_ratio']))))
     print("# reservoir edges = " + str(num_reservoir_edges) + " vs " + str(num_edges))
+
+
+def basic_distributed(configs):
+    start_size = int(configs['starting_size'])
+    net = nx.empty_graph(start_size, create_using=nx.DiGraph())
+    for n in net.nodes():
+        net['input'][n] = 1
+        net[n]['output'] = 1
+        net['state'] = None
+
+    return net

@@ -36,12 +36,21 @@ def calc_directed (net, node, fitness_metric, configs):
 
 
 
-def calc_undirected (fitness_metric, up, down):
+def calc_undirected (fitness_metric, up, down, node):
     # might be broken by now
     if (up + down ==0): return 0
 
     if (fitness_metric == 'info'):
         return 1-entropy(up,down)
+
+    elif (fitness_metric == 'info_normz'):
+
+        base = math.pow(2,len(node.in_edges()) + len(node.out_edges()))
+        I = 1-entropy_normz(up,down,base)
+        bits = math.pow(base,I)
+        if bits > 1 or bits < 0:
+            print("Bits fitness OOB = " + str(bits))
+            assert(False)
 
     elif (fitness_metric == 'None' or fitness_metric == 'none'):
         return 1
@@ -62,6 +71,16 @@ def entropy(num0,num1):
     return H0 + H1
 
 
+def entropy_normz(num0,num1,base):
+    total = num0 + num1
+
+    if (num0 == 0): H0 = 0
+    else: H0 = -1 * (num0 / float(total)) * math.log(num0 / float(total),base)
+
+    if (num1 == 0): H1 = 0
+    else: H1 = -1 * (num1 / float(total)) * math.log(num1 / float(total),base)
+
+    return H0 + H1
 
 def cond_entropy(num0,num1,given):
     total = num0 + num1

@@ -88,8 +88,8 @@ def init_csv(out_dir, configs):
 
 
     else:
-        net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Mean Fitness, Variance in Fitness, Fitness_Div_#Edges, Fitness_Div_#Nodes, Error of Base Problem, Diameter\n"
-
+        #net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Mean Fitness, Variance in Fitness, Fitness_Div_#Edges, Fitness_Div_#Nodes, Error of Base Problem, Diameter\n"
+        net_data_title = "Generation, Net Size, Fitness, Average Degree, Edge:Node Ratio, Mean Fitness, Variance in Fitness, Fitness_Div_#Edges, Fitness_Div_#Nodes, Diameter\n"
 
     deg_distrib_title = "Generation, Net Size, In Degrees, In Degree Frequencies, Out Degrees, Out Degree Frequencies, Degs, Deg Freqs\n"
     err_file_title = "Generation, Iteration, Error (MSE)\n"
@@ -114,7 +114,8 @@ def init_csv(out_dir, configs):
 
 def popn_data(population, output_dir, gen, configs):
 
-    assert(util.boool(configs['directed'])) #pretty simple fix for undirected features, but I'm lazy
+    #assert(util.boool(configs['directed'])) #pretty simple fix for undirected features, but I'm lazy
+    scale_node_fitness = configs['scale_node_fitness']
 
     if (population[0].edges()):
         output_csv = output_dir + "/net_data.csv"
@@ -122,16 +123,15 @@ def popn_data(population, output_dir, gen, configs):
         with open(output_csv, 'a') as output_file:
             output = csv.writer(output_file)
 
-            all_fitness = np.array([population[p].graph['fitness']/len(population[p].nodes()) for p in range(len(population))])
+            if scale_node_fitness: all_fitness = np.array([population[p].graph['fitness'] for p in range(len(population))])
+            else: all_fitness = np.array([population[p].graph['fitness']/len(population[p].nodes()) for p in range(len(population))])
             mean_fitness = np.mean(all_fitness)
             var_fitness = np.var(all_fitness)
 
             net = population[0] #most fit net
             undir = net.to_undirected()
             nets_info = [gen, len(net.nodes()), net.graph['fitness'], sum(net.degree().values())/len(net.nodes()),len(net.edges())/len(net.nodes()),
-                         mean_fitness, var_fitness, net.graph['fitness']/float(len(net.edges())), net.graph['fitness']/float(len(net.nodes())),
-                         net.graph['error'], nx.diameter(undir), nx.degree_assortativity_coefficient(net), nx.attribute_assortativity_coefficient(net, 'state'), nx.average_clustering(undir),
-                        nx.degree_assortativity_coefficient(net) * len(net.nodes()), nx.attribute_assortativity_coefficient(net, 'state') * len(net.nodes()), nx.average_clustering(undir) * len(net.nodes())]
+                         mean_fitness, var_fitness, net.graph['fitness']/float(len(net.edges())), net.graph['fitness']/float(len(net.nodes())), nx.diameter(undir)]
 
             if util.boool(configs['directed']):
                 nets_info.append(len(net.in_edges(net.graph['output_nodes'])))

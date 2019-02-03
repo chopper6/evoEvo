@@ -116,7 +116,9 @@ def min_num_nodes(configs):
     self_loops = util.boool(configs['self_loops'])
     input_output_e2n =  util.boool(configs['input_output_e2n'])
 
-    assert(directed) #too lazy to make undirected version now
+    if not directed:
+        print("\nWARNING build_nets 120: will default min num nodes = 8 for an undirected graph until my lazy ass fixes this.\n")
+        return 8
 
     if self_loops:
         min_num = math.ceil(edge_node_ratio)

@@ -47,7 +47,7 @@ def calc_undirected (fitness_metric, net, node):
 
     elif (fitness_metric == 'info_normz'):
 
-        base = math.pow(2,len(node.in_edges()) + len(node.out_edges()))
+        base = math.pow(2,len(net.in_edges(node)) + len(net.out_edges(node)))
         I = 1-entropy_normz(up,down,base)
         bits = math.pow(base,I)
         if bits > 1 or bits < 0:

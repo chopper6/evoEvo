@@ -121,7 +121,7 @@ def node_product(net, scale_node_fitness, configs):
         if fitness_score > 1 or fitness_score < 0:
             print("Total net fitness before adjustment = " + str(fitness_score))
             assert(False)
-        fitness_score = math.pow(base,fitness_score)/base
+        fitness_score = math.pow(base,fitness_score) #/base
         if fitness_score > 1 or fitness_score < 0:
             print("Total net fitness OOB = " + str(fitness_score))
             assert(False)

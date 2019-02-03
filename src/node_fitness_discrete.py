@@ -54,6 +54,7 @@ def calc_undirected (fitness_metric, net, node):
             print("\nBits fitness OOB = " + str(bits))
             print('from I = ' + str(I) + " and base = " + str(base) + "\n")
             #assert(False)
+        return bits
 
     elif (fitness_metric == 'None' or fitness_metric == 'none'):
         return 1
